@@ -1,9 +1,6 @@
-#ifndef     _TYPES_H_
-#include    "Types.H"
-#endif //   _TYPES_H_
+#include    "Types.h"
 
-#ifndef     _REFERENCE_COUNTED_OBJECT_H_
-#define     _REFERENCE_COUNTED_OBJECT_H_
+#pragma once
 
 class ReferenceCountedObject
 {
@@ -40,11 +37,9 @@ virtual ~ReferenceCountedObject (void) {
 
     private:
         uint referenceCount;
-        
+
         #ifndef NDEBUG
         uint debugId;
 static  uint nextDebugId;
         #endif
 };
-        
-#endif  //  _REFERENCE_COUNTED_OBJECT_H_

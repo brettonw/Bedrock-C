@@ -1,5 +1,4 @@
-#ifndef     _TYPES_H_
-#define     _TYPES_H_
+#pragma once
 
 // standard includes
 #include    <cstring>
@@ -24,5 +23,3 @@ typedef unsigned long ulong;
 #ifndef     ASSERT_CALL
 #define     ASSERT_CALL(x)
 #endif  //  ASSERT_CALL
-
-#endif // _TYPES_H_

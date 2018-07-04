@@ -1,0 +1,15 @@
+PtrTo.o: src/main/PtrTo.cpp src/main/PtrTo.h \
+ src/main/ReferenceCountedObject.h src/main/Types.h
+Bag.o: src/main/Bag.cpp src/main/Bag.h src/main/TextContainer.h \
+ src/main/Text.h src/main/RawText.h src/main/PtrTo.h \
+ src/main/ReferenceCountedObject.h src/main/Types.h
+Text.o: src/main/Text.cpp src/main/Text.h src/main/RawText.h \
+ src/main/PtrTo.h src/main/ReferenceCountedObject.h src/main/Types.h
+ReferenceCountedObject.o: src/main/ReferenceCountedObject.cpp \
+ src/main/ReferenceCountedObject.h src/main/Types.h
+two.o: src/main/two.cpp
+TextContainer.o: src/main/TextContainer.cpp src/main/TextContainer.h \
+ src/main/Text.h src/main/RawText.h src/main/PtrTo.h \
+ src/main/ReferenceCountedObject.h src/main/Types.h
+RawText.o: src/main/RawText.cpp src/main/RawText.h src/main/PtrTo.h \
+ src/main/ReferenceCountedObject.h src/main/Types.h

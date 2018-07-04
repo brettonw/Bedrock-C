@@ -1,13 +1,6 @@
-#ifndef     _REFERENCE_COUNTED_OBJECT_H_
-#include    "ReferenceCountedObject.H"
-#endif  //  _REFERENCE_COUNTED_OBJECT_H_
+#include    "PtrTo.h"
 
-#ifndef     _PTR_TO_H_
-#include    "PtrTo.H"
-#endif  //  _PTR_TO_H_
-
-#ifndef     _RAW_TEXT_H_
-#define     _RAW_TEXT_H_
+#pragma once
 
 MAKE_PTR_TO(RawText) {
     private:
@@ -113,7 +106,7 @@ MAKE_PTR_TO(RawText) {
         int compare (const char* source, uint sourceLength) const {
             uint minLength = min (length, sourceLength);
             int comparison = memcmp (bytes, source, minLength);
-            if ((comparison != 0) || (length == sourceLength)) {
+            if ((comparison != 0) or (length == sourceLength)) {
                 return comparison;
             } else {
                 return length - sourceLength;
@@ -155,6 +148,3 @@ MAKE_PTR_TO(RawText) {
             return empty;
         }
 };
-
-#endif  //  _RAW_TEXT_H_
-

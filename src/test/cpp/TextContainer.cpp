@@ -1,8 +1,8 @@
-#include "UNIT_TEST/unit_tester.H"
-#include "TextContainer.H"
+#include "Test.h"
+#include "TextContainer.h"
 
 
-BOOST_AUTO_TEST_CASE(TestTextLess) {
+TEST_CASE(TestTextLess) {
     Text    a ("hello");
     Text    b ("there");
     Text    c ("world");
@@ -13,7 +13,7 @@ BOOST_AUTO_TEST_CASE(TestTextLess) {
     TESTXY (textLess (c, a), false);
 }
 
-BOOST_AUTO_TEST_CASE(TestTextSet) {
+TEST_CASE(TestTextSet) {
     TextSet ts;
     ts.put ("Hello");
     ts.put ("World");
@@ -26,5 +26,5 @@ BOOST_AUTO_TEST_CASE(TestTextSet) {
     cerr << ts << endl;
 }
 
-BOOST_AUTO_TEST_CASE(TestTextMap) {
+TEST_CASE(TestTextMap) {
 }

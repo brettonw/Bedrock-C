@@ -1,5 +1,5 @@
-#include "UNIT_TEST/unit_tester.H"
-#include "PtrTo.H"
+#include "Test.h"
+#include "PtrTo.h"
 
 MAKE_PTR_TO(TestClass) {
     private:
@@ -71,11 +71,11 @@ void testFunctionScopeRef (const PtrToTestClass& ptrToTestClass) {
 // the size of the Ptrto is the same as the size of a bare pointer - this might change if the
 // PtrTo class is modified to support derivation, which would add a virtual table pointer to the
 // class that would substantially change performance
-BOOST_AUTO_TEST_CASE(TestPtrTo0) {
+TEST_CASE(TestPtrTo0) {
     TESTXY(sizeof(PtrToTestClass), sizeof(TestClass*));
 }
 
-BOOST_AUTO_TEST_CASE(TestPtrTo1) {
+TEST_CASE(TestPtrTo1) {
     // create a false scope so the pointer will go out of scope before the program closes
     if (1) {
         PtrToDerivedTestClass ptrToDerivedTestClass = new DerivedTestClass ();
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(TestPtrTo1) {
     TestClass::checkPtrs ();
 }
 
-BOOST_AUTO_TEST_CASE(TestPtrTo2) {
+TEST_CASE(TestPtrTo2) {
     // create a false scope so the pointer will go out of scope before the program closes
     if (1) {
         // a basic empty object to start

@@ -1,8 +1,8 @@
-#include "UNIT_TEST/unit_tester.H"
-#include "RawText.H"
+#include "Test.h"
+#include "RawText.h"
 
 
-BOOST_AUTO_TEST_CASE(TestRawText) {
+TEST_CASE(TestRawText) {
     const char* helloWorld = "Hello World";
     uint helloWorldLength = strlen (helloWorld);
     PtrToRawText rawText = RawText::make (helloWorld, helloWorldLength);

@@ -1,4 +1,4 @@
-#include    "RawText.H"
+#include    "RawText.h"
 
 PtrToRawText RawText::empty;
 

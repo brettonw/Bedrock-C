@@ -1,9 +1,6 @@
-#ifndef     _REFERENCE_COUNTED_OBJECT_H_
-#include    "ReferenceCountedObject.H"
-#endif  //  _REFERENCE_COUNTED_OBJECT_H_
+#include    "ReferenceCountedObject.h"
 
-#ifndef     _PTR_TO_H_
-#define     _PTR_TO_H_
+#pragma once
 
 // a smart pointer wrapper to a reference counted class
 template <class aType>
@@ -91,12 +88,12 @@ class PtrTo {
             return *this;
         }
 
-        bool operator == (const PtrTo<aType>& ptr) {
-            return ptrToType == ptr.ptrToType;
+        bool operator == (const aType* ptr) {
+            return ptrToType == ptr;
         }
 
-        bool operator != (const PtrTo<aType>& ptr) {
-            return ptrToType != ptr.ptrToType;
+        bool operator != (const aType* ptr) {
+            return ptrToType != ptr;
         }
 
         bool isUnique () const {
@@ -140,6 +137,3 @@ template<typename TypeX, typename TypeY>
 PtrTo<TypeX> ptr_downcast (PtrTo<TypeY>& ptrToY) {
     return PtrTo<TypeX> (dynamic_cast<TypeX*> (ptrToY.getPtr ()));
 }
-
-
-#endif  //  _PTR_TO_H_

@@ -1,9 +1,6 @@
-#ifndef     _TEXT_H_
-#include    "Text.H"
-#endif //   _TEXT_H_
+#include    "Text.h"
 
-#ifndef     _TEXT_CONTAINER_H_
-#define     _TEXT_CONTAINER_H_
+#pragma once
 
 //-------------------------------------------------------------------------------------------------
 class TextLess {
@@ -89,6 +86,4 @@ ostream& operator << (ostream& ostr, const TextSet& set) {
 }
 
 //-------------------------------------------------------------------------------------------------
-
-#endif  //  _TEXT_CONTAINER_H_
 

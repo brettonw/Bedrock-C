@@ -1,9 +1,6 @@
-#ifndef     _RAW_TEXT_H_
-#include    "RawText.H"
-#endif  //  _RAW_TEXT_H_
+#include    "RawText.h"
 
-#ifndef     _TEXT_H_
-#define     _TEXT_H_
+#pragma once
 
 class Text {
     private:
@@ -84,7 +81,7 @@ class Text {
         }
 
         bool operator == (const Text& text) const {
-            return ((ptr == text.ptr) || (compare (text) == 0));
+            return ((ptr == text.ptr) or (compare (text) == 0));
         }
 
         bool operator == (const char* source) const {
@@ -92,7 +89,7 @@ class Text {
         }
 
         bool operator != (const Text& text) const {
-            return ((ptr != text.ptr) && (compare (text) != 0));
+            return ((ptr != text.ptr) and (compare (text) != 0));
         }
 
         bool operator != (const char* source) const {
@@ -148,6 +145,11 @@ class Text {
             return compare (text.get (), text.length());
         }
 
+        // find
+        // substr
+        // split
+        // format
+
         // append
         Text& append (const char* source, uint sourceLength) {
             if (! ptr->append(source, sourceLength)) {
@@ -165,10 +167,6 @@ class Text {
         Text& append (const Text& text) {
             return append (text.get (), text.length());
         }
-
-        // find
-        // substr
-        // format
 
         // operators
         Text& operator += (const Text& text) {
@@ -233,5 +231,3 @@ ostream& operator << (ostream& ostr, const Text& text) {
 }
 
 #define END_LINE    "\n";
-
-#endif  //  _TEXT_H_

@@ -1,11 +1,11 @@
-#include "UNIT_TEST/unit_tester.H"
-#include "Text.H"
+#include "Test.h"
+#include "Text.h"
 
-BOOST_AUTO_TEST_CASE(TestText0) {
+TEST_CASE(TestText0) {
     TESTXY(sizeof(Text), sizeof(void*));
 }
 
-BOOST_AUTO_TEST_CASE(TestText1) {
+TEST_CASE(TestText1) {
     const char* hello = "Hello";
     const char* world = "World";
     Text helloText = hello;
