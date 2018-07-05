@@ -21,8 +21,8 @@ typedef unsigned int uint;
 typedef unsigned long ulong;
 
 // this is primarily for testing purposes
-#ifndef     ASSERT_CALL
-#define     ASSERT_CALL(x)
-#endif  //  ASSERT_CALL
+#ifndef     TEST_ASSERTION
+#define     TEST_ASSERTION(x)
+#endif  //  TEST_ASSERTION
 
 #endif // _TYPES_H_

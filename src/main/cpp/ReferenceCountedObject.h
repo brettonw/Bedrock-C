@@ -19,9 +19,7 @@ class ReferenceCountedObject
             #endif
         }
 
-virtual ~ReferenceCountedObject (void) {
-            ASSERT_CALL(referenceCount == 0);
-        }
+virtual ~ReferenceCountedObject (void) {};
 
         void addRef (void){
             referenceCount++;

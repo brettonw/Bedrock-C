@@ -4,6 +4,6 @@
 using namespace std;
 
 int main (int argc, char** argv) {
-	cerr << "Hello World" << endl;
+	cerr << "Hello World XXX" << endl;
 	return EXIT_SUCCESS;
 }

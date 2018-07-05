@@ -1,68 +1,95 @@
-# compiler and linker
-CPP := $(shell find /usr/local/bin | grep -p "\/g++-\d")
-CPPFLAGS := -std=c++14
+.DEFAULT_GOAL := runTests
 
-# the Target Binary Program
-TARGET := main
+# compiler and linker
+compiler := $(shell find /usr/local/bin | grep -p "\/g++-\d")
+compilerSourceOptions := -std=c++14
+
+# the target binary
+target := main
+testTarget := test
 
 # variables
-SRCDIR := src/main/cpp
-INCDIR := src/main/cpp
-TARGETDIR := target
-BUILDDIR := $(TARGETDIR)/objects
-RESDIR := src/main/resources
-SRCEXT := cpp
-DEPEXT := d
-OBJEXT := o
+sourceDir := src/main/cpp
+testDir := src/test/cpp
+targetDir := target
+sourceObjectsDir := $(targetDir)/objects
+resourcesDir := src/main/resources
+sourceFileExtension := cpp
+dependencyFileExtension := d
+objectFileExtension := o
 
-# flags, libraries, and encludes
-CPPFLAGS := -std=c++14 -Wall -O3 -g
-LDFLAGS := -lstdc++
-LDLIBS :=
-INC := -I$(INCDIR)
-INCDEP := -I$(INCDIR)
+# flags, libraries, and includes
+compilerSourceOptions := -std=c++14 -Wall -g -D_DEBUG_
+compilerTestOptions :=
+linkerOptions := -lstdc++
+additionalLibraries :=
 
-#---------------------------------------------------------------------------------
-# DO NOT EDIT BELOW THIS LINE
-#---------------------------------------------------------------------------------
-SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
-OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.$(OBJEXT)))
+# the rest of this file is common to all projects
+sourceFiles := $(shell find $(sourceDir) -type f -name *.$(sourceFileExtension) ! -name "*Main.cpp")
+sourceObjectFiles := $(patsubst $(sourceDir)/%,$(sourceObjectsDir)/%,$(sourceFiles:.$(sourceFileExtension)=.$(objectFileExtension)))
+sourceFileMain := $(shell find $(sourceDir) -type f -name "*Main.cpp")
+sourceObjectMain := $(patsubst $(sourceDir)/%,$(sourceObjectsDir)/%,$(sourceFileMain:.$(sourceFileExtension)=.$(objectFileExtension)))
+testFiles := $(shell find $(testDir) -type f -name *.$(sourceFileExtension))
+testObjectFiles := $(patsubst $(testDir)/%,$(sourceObjectsDir)/%,$(testFiles:.$(sourceFileExtension)=.$(objectFileExtension)))
 
-# default make all
-all: resources $(TARGET)
+# run
+run: build
+	@echo
+	@$(targetDir)/$(target)
 
-# remake
-remake: clean all
+# basic build
+build: resources $(target)
+
+# run the tests
+runTests: buildTests
+	$(targetDir)/$(testTarget)
+
+# build the tests
+buildTests: resources $(testTarget)
 
 # copy resources to the target directory
 resources: directories
-	@cp $(RESDIR)/* $(TARGETDIR)/
+	@cp $(resourcesDir)/* $(targetDir)/
 
-# make the Directories
+# make the directories
 directories:
-	@mkdir -p $(TARGETDIR)
-	@mkdir -p $(BUILDDIR)
+	@mkdir -p $(targetDir)
+	@mkdir -p $(sourceObjectsDir)
+	@mkdir -p $(sourceObjectsDir)
 
-# clean, completely remove the target directory
+# completely remove the target directory
 clean:
-	@$(RM) -rf $(TARGETDIR)
+	@$(RM) -rf $(targetDir)
 
 # pull in dependency info for *existing* .o files
--include $(OBJECTS:.$(OBJEXT)=.$(DEPEXT))
+-include $(sourceObjectFiles:.$(objectFileExtension)=.$(dependencyFileExtension))
+-include $(testObjectFiles:.$(objectFileExtension)=.$(dependencyFileExtension))
 
 # link
-$(TARGET): $(OBJECTS)
-	$(CPP) -o $(TARGETDIR)/$(TARGET) $^ $(LDFLAGS) $(LDLIBS)
+$(target): $(sourceObjectFiles) $(sourceObjectMain)
+	$(compiler) -o $(targetDir)/$(target) $^ $(linkerOptions) $(additionalLibraries)
+
+$(testTarget): $(sourceObjectFiles) $(testObjectFiles)
+	$(compiler) -o $(targetDir)/$(testTarget) $^ $(linkerOptions) $(additionalLibraries)
 
 # compile
-$(BUILDDIR)/%.$(OBJEXT): $(SRCDIR)/%.$(SRCEXT)
+$(sourceObjectsDir)/%.$(objectFileExtension): $(sourceDir)/%.$(sourceFileExtension)
 	@mkdir -p $(dir $@)
-	$(CPP) $(CPPFLAGS) $(INC) -c -o $@ $<
-	@$(CPP) $(CPPFLAGS) $(INCDEP) -MM $(SRCDIR)/$*.$(SRCEXT) > $(BUILDDIR)/$*.$(DEPEXT)
-	@cp -f $(BUILDDIR)/$*.$(DEPEXT) $(BUILDDIR)/$*.$(DEPEXT).tmp
-	@sed -e 's|.*:|$(BUILDDIR)/$*.$(OBJEXT):|' < $(BUILDDIR)/$*.$(DEPEXT).tmp > $(BUILDDIR)/$*.$(DEPEXT)
-	@sed -e 's/.*://' -e 's/\\$$//' < $(BUILDDIR)/$*.$(DEPEXT).tmp | fmt -1 | sed -e 's/^ *//' -e 's/$$/:/' >> $(BUILDDIR)/$*.$(DEPEXT)
-	@rm -f $(BUILDDIR)/$*.$(DEPEXT).tmp
+	$(compiler) $(compilerSourceOptions) -c -o $@ $<
+	@$(compiler) $(compilerSourceOptions) -MM $(sourceDir)/$*.$(sourceFileExtension) > $(sourceObjectsDir)/$*.$(dependencyFileExtension)
+	@cp -f $(sourceObjectsDir)/$*.$(dependencyFileExtension) $(sourceObjectsDir)/$*.$(dependencyFileExtension).tmp
+	@sed -e 's|.*:|$(sourceObjectsDir)/$*.$(objectFileExtension):|' < $(sourceObjectsDir)/$*.$(dependencyFileExtension).tmp > $(sourceObjectsDir)/$*.$(dependencyFileExtension)
+	@sed -e 's/.*://' -e 's/\\$$//' < $(sourceObjectsDir)/$*.$(dependencyFileExtension).tmp | fmt -1 | sed -e 's/^ *//' -e 's/$$/:/' >> $(sourceObjectsDir)/$*.$(dependencyFileExtension)
+	@rm -f $(sourceObjectsDir)/$*.$(dependencyFileExtension).tmp
+
+$(sourceObjectsDir)/%.$(objectFileExtension): $(testDir)/%.$(sourceFileExtension)
+	@mkdir -p $(dir $@)
+	$(compiler) $(compilerSourceOptions) $(compilerTestOptions) -I$(sourceDir) -c -o $@ $<
+	@$(compiler) $(compilerSourceOptions) $(compilerTestOptions) -I$(sourceDir) -MM $(testDir)/$*.$(sourceFileExtension) > $(sourceObjectsDir)/$*.$(dependencyFileExtension)
+	@cp -f $(sourceObjectsDir)/$*.$(dependencyFileExtension) $(sourceObjectsDir)/$*.$(dependencyFileExtension).tmp
+	@sed -e 's|.*:|$(sourceObjectsDir)/$*.$(objectFileExtension):|' < $(sourceObjectsDir)/$*.$(dependencyFileExtension).tmp > $(sourceObjectsDir)/$*.$(dependencyFileExtension)
+	@sed -e 's/.*://' -e 's/\\$$//' < $(sourceObjectsDir)/$*.$(dependencyFileExtension).tmp | fmt -1 | sed -e 's/^ *//' -e 's/$$/:/' >> $(sourceObjectsDir)/$*.$(dependencyFileExtension)
+	@rm -f $(sourceObjectsDir)/$*.$(dependencyFileExtension).tmp
 
 # non-file targets
-.PHONY: all remake clean resources
+.PHONY: run build runTests buildTests clean resources

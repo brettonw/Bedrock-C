@@ -1,16 +1,15 @@
 #include "Test.h"
 #include "TextContainer.h"
 
-
 TEST_CASE(TestTextLess) {
     Text    a ("hello");
     Text    b ("there");
     Text    c ("world");
     TextLess textLess;
-    TESTXY (textLess (a, b), true);
-    TESTXY (textLess (b, c), true);
-    TESTXY (textLess (a, c), true);
-    TESTXY (textLess (c, a), false);
+    TEST_XY (textLess (a, b), true);
+    TEST_XY (textLess (b, c), true);
+    TEST_XY (textLess (a, c), true);
+    TEST_XY (textLess (c, a), false);
 }
 
 TEST_CASE(TestTextSet) {
@@ -18,10 +17,10 @@ TEST_CASE(TestTextSet) {
     ts.put ("Hello");
     ts.put ("World");
 
-    TESTXY (ts.size(), 2);
+    TEST_XY (ts.size(), 2);
 
-    TESTXY (ts.contains(Text ("JOE")), false);
-    TESTXY (ts.contains(Text ("Hello")), true);
+    TEST_XY (ts.contains(Text ("JOE")), false);
+    TEST_XY (ts.contains(Text ("Hello")), true);
 
     cerr << ts << endl;
 }

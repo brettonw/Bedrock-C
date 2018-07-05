@@ -47,12 +47,10 @@ class PtrTo {
         }
 
         const aType& operator * () const {
-            ASSERT_CALL (ptrToType);
             return *ptrToType;
         }
 
         const aType* operator -> () const {
-            ASSERT_CALL (ptrToType);
             return ptrToType;
         }
 
@@ -61,12 +59,10 @@ class PtrTo {
         }
 
         aType& operator * () {
-            ASSERT_CALL (ptrToType);
             return *ptrToType;
         }
 
         aType* operator -> () {
-            ASSERT_CALL (ptrToType);
             return ptrToType;
         }
 

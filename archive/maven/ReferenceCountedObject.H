@@ -23,7 +23,7 @@ class ReferenceCountedObject
         }
 
 virtual ~ReferenceCountedObject (void) {
-            ASSERT_CALL(referenceCount == 0);
+            TEST_ASSERTION(referenceCount == 0);
         }
 
         void addRef (void){
