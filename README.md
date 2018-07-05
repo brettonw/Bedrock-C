@@ -1,28 +1,12 @@
 # Two
 C++ Code Project
 
-- .o files need to be built into target
-- src/main files should all be compiled together into a lib, for each subdir
-- src/test files should each be compiled and linked against the found libs
+TODO
+- Standardize makefile to support debug and release compilation options
+- makefile to support src/test/resources
 
-steps:
-1. scan src/main for subdirs
-2. analyze dependencies
-3. for each subdir, make a copy under $PROJECT_DIR/target, compile each file that is newer
-   than the corresponding object file - or whose dependency tree indicates recompilation.
-   drop the resulting .lib files in target.
-4. for each file under src/test - compile and link as an executable against all the libs.
-   then run it, and report success or failure
-5. if there is a program.cpp or $PROJECT_NAME.cpp file under src/main - compile and link it
-   as an executable against all the libs under target_
-
-	src
-	 +-	lib
-	     +- com/brettonw/common
-	     +- com/brettonw/scanner
-	 +- app
-	     +- editor
-	     +- blahblah
-	 +- test
-	     + lib/common/brettonw/common/text
-	     + lib/common/brettonw/common/rawtext
+NOTES
+- The "standardized" version of the makefile now supports making tests and a standalone executable, 
+and requires the developer to use the src/main/cpp and src/test/cpp structure - the Main.cpp file
+is the only standard requirement, and Test.cpp is not really special but a main implementation should
+be present, with the understanding that its body will run after all the tests have loaded and run.
