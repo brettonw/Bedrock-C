@@ -19,7 +19,7 @@ class TextMap : public map<Text, ValueType, TextLess> {
         typedef typename base_container::const_iterator const_iterator;
 
         TextMap<ValueType>& set (const Text& key, const ValueType& value) {
-            this->insert (pair<Text, ValueType> (key, value));
+            (*this)[key] = value;
             return *this;
         }
 
@@ -41,7 +41,7 @@ class TextMap : public map<Text, ValueType, TextLess> {
             Text result;
             const char* separator = "";
             for (const_iterator it = this->begin (); it != this->end (); ++it) {
-                result << separator << *(it->first) << ": " << *(it->second);
+                result << separator << (it->first) << ": " << (it->second);
                 separator = ", ";
             }
             return result;
