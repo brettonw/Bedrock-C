@@ -1,7 +1,4 @@
-#include <cstdlib>
-#include <iostream>
-
-using namespace std;
+#include    "Types.h"
 
 int main (int argc, char** argv) {
 	cerr << "Hello World XXX" << endl;
