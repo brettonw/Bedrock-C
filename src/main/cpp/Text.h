@@ -2,6 +2,7 @@
 
 #pragma once
 
+
 class Text {
     private:
         PtrToRawText ptr;
@@ -30,6 +31,10 @@ class Text {
 
         uint length () const {
             return ptr->getLength();
+        }
+
+        bool isEmpty () {
+            return (length () == 0);
         }
 
         uint capacity () const {
@@ -81,7 +86,7 @@ class Text {
         }
 
         bool operator == (const Text& text) const {
-            return ((ptr == text.ptr) or (compare (text) == 0));
+            return ((ptr == text.ptr) || (compare (text) == 0));
         }
 
         bool operator == (const char* source) const {
@@ -89,7 +94,7 @@ class Text {
         }
 
         bool operator != (const Text& text) const {
-            return ((ptr != text.ptr) and (compare (text) != 0));
+            return ((ptr != text.ptr) && (compare (text) != 0));
         }
 
         bool operator != (const char* source) const {
@@ -145,11 +150,6 @@ class Text {
             return compare (text.get (), text.length());
         }
 
-        // find
-        // substr
-        // split
-        // format
-
         // append
         Text& append (const char* source, uint sourceLength) {
             if (! ptr->append(source, sourceLength)) {
@@ -167,6 +167,56 @@ class Text {
         Text& append (const Text& text) {
             return append (text.get (), text.length());
         }
+
+        int find (const Text& pattern) const {
+            const char* base = get ();
+            const char* match = strstr(base, pattern.get ());
+            if (match != 0) {
+                return (match - base);
+            }
+            return -1;
+        }
+
+        Text substring (uint subStart, uint subLength) const {
+            uint textLength = length ();
+            if (subStart < textLength) {
+                subLength = min (textLength - subStart, subLength);
+                if (subLength > 0) {
+                    return Text (get () + subStart, subLength);
+                }
+            }
+            return Text ();
+        }
+
+        Text substring (uint start) const {
+            return substring (start, length() - start);
+        }
+
+        // split
+        vector<Text> splitFirst (const Text& pattern) const {
+            vector<Text> result;
+            int match = find (pattern);
+            if (match >= 0) {
+                result.push_back (substring (0, match));
+                result.push_back (substring (match + pattern.length ()));
+            } else {
+                result.push_back (*this);
+            }
+            return result;
+        }
+
+        vector<Text> split (const Text& pattern) {
+            vector<Text> result;
+            vector<Text> splitResult = splitFirst (pattern);
+            while (splitResult.size() == 2) {
+                result.push_back (splitResult[0]);
+                splitResult = splitResult[1].splitFirst (pattern);
+            }
+            result.push_back (splitResult[0]);
+            return result;
+        }
+
+        // format
 
         // operators
         Text& operator += (const Text& text) {

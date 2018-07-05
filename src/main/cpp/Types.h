@@ -11,7 +11,7 @@
 #include    <vector>
 #include    <set>
 #include    <map>
-#include    <exception>
+#include    <stdexcept>
 using namespace std;
 
 // a few basic types

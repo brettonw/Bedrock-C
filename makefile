@@ -1,8 +1,7 @@
-.DEFAULT_GOAL := runTests
+.DEFAULT_GOAL := runTest
 
 # compiler and linker
-compiler := $(shell find /usr/local/bin | grep -p "\/g++-\d")
-compilerSourceOptions := -std=c++14
+compiler := $(shell find /usr/local/bin /usr/bin | grep -P "\/g\+\+" | tail -1)
 
 # the target binary
 target := main
@@ -12,25 +11,24 @@ testTarget := test
 sourceDir := src/main/cpp
 testDir := src/test/cpp
 targetDir := target
-sourceObjectsDir := $(targetDir)/objects
+objectsDir := $(targetDir)/objects
 resourcesDir := src/main/resources
 sourceFileExtension := cpp
 dependencyFileExtension := d
 objectFileExtension := o
 
 # flags, libraries, and includes
-compilerSourceOptions := -std=c++14 -Wall -g -D_DEBUG_
-compilerTestOptions :=
+compilerOptions := -std=c++11 -Wall -g -D_DEBUG_
 linkerOptions := -lstdc++
 additionalLibraries :=
 
 # the rest of this file is common to all projects
 sourceFiles := $(shell find $(sourceDir) -type f -name *.$(sourceFileExtension) ! -name "*Main.cpp")
-sourceObjectFiles := $(patsubst $(sourceDir)/%,$(sourceObjectsDir)/%,$(sourceFiles:.$(sourceFileExtension)=.$(objectFileExtension)))
+sourceObjectFiles := $(patsubst $(sourceDir)/%,$(objectsDir)/%,$(sourceFiles:.$(sourceFileExtension)=.$(objectFileExtension)))
 sourceFileMain := $(shell find $(sourceDir) -type f -name "*Main.cpp")
-sourceObjectMain := $(patsubst $(sourceDir)/%,$(sourceObjectsDir)/%,$(sourceFileMain:.$(sourceFileExtension)=.$(objectFileExtension)))
+sourceObjectMain := $(patsubst $(sourceDir)/%,$(objectsDir)/%,$(sourceFileMain:.$(sourceFileExtension)=.$(objectFileExtension)))
 testFiles := $(shell find $(testDir) -type f -name *.$(sourceFileExtension))
-testObjectFiles := $(patsubst $(testDir)/%,$(sourceObjectsDir)/%,$(testFiles:.$(sourceFileExtension)=.$(objectFileExtension)))
+testObjectFiles := $(patsubst $(testDir)/%,$(objectsDir)/%,$(testFiles:.$(sourceFileExtension)=.$(objectFileExtension)))
 
 # run
 run: build
@@ -41,11 +39,12 @@ run: build
 build: resources $(target)
 
 # run the tests
-runTests: buildTests
-	$(targetDir)/$(testTarget)
+runTest: buildTest
+	@echo
+	@$(targetDir)/$(testTarget)
 
 # build the tests
-buildTests: resources $(testTarget)
+buildTest: resources $(testTarget)
 
 # copy resources to the target directory
 resources: directories
@@ -54,8 +53,8 @@ resources: directories
 # make the directories
 directories:
 	@mkdir -p $(targetDir)
-	@mkdir -p $(sourceObjectsDir)
-	@mkdir -p $(sourceObjectsDir)
+	@mkdir -p $(objectsDir)
+	@mkdir -p $(objectsDir)
 
 # completely remove the target directory
 clean:
@@ -67,29 +66,33 @@ clean:
 
 # link
 $(target): $(sourceObjectFiles) $(sourceObjectMain)
-	$(compiler) -o $(targetDir)/$(target) $^ $(linkerOptions) $(additionalLibraries)
+	@echo "Linking $(targetDir)/$(target)"
+	@$(compiler) -o $(targetDir)/$(target) $^ $(linkerOptions) $(additionalLibraries)
 
 $(testTarget): $(sourceObjectFiles) $(testObjectFiles)
-	$(compiler) -o $(targetDir)/$(testTarget) $^ $(linkerOptions) $(additionalLibraries)
-
+	@echo "Linking $(targetDir)/$(target)"
+	@$(compiler) -o $(targetDir)/$(testTarget) $^ $(linkerOptions) $(additionalLibraries)
+	
 # compile
-$(sourceObjectsDir)/%.$(objectFileExtension): $(sourceDir)/%.$(sourceFileExtension)
+$(objectsDir)/%.$(objectFileExtension): $(sourceDir)/%.$(sourceFileExtension)
+	@echo "Compiling $<"
 	@mkdir -p $(dir $@)
-	$(compiler) $(compilerSourceOptions) -c -o $@ $<
-	@$(compiler) $(compilerSourceOptions) -MM $(sourceDir)/$*.$(sourceFileExtension) > $(sourceObjectsDir)/$*.$(dependencyFileExtension)
-	@cp -f $(sourceObjectsDir)/$*.$(dependencyFileExtension) $(sourceObjectsDir)/$*.$(dependencyFileExtension).tmp
-	@sed -e 's|.*:|$(sourceObjectsDir)/$*.$(objectFileExtension):|' < $(sourceObjectsDir)/$*.$(dependencyFileExtension).tmp > $(sourceObjectsDir)/$*.$(dependencyFileExtension)
-	@sed -e 's/.*://' -e 's/\\$$//' < $(sourceObjectsDir)/$*.$(dependencyFileExtension).tmp | fmt -1 | sed -e 's/^ *//' -e 's/$$/:/' >> $(sourceObjectsDir)/$*.$(dependencyFileExtension)
-	@rm -f $(sourceObjectsDir)/$*.$(dependencyFileExtension).tmp
+	@$(compiler) $(compilerOptions) -c -o $@ $<
+	@$(compiler) $(compilerOptions) -MM $(sourceDir)/$*.$(sourceFileExtension) > $(objectsDir)/$*.$(dependencyFileExtension)
+	@cp -f $(objectsDir)/$*.$(dependencyFileExtension) $(objectsDir)/$*.$(dependencyFileExtension).tmp
+	@sed -e 's|.*:|$(objectsDir)/$*.$(objectFileExtension):|' < $(objectsDir)/$*.$(dependencyFileExtension).tmp > $(objectsDir)/$*.$(dependencyFileExtension)
+	@sed -e 's/.*://' -e 's/\\$$//' < $(objectsDir)/$*.$(dependencyFileExtension).tmp | fmt -1 | sed -e 's/^ *//' -e 's/$$/:/' >> $(objectsDir)/$*.$(dependencyFileExtension)
+	@rm -f $(objectsDir)/$*.$(dependencyFileExtension).tmp
 
-$(sourceObjectsDir)/%.$(objectFileExtension): $(testDir)/%.$(sourceFileExtension)
+$(objectsDir)/%.$(objectFileExtension): $(testDir)/%.$(sourceFileExtension)
+	@echo "Compiling $<"
 	@mkdir -p $(dir $@)
-	$(compiler) $(compilerSourceOptions) $(compilerTestOptions) -I$(sourceDir) -c -o $@ $<
-	@$(compiler) $(compilerSourceOptions) $(compilerTestOptions) -I$(sourceDir) -MM $(testDir)/$*.$(sourceFileExtension) > $(sourceObjectsDir)/$*.$(dependencyFileExtension)
-	@cp -f $(sourceObjectsDir)/$*.$(dependencyFileExtension) $(sourceObjectsDir)/$*.$(dependencyFileExtension).tmp
-	@sed -e 's|.*:|$(sourceObjectsDir)/$*.$(objectFileExtension):|' < $(sourceObjectsDir)/$*.$(dependencyFileExtension).tmp > $(sourceObjectsDir)/$*.$(dependencyFileExtension)
-	@sed -e 's/.*://' -e 's/\\$$//' < $(sourceObjectsDir)/$*.$(dependencyFileExtension).tmp | fmt -1 | sed -e 's/^ *//' -e 's/$$/:/' >> $(sourceObjectsDir)/$*.$(dependencyFileExtension)
-	@rm -f $(sourceObjectsDir)/$*.$(dependencyFileExtension).tmp
+	@$(compiler) $(compilerOptions) -I$(sourceDir) -c -o $@ $<
+	@$(compiler) $(compilerOptions) -I$(sourceDir) -MM $(testDir)/$*.$(sourceFileExtension) > $(objectsDir)/$*.$(dependencyFileExtension)
+	@cp -f $(objectsDir)/$*.$(dependencyFileExtension) $(objectsDir)/$*.$(dependencyFileExtension).tmp
+	@sed -e 's|.*:|$(objectsDir)/$*.$(objectFileExtension):|' < $(objectsDir)/$*.$(dependencyFileExtension).tmp > $(objectsDir)/$*.$(dependencyFileExtension)
+	@sed -e 's/.*://' -e 's/\\$$//' < $(objectsDir)/$*.$(dependencyFileExtension).tmp | fmt -1 | sed -e 's/^ *//' -e 's/$$/:/' >> $(objectsDir)/$*.$(dependencyFileExtension)
+	@rm -f $(objectsDir)/$*.$(dependencyFileExtension).tmp
 
 # non-file targets
-.PHONY: run build runTests buildTests clean resources
+.PHONY: run build runTest buildTest clean resources

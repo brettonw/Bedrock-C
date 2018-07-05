@@ -7,23 +7,24 @@
 
 MAKE_PTR_TO(BagThing) {
     public:
-        typedef enum {
-            STR_TYPE,
-            INT_TYPE,
-            FLT_TYPE,
-            BLN_TYPE,
-            ARR_TYPE,
-            OBJ_TYPE
-        } Type;
+    typedef enum {
+        TEXT_TYPE,
+        INTEGER_TYPE,
+        FLOAT_TYPE,
+        BOOL_TYPE,
+        ARRAY_TYPE,
+        OBJECT_TYPE
+    } Type;
 
-		BagThing (Type _type) : type (_type) {}
+        BagThing (Type _type) : type (_type) {}
         virtual ~BagThing () {}
 
-        Type getType () const { return type; }
+        Type getType () const { return type; };
+        virtual Text toJson () const { return toText (); };
         virtual Text toText () const = 0;
 
     protected:
-    	Type type;
+        Type type;
 
         static Text enclose (const Text& value, const Text& beginEnclosure, const Text& endEnclosure) {
             return Text () << beginEnclosure << value << endEnclosure;
@@ -43,9 +44,10 @@ MAKE_PTR_TO_SUB(BagText, BagThing) {
         Text value;
 
     public:
-        BagText (const Text& _value) : BagThing (STR_TYPE), value (_value) {}
+        BagText (const Text& _value) : BagThing (BagThing::TEXT_TYPE), value (_value) {}
         virtual ~BagText () { }
-        virtual Text toText () const { return enquote (value); }
+        virtual Text toJson () const { return enquote (toText ()); }
+        virtual Text toText () const { return value; }
 };
 
 MAKE_PTR_TO_SUB(BagInteger, BagThing) {
@@ -53,7 +55,7 @@ MAKE_PTR_TO_SUB(BagInteger, BagThing) {
         int value;
 
     public:
-        BagInteger (int _value) : BagThing (INT_TYPE), value (_value) {}
+        BagInteger (int _value) : BagThing (BagThing::INTEGER_TYPE), value (_value) {}
         virtual ~BagInteger () {}
         virtual Text toText () const { return Text () << value; }
 };
@@ -63,7 +65,7 @@ MAKE_PTR_TO_SUB(BagFloat, BagThing) {
         double value;
 
     public:
-        BagFloat (double _value) : BagThing (FLT_TYPE), value (_value) {}
+        BagFloat (double _value) : BagThing (BagThing::FLOAT_TYPE), value (_value) {}
         virtual ~BagFloat () {}
         virtual Text toText () const { return Text () << value; }
 };
@@ -73,12 +75,23 @@ MAKE_PTR_TO_SUB(BagBool, BagThing) {
         bool value;
 
     public:
-        BagBool (bool _value) : BagThing (BLN_TYPE), value (_value) {}
+        BagBool (bool _value) : BagThing (BagThing::BOOL_TYPE), value (_value) {}
         virtual ~BagBool () {}
         virtual Text toText () const { return Text () << value; }
 };
 
-MAKE_PTR_TO_SUB(BagArray, BagThing) {
+MAKE_PTR_TO_SUB(BagContainer, BagThing) {
+    public:
+        BagContainer (Type _type) : BagThing (_type) {}
+
+        PtrToBagThing get (const Text& path) {
+            return const_cast<const BagContainer*>(this)->get (path);
+        }
+
+        virtual const PtrToBagThing get (const Text& path) const = 0;
+};
+
+MAKE_PTR_TO_SUB(BagArray, BagContainer) {
     protected:
         vector<PtrToBagThing> value;
         Text beginEnclosure;
@@ -91,18 +104,28 @@ MAKE_PTR_TO_SUB(BagArray, BagThing) {
         }
 
     public:
-        BagArray () : BagThing (ARR_TYPE), beginEnclosure ("["), endEnclosure ("]"), separator (",") {}
-        BagArray (const Text& _begin, const Text& _end, const Text& _separator) : BagThing (ARR_TYPE), beginEnclosure (_begin), endEnclosure (_end), separator (_separator) {}
+        BagArray () : BagContainer (BagThing::ARRAY_TYPE), beginEnclosure ("["), endEnclosure ("]"), separator (",") {}
+        BagArray (const Text& _begin, const Text& _end, const Text& _separator) : BagContainer (BagThing::ARRAY_TYPE), beginEnclosure (_begin), endEnclosure (_end), separator (_separator) {}
         virtual ~BagArray () {}
+
+        virtual Text toJson () const {
+            Text prepend = "";
+            Text out;
+            for (vector<PtrToBagThing>::const_iterator it = value.begin (); it != value.end (); ++it) {
+                out << prepend << (*it)->toJson ();
+                prepend = separator;
+            }
+            return enclose (out, beginEnclosure, endEnclosure);
+        }
 
         virtual Text toText () const {
             Text prepend = "";
             Text out;
             for (vector<PtrToBagThing>::const_iterator it = value.begin (); it != value.end (); ++it) {
                 out << prepend << (*it)->toText ();
-                prepend = separator;
+                prepend = END_LINE;
             }
-            return enclose (out, beginEnclosure, endEnclosure);
+            return out << END_LINE;
         }
 
         template<typename BagThingSubtype>
@@ -111,8 +134,15 @@ MAKE_PTR_TO_SUB(BagArray, BagThing) {
             return this;
         }
 
-        PtrToBagArray add(const char* thing) {
+        PtrToBagArray add(const Text& thing) {
             return add (new BagText (thing));
+        }
+
+        // old C++ - we either add this explicit conversion, or remove the
+        // overload that handles bool types, as the compiler implicitly
+        // chooses that conversion over this one
+        PtrToBagArray add(const char* thing) {
+            return add (Text (thing));
         }
 
         PtrToBagArray add(int thing) {
@@ -139,40 +169,80 @@ MAKE_PTR_TO_SUB(BagArray, BagThing) {
             return (index < value.size ()) ? value[index] : (BagThing*)0;
         }
 
-        // sort
-        // "get" that takes a path string
+        virtual const PtrToBagThing get (const Text& path) const {
+            vector<Text> parts = path.splitFirst ("/");
+            uint index = atoi (parts[0].get ());
+            PtrToBagThing ptrToBagThing = get (index);
+            if ((parts.size () == 2) and ptrToBagThing) {
+                switch (ptrToBagThing->getType ()) {
+                    case BagThing::OBJECT_TYPE:
+                    case BagThing::ARRAY_TYPE:
+                        return ptr_downcast<BagContainer> (ptrToBagThing)->get (parts[1]);
+                    default:
+                        return (BagThing*) 0;
+                }
+            }
+            return ptrToBagThing;
+        }
+
+        /*
+        PtrToBagThing operator [] (uint index) {
+            return get (index);
+        }
+
+        const PtrToBagThing operator [] (uint index) const {
+            return get (index);
+        }
+        */
 };
 
-MAKE_PTR_TO_SUB(BagObject, BagThing) {
+MAKE_PTR_TO_SUB(BagObject, BagContainer) {
     protected:
         TextMap<PtrToBagThing> value;
 
         PtrToBagObject put (const Text& name, BagThing* bagThing) {
-            value.set(name, bagThing);
+            value[name] = bagThing;
             return this;
         }
 
     public:
-        BagObject () : BagThing (OBJ_TYPE) {}
+        BagObject () : BagContainer (BagThing::OBJECT_TYPE) {}
         virtual ~BagObject () {}
-        virtual Text toText () const {
+        virtual Text toJson () const {
             const char* prepend = "";
             Text out;
             for (TextMap<PtrToBagThing>::const_iterator it = value.begin (); it != value.end (); ++it) {
-                out << prepend << enquote (it->first) << ":" << it->second->toText ();
+                out << prepend << enquote (it->first) << ":" << it->second->toJson ();
                 prepend = ",";
             }
             return enclose (out, "{", "}");
         }
 
+        virtual Text toText () const {
+            const char* prepend = "";
+            Text out;
+            for (TextMap<PtrToBagThing>::const_iterator it = value.begin (); it != value.end (); ++it) {
+                out << prepend << it->first << "=" << it->second->toText ();
+                prepend = END_LINE;
+            }
+            return out << END_LINE;
+        }
+
         template<typename BagThingSubtype>
         PtrToBagObject put (const Text& name, PtrTo<BagThingSubtype> bagThing) {
-            value.set(name, ptr_upcast<BagThing>(bagThing));
+            value[name] = ptr_upcast<BagThing>(bagThing);
             return this;
         }
 
-        PtrToBagObject put (const Text& name, const char* thing) {
+        PtrToBagObject put (const Text& name, const Text& thing) {
             return put (name, new BagText (thing));
+        }
+
+        // old C++ - we either add this explicit conversion, or remove the
+        // overload that handles bool types, as the compiler implicitly
+        // chooses that conversion over this one
+        PtrToBagObject put (const Text& name, const char* thing) {
+            return put (name, Text (thing));
         }
 
         PtrToBagObject put (const Text& name, int thing) {
@@ -191,28 +261,38 @@ MAKE_PTR_TO_SUB(BagObject, BagThing) {
             return value.size();
         }
 
-        PtrToBagThing get (const Text& name) {
+        PtrToBagThing getLocal (const Text& name) {
             PtrToBagThing* handle = value.get (name);
             return (handle) ? *handle : (BagThing*)0;
         }
 
-        const PtrToBagThing get (const Text& name) const {
+        const PtrToBagThing getLocal (const Text& name) const {
             const PtrToBagThing* handle = value.get (name);
             return (handle) ? *handle : (BagThing*)0;
         }
 
-        // "get" that takes a path string
+        virtual const PtrToBagThing get (const Text& path) const {
+            vector<Text> parts = path.splitFirst ("/");
+            PtrToBagThing ptrToBagThing = getLocal (parts[0]);
+            if ((parts.size () == 2) and ptrToBagThing) {
+                switch (ptrToBagThing->getType ()) {
+                    case BagThing::OBJECT_TYPE:
+                    case BagThing::ARRAY_TYPE:
+                        return ptr_downcast<BagContainer> (ptrToBagThing)->get (parts[1]);
+                    default:
+                        return (BagThing*) 0;
+                }
+            }
+            return ptrToBagThing;
+        }
+
+        /*
+        PtrToBagThing operator [] (const Text& name) {
+            return get (name);
+        }
+
+        const PtrToBagThing operator [] (const Text& name) const {
+            return get (name);
+        }
+        */
 };
-
-/*
-CSV 		- array of objects,
-			- index and sort functions
-
-XML 		- Object with array of child objects, _tag, and _body (everything else is an attribute)
-			- find function to return array of matching objects
-
-JSON 		- whatever
-
-Registry 	- Objects of Objects
-			- findPath function
-*/
