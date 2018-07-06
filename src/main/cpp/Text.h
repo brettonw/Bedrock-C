@@ -2,7 +2,6 @@
 
 #pragma once
 
-
 class Text {
     private:
         PtrToRawText ptr;

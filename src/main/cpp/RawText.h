@@ -2,6 +2,10 @@
 
 #pragma once
 
+// RawText is generally presumed to be a buffer containing a valid UTF-8 encoding of text. As such,
+// no wide-char support is provided, nor is there a direct indexing capability. the user must read
+// the text buffer as a stream text as a stream. NOTE: this means that count and length might be two
+// different things...
 MAKE_PTR_TO(RawText) {
     private:
         uint capacity;
