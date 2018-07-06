@@ -20,7 +20,7 @@ dependencyFileExtension := d
 objectFileExtension := o
 
 # flags, libraries, and includes
-compilerOptions := -std=c++11 -Wall -O3
+compilerOptions := -std=c++11 -Wall
 linkerOptions := -lstdc++
 additionalLibraries :=
 
@@ -70,6 +70,9 @@ report:
 
 debug:
 	$(eval compilerOptions += -g -D_DEBUG_)
+
+release:
+	$(eval compilerOptions += -O3)
 
 # completely remove the target directory
 clean:
