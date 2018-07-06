@@ -1,7 +1,9 @@
-.DEFAULT_GOAL := runTest
+.DEFAULT_GOAL := runTestDebug
+SHELL := /usr/bin/env bash
 
 # compiler and linker
-compiler := $(shell find /usr/local/bin /usr/bin | grep -P "\/g\+\+" | tail -1)
+compiler := $(shell find /usr/local/bin /usr/bin | grep -P "\/g\+\+" | head -n 1)
+#$(info compiler is $(compiler))
 
 # the target binary
 target := main
@@ -18,7 +20,7 @@ dependencyFileExtension := d
 objectFileExtension := o
 
 # flags, libraries, and includes
-compilerOptions := -std=c++11 -Wall -g -D_DEBUG_
+compilerOptions := -std=c++11 -Wall -O3
 linkerOptions := -lstdc++
 additionalLibraries :=
 
@@ -31,19 +33,27 @@ testFiles := $(shell find $(testDir) -type f -name *.$(sourceFileExtension))
 testObjectFiles := $(patsubst $(testDir)/%,$(objectsDir)/%,$(testFiles:.$(sourceFileExtension)=.$(objectFileExtension)))
 
 # run
+runDebug: debug run
+
 run: build
 	@echo
 	@$(targetDir)/$(target)
 
 # basic build
+buildDebug: debug build
+
 build: resources $(target)
 
 # run the tests
+runTestDebug: debug runTest
+
 runTest: buildTest
 	@echo
-	@$(targetDir)/$(testTarget)
+	@$(targetDir)/$(testTarget) 2>&1 | tee $(targetDir)/test.err
 
 # build the tests
+buildTestDebug: debug buildTest
+
 buildTest: resources $(testTarget)
 
 # copy resources to the target directory
@@ -51,10 +61,15 @@ resources: directories
 	@cp $(resourcesDir)/* $(targetDir)/
 
 # make the directories
-directories:
+directories: report
 	@mkdir -p $(targetDir)
 	@mkdir -p $(objectsDir)
-	@mkdir -p $(objectsDir)
+
+report:
+	@echo Building with $(compiler) $(compilerOptions)
+
+debug:
+	$(eval compilerOptions += -g -D_DEBUG_)
 
 # completely remove the target directory
 clean:
@@ -72,7 +87,7 @@ $(target): $(sourceObjectFiles) $(sourceObjectMain)
 $(testTarget): $(sourceObjectFiles) $(testObjectFiles)
 	@echo "Linking $(targetDir)/$(target)"
 	@$(compiler) -o $(targetDir)/$(testTarget) $^ $(linkerOptions) $(additionalLibraries)
-	
+
 # compile
 $(objectsDir)/%.$(objectFileExtension): $(sourceDir)/%.$(sourceFileExtension)
 	@echo "Compiling $<"
@@ -95,4 +110,4 @@ $(objectsDir)/%.$(objectFileExtension): $(testDir)/%.$(sourceFileExtension)
 	@rm -f $(objectsDir)/$*.$(dependencyFileExtension).tmp
 
 # non-file targets
-.PHONY: run build runTest buildTest clean resources
+.PHONY: run build runTest buildTest clean resources report debug release
