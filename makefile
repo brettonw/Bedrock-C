@@ -32,28 +32,38 @@ sourceObjectMain := $(patsubst $(sourceDir)/%,$(objectsDir)/%,$(sourceFileMain:.
 testFiles := $(shell find $(testDir) -type f -name *.$(sourceFileExtension))
 testObjectFiles := $(patsubst $(testDir)/%,$(objectsDir)/%,$(testFiles:.$(sourceFileExtension)=.$(objectFileExtension)))
 
-# run
+# debug targets
 runDebug: debug run
 
+buildDebug: debug build
+
+runTestDebug: debug runTest
+
+buildTestDebug: debug buildTest
+
+# release targets
+runRelease: release run
+
+buildRelease: release build
+
+runTestRelease: release runTest
+
+buildTestRelease: release buildTest
+
+# run
 run: build
 	@echo
 	@$(targetDir)/$(target)
 
 # basic build
-buildDebug: debug build
-
 build: resources $(target)
 
 # run the tests
-runTestDebug: debug runTest
-
 runTest: buildTest
 	@echo
 	@$(targetDir)/$(testTarget) 2>&1 | tee $(targetDir)/test.err
 
 # build the tests
-buildTestDebug: debug buildTest
-
 buildTest: resources $(testTarget)
 
 # copy resources to the target directory
@@ -64,14 +74,6 @@ resources: directories
 directories:
 	@mkdir -p $(targetDir)
 	@mkdir -p $(objectsDir)
-
-debug:
-	$(eval compilerOptions += -g -D_DEBUG_)
-	@echo Building DEBUG with $(compiler) $(compilerOptions)
-
-release:
-	$(eval compilerOptions += -O3)
-	@echo Building RELEASE with $(compiler) $(compilerOptions)
 
 # completely remove the target directory
 clean:
@@ -111,5 +113,14 @@ $(objectsDir)/%.$(objectFileExtension): $(testDir)/%.$(sourceFileExtension)
 	@sed -e 's/.*://' -e 's/\\$$//' < $(objectsDir)/$*.$(dependencyFileExtension).tmp | fmt -1 | sed -e 's/^ *//' -e 's/$$/:/' >> $(objectsDir)/$*.$(dependencyFileExtension)
 	@rm -f $(objectsDir)/$*.$(dependencyFileExtension).tmp
 
+debug:
+	$(eval compilerOptions += -g -D_DEBUG_)
+	@echo Building DEBUG with $(compiler) $(compilerOptions)
+
+release:
+	$(eval compilerOptions += -O3)
+	@echo Building RELEASE with $(compiler) $(compilerOptions)
+
 # non-file targets
-.PHONY: run build runTest buildTest clean resources report debug release
+.PHONY: run build runTest buildTest clean resources debug release runDebug buildDebug runTestDebug buildTestDebug runRelease buildRelease runTestRelease buildTestRelease
+
