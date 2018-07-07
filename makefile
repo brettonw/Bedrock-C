@@ -61,18 +61,17 @@ resources: directories
 	@cp $(resourcesDir)/* $(targetDir)/
 
 # make the directories
-directories: report
+directories:
 	@mkdir -p $(targetDir)
 	@mkdir -p $(objectsDir)
 
-report:
-	@echo Building with $(compiler) $(compilerOptions)
-
 debug:
 	$(eval compilerOptions += -g -D_DEBUG_)
+	@echo Building DEBUG with $(compiler) $(compilerOptions)
 
 release:
 	$(eval compilerOptions += -O3)
+	@echo Building RELEASE with $(compiler) $(compilerOptions)
 
 # completely remove the target directory
 clean:
