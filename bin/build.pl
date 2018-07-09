@@ -107,15 +107,11 @@ my $buildFileName = "build.json";
 my $buildScriptSourceDirectory = dirname(abs_path(__FILE__));
 #print STDERR "Executing: $buildScriptSourceDirectory\n";
 
-# load a default global configuration, and the project configuration if it exists
+# load a default global configuration into a configuration stack
 my $buildConfigurationStack = [];
 push (@$buildConfigurationStack, JsonFile::read("$buildScriptSourceDirectory/$buildFileName"));
 
-#my $globalBuildConfiguration = JsonFile::read("$buildScriptSourceDirectory/$buildFileName");
-#my $projectBuildConfiguration = {};
-#my $sourcePathBuildConfiguration = {};
-#my $commandLineBuildConfiguration = {};
-
+# function to traverse the configuration stack to retrieve a defined value
 sub getConfigurationVariable {
     my ($variableName) = @_;
 
@@ -137,7 +133,7 @@ sub getConfigurationVariable {
     return $value;
 }
 
-# process the command line options into a configuration hash
+# process the command line options into a configuration hash in the configuration stack
 my $commandLineBuildConfiguration = {};
 foreach my $argument (@ARGV) {
     if ($argument =~ /^([^=]*)=([^=]*)$/) {
@@ -152,23 +148,24 @@ foreach my $argument (@ARGV) {
     }
 }
 push (@$buildConfigurationStack, $commandLineBuildConfiguration);
+
+# now load the project local build configuration file into the configuration stack
 push (@$buildConfigurationStack, JsonFile::read(getConfigurationVariable ("buildConfigurationFileName")));
 
 # read the source path looking for subdirs
 my @sourcePaths;
 my $sourcePath = getConfigurationVariable ("sourcePath");
-#print STDERR "SourcePath: $sourcePath\n";
 if (opendir(SOURCEDIR, $sourcePath)) {
     while (my $file = readdir(SOURCEDIR)) {
         next unless (($file !~ /^\./) && (-d "$sourcePath/$file"));
-        #print "$sourcePath/$file\n";
 
-        # look inside the potential sourcepath for a build.json file
+        # look inside the potential sourcepath for a build configuration file
         push(@$buildConfigurationStack, JsonFile::read("$sourcePath/$file/" . getConfigurationVariable("buildConfigurationFileName")));
 
         print STDERR "Source Path: $file\n";
         push(@sourcePaths, $file);
 
+        pop (@$buildConfigurationStack);
     }
     closedir(SOURCEDIR);
 } else {
