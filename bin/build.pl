@@ -10,13 +10,11 @@ use utf8;
 
 use File::Path qw(make_path);
 use File::Basename;
-use File::Glob qw(:glob csh_glob);
 use Cwd qw(abs_path);
 
 # search my script directory location for the "my" lib
 use lib dirname (abs_path(__FILE__));
 use my::JsonFile;
-use my::Web;
 
 # build.pl, a comprehensive build script in perl for C++ on UNIX systems (MacOS and Linux).
 # written by Bretton Wade, July 2018
@@ -135,6 +133,9 @@ sub getConfigurationVariable {
     }
     return $value;
 }
+sub conf {
+    return getConfigurationVariable (@_);
+}
 
 # process the command line options into a configuration hash in the configuration stack
 my $commandLineBuildConfiguration = {};
@@ -142,7 +143,7 @@ foreach my $argument (@ARGV) {
     if ($argument =~ /^([^=]*)=([^=]*)$/) {
         my $key = $1;
         my $value = $2;
-        if (getConfigurationVariable($1) ne "") {
+        if (conf($1) ne "") {
             $commandLineBuildConfiguration->{$1} = $2;
             print STDERR "$1 = $2\n";
         } else {
@@ -153,17 +154,17 @@ foreach my $argument (@ARGV) {
 push (@$buildConfigurationStack, $commandLineBuildConfiguration);
 
 # now load the project local build configuration file into the configuration stack
-push (@$buildConfigurationStack, JsonFile::read(getConfigurationVariable ("buildConfigurationFileName")));
+push (@$buildConfigurationStack, JsonFile::read(conf ("buildConfigurationFileName")));
 
 # read the source path looking for subdirs, and loading their build configurations
 my $targets = {};
-my $sourcePath = getConfigurationVariable ("sourcePath");
-if (opendir(SOURCEDIR, $sourcePath)) {
-    while (my $file = readdir(SOURCEDIR)) {
+my $sourcePath = conf ("sourcePath");
+if (opendir(SOURCE_PATH, $sourcePath)) {
+    while (my $file = readdir(SOURCE_PATH)) {
         next unless (($file !~ /^\./) && (-d "$sourcePath/$file"));
-        $targets->{$file} = JsonFile::read("$sourcePath/$file/" . getConfigurationVariable("buildConfigurationFileName"));
+        $targets->{$file} = JsonFile::read("$sourcePath/$file/" . conf("buildConfigurationFileName"));
     }
-    closedir(SOURCEDIR);
+    closedir(SOURCE_PATH);
 } else {
     print STDERR "Can't open source directory ($sourcePath), $!\n";
 }
@@ -171,43 +172,87 @@ if (opendir(SOURCEDIR, $sourcePath)) {
 # identify the targets to build, and the dependency order to do it. the dependency graph is implicit
 # in the dependencies array for each target, so we traverse it in depth first order, emitting build
 # targets on return (marking them as visited).
-my $targetsInOrder = [];
-sub traverseDependencies {
+my $targetsInDependencyOrder = [];
+sub traverseTargetDependencies {
     my ($target) = @_;
     if (exists ($targets->{$target})) {
         if (!exists($targets->{$target}->{touched})) {
             $targets->{$target}->{touched} = 1;
             my $dependencies = exists($targets->{$target}->{dependencies}) ? $targets->{$target}->{dependencies} : [];
             for my $dependency (sort (@$dependencies)) {
-                traverseDependencies($dependency);
+                traverseTargetDependencies($dependency);
             }
-            push (@$targetsInOrder, $target);
+            push (@$targetsInDependencyOrder, $target);
         }
     } else {
         print STDERR "Unknown target: $target\n";
     }
 }
 
-my $targetsToBuild = getConfigurationVariable("target");
+my $targetsToBuild = conf ("target");
 $targetsToBuild = (ref $targetsToBuild eq "ARRAY") ? $targetsToBuild : (($targetsToBuild ne "*") ? [split (/, ?/, $targetsToBuild)] : [sort keys (%$targets)]);
 for my $target (@$targetsToBuild) {
-    traverseDependencies ($target);
+    traverseTargetDependencies ($target);
+}
+
+# function to read a dependencies file
+sub readObjectDependencies {
+    my ($sourceTargetPath, $sourceTargetFile, $objectPath) = @_;
+    my $sourceExtension = conf ("sourceExtension");
+    my $dependencyExtension = conf ("dependencyExtension");
+    my $dependencyFile = $sourceTargetFile;
+    $dependencyFile =~ s/$sourceExtension$/$dependencyExtension/;
+    if (open (DEPENDENCY_FILE, "$objectPath/$dependencyFile")) {
+        my $dependencyLine = "";
+        while (<DEPENDENCY_FILE>) {
+            chomp;
+            $dependencyLine .= $_;
+            last if ($dependencyLine !~ /\\$/);
+        }
+        close (DEPENDENCY_FILE);
+        
+        # process the dependency line into an array of dependencies
+        return [split (/ /, $dependencyLine)];
+    }
+    return [$sourceTargetFile];
 }
 
 # now walk the targets in dependency order
-for my $target (@$targetsInOrder) {
+for my $target (@$targetsInDependencyOrder) {
     push (@$buildConfigurationStack, $targets->{$target});
-    my $targetPath = getConfigurationVariable("targetPath");
+    my $targetPath = conf ("targetPath");
 
     # determine what configurations to build
-    my $configurations = getConfigurationVariable("configurations");
-    my $configurationToBuild = getConfigurationVariable("configuration");
+    my $configurations = conf ("configurations");
+    my $configurationToBuild = conf ("configuration");
     $configurationToBuild = (ref $configurationToBuild eq "ARRAY") ? $configurationToBuild : (($configurationToBuild ne "*") ? [ split(/, ?/, $configurationToBuild) ] : [ sort keys (%$configurations) ]);
     for my $configuration (@$configurationToBuild) {
         print STDERR "BUILD $target/$configuration\n";
         my $objectPath = "$targetPath/$target/$configuration/objects";
-        make_path ($objectPath);
-
+    	make_path ($objectPath);
+       	
+       	# gather up all the source files in the source path
+       	my $sourceTargetPath = "$sourcePath/$target";
+       	my $sourceExtension = conf ("sourceExtension");
+       	my $sourceTargetFiles = {};
+        if (opendir(SOURCE_TARGET_DIR, $sourceTargetPath)) {
+            while (my $sourceTargetFile = readdir(SOURCE_TARGET_DIR)) {
+                if ($sourceTargetFile =~ /$sourceExtension$/) {
+                    $sourceTargetFiles->{$sourceTargetFile} = readObjectDependencies ($sourceTargetPath, $sourceTargetFile, $objectPath);
+                    print STDERR "    Source: $sourceTargetFile\n";
+                }
+            }
+            closedir(SOURCE_TARGET_DIR);
+        } else {
+            print STDERR "Can't open target source directory ($sourceTargetPath), $!\n";
+        }
+       	
+        # now the sourceTargetFiles have a dependency line, we only need to compare the dates of 
+        # those files to the date of the object file, if it exists.
+        for my $sourceTargetFile (sort keys %$sourceTargetFiles) {
+            my $dependsGenerator = conf ("compiler") . " " . conf ("compilerOptions") . " " . conf ("configurations")->{$configuration}->{dependerOptions} . " $sourceTargetPath/$sourceTargetFile > $objectPath/$sourceTargetFile";
+            print STDERR "$dependsGenerator\n"; 
+        }
         ### XXX TODO
     }
 
