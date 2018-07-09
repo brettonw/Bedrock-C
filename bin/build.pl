@@ -56,7 +56,10 @@ use my::JsonFile;
 #           prepending with "$", respectively.
 #   dependencies:
 #           targets (library or application) might depend on another target being built first, so
-#           dependencies can be named in the array variable "dependencies".
+#           dependencies can be named in the array variable "dependencies". the default include path
+#           sent to the compiler will include the dependency directories as -I includes. (another
+#           option would be to set the include path to be the sourceDir, and require that all 
+#           external includes be referenced with a relative path, i.e. #include "common/Types.h"
 #
 # tree structure -
 # i was originally going to try to mimic a maven project and allow other languages to be present
@@ -195,6 +198,11 @@ for my $target (@$targetsToBuild) {
     traverseTargetDependencies ($target);
 }
 
+#---------------------------------------------------------------------------------------------------
+# an example object dependencies file:
+# ReferenceCountedObject.o: source/common/ReferenceCountedObject.cpp \
+#  source/common/ReferenceCountedObject.h source/common/Types.h
+
 # function to read a dependencies file
 sub readObjectDependencies {
     my ($sourceTargetPath, $sourceTargetFile, $objectPath) = @_;
@@ -212,9 +220,13 @@ sub readObjectDependencies {
         close (DEPENDENCY_FILE);
         
         # process the dependency line into an array of dependencies
+        print STDERR "       DEPENDENCIES: $dependencyLine\n";
         return [split (/ /, $dependencyLine)];
     }
     return [$sourceTargetFile];
+}
+
+sub writeObjectDependencies {
 }
 
 # now walk the targets in dependency order
@@ -247,11 +259,14 @@ for my $target (@$targetsInDependencyOrder) {
             print STDERR "Can't open target source directory ($sourceTargetPath), $!\n";
         }
        	
+       	# XXX TODO need to build an "includes (-I 'dir') line of data based on the target dependencies
+       	
         # now the sourceTargetFiles have a dependency line, we only need to compare the dates of 
         # those files to the date of the object file, if it exists.
         for my $sourceTargetFile (sort keys %$sourceTargetFiles) {
-            my $dependsGenerator = conf ("compiler") . " " . conf ("compilerOptions") . " " . conf ("configurations")->{$configuration}->{dependerOptions} . " $sourceTargetPath/$sourceTargetFile > $objectPath/$sourceTargetFile";
+            my $dependsGenerator = conf ("compiler") . " -I$sourcePath" . conf ("compilerOptions") . " " . conf ("configurations")->{$configuration}->{dependerOptions} . " $sourceTargetPath/$sourceTargetFile > $objectPath/$sourceTargetFile";
             print STDERR "$dependsGenerator\n"; 
+            qx/$dependsGenerator/;
         }
         ### XXX TODO
     }
