@@ -6,7 +6,7 @@
     "target": "*",
     "configuration": "*",
     "type": "application",
-    "dependencies": "",
+    "dependencies": [],
     "configurations": {
         "debug": {
             "compilerOptions": "-std=c++11 -Wall -g -D_DEBUG_",
