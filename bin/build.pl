@@ -4,6 +4,7 @@ use strict;
 use warnings FATAL => 'all';
 use diagnostics;
 
+# utf8 everything...
 binmode STDOUT, ":utf8";
 binmode STDERR, ":utf8";
 use utf8;
@@ -12,12 +13,12 @@ use File::Path qw(make_path);
 use File::Basename;
 use Cwd qw(abs_path);
 
-# search my script directory location for the "my" lib
-use lib dirname (abs_path(__FILE__));
-use my::JsonFile;
+# search under the script directory location for the "my" libs
+use lib dirname (abs_path(__FILE__)) . "/my";
+use BuildConfiguration qw(conf);
 
-# build.pl, a comprehensive build script in perl for C++ on UNIX systems (MacOS and Linux).
-# written by Bretton Wade, July 2018
+# build.pl, a comprehensive build script in perl for Gnu-based C++ projects on UNIX systems (MacOS 
+# and Linux). written by Bretton Wade, July 2018
 #
 # configurations -
 #   files:
@@ -64,6 +65,7 @@ use my::JsonFile;
 # tree structure -
 # i was originally going to try to mimic a maven project and allow other languages to be present
 # (java, etc.), but decided that a separate directory is ultimately cleaner.
+# NOTE: *ALL* built files are deposited in "target", so clean builds are made by removing "target".
 #
 # source -+- (lib)
 #         +- (lib)
@@ -107,38 +109,8 @@ use my::JsonFile;
 #                                +- (copied resources)
 #
 
-# get the build script source directory
-my $buildScriptSourceDirectory = dirname(abs_path(__FILE__));
-#print STDERR "Executing: $buildScriptSourceDirectory\n";
-
-# load a default global configuration into a configuration stack
-my $buildConfigurationStack = [];
-push (@$buildConfigurationStack, JsonFile::read("$buildScriptSourceDirectory/build.json"));
-
-# function to traverse the configuration stack to retrieve a defined value
-sub getConfigurationVariable {
-    my ($variableName) = @_;
-
-    # loop over the build configuration stack
-    my $value = "";
-    for my $buildConfiguration (@$buildConfigurationStack) {
-        if (exists ($buildConfiguration->{$variableName})) {
-            my $existingValue = $value;
-            $value = $buildConfiguration->{$variableName};
-            if (ref($value) ne "HASH") {
-                # do variable substitution if the existing value should be used in the replacement
-                $value =~ s/\$$variableName/$existingValue/g;
-
-                # do a substitution with a shell command if one is requested
-                $value =~ s/\$\(([^\)]*)\)/my $x = qx%$1%; chomp $x; $x/e;
-            }
-        }
-    }
-    return $value;
-}
-sub conf {
-    return getConfigurationVariable (@_);
-}
+# load a default global configuration into a configuration stack from the script source directory
+BuildConfiguration::enter (dirname(abs_path(__FILE__)));
 
 # process the command line options into a configuration hash in the configuration stack
 my $commandLineBuildConfiguration = {};
@@ -154,10 +126,10 @@ foreach my $argument (@ARGV) {
         }
     }
 }
-push (@$buildConfigurationStack, $commandLineBuildConfiguration);
+BuildConfiguration::begin ($commandLineBuildConfiguration);
 
 # now load the project local build configuration file into the configuration stack
-push (@$buildConfigurationStack, JsonFile::read(conf ("buildConfigurationFileName")));
+BuildConfiguration::enter (".");
 
 # read the source path looking for subdirs, and loading their build configurations
 my $targets = {};
@@ -165,7 +137,7 @@ my $sourcePath = conf ("sourcePath");
 if (opendir(SOURCE_PATH, $sourcePath)) {
     while (my $file = readdir(SOURCE_PATH)) {
         next unless (($file !~ /^\./) && (-d "$sourcePath/$file"));
-        $targets->{$file} = JsonFile::read("$sourcePath/$file/" . conf("buildConfigurationFileName"));
+        $targets->{$file} = BuildConfiguration::read("$sourcePath/$file/");
     }
     closedir(SOURCE_PATH);
 } else {
@@ -231,7 +203,7 @@ sub writeObjectDependencies {
 
 # now walk the targets in dependency order
 for my $target (@$targetsInDependencyOrder) {
-    push (@$buildConfigurationStack, $targets->{$target});
+    BuildConfiguration::begin ($targets->{$target});
     my $targetPath = conf ("targetPath");
 
     # determine what configurations to build
@@ -264,12 +236,12 @@ for my $target (@$targetsInDependencyOrder) {
         # now the sourceTargetFiles have a dependency line, we only need to compare the dates of 
         # those files to the date of the object file, if it exists.
         for my $sourceTargetFile (sort keys %$sourceTargetFiles) {
-            my $dependsGenerator = conf ("compiler") . " -I$sourcePath" . conf ("compilerOptions") . " " . conf ("configurations")->{$configuration}->{dependerOptions} . " $sourceTargetPath/$sourceTargetFile > $objectPath/$sourceTargetFile";
+            my $dependsGenerator = conf ("compiler") . " -I$sourcePath " . conf ("configurations")->{$configuration}->{compilerOptions} . " " . conf ("configurations")->{$configuration}->{dependerOptions} . " $sourceTargetPath/$sourceTargetFile > $objectPath/$sourceTargetFile";
             print STDERR "$dependsGenerator\n"; 
             qx/$dependsGenerator/;
         }
         ### XXX TODO
     }
 
-    pop (@$buildConfigurationStack);
+    BuildConfiguration::end ();
 }
