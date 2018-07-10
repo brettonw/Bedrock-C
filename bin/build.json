@@ -1,8 +1,6 @@
 {
     "buildConfigurationFileName": "build.json",
     "compiler": "$(find /usr/local/bin /usr/bin | grep -P \"\\/g\\+\\+\" | head -n 1)",
-    "linker": "$compiler",
-    "depender": "$compiler",
     "sourcePath": "source",
     "targetPath": "target",
     "sourceExtension": ".cpp",
@@ -17,12 +15,14 @@
         "debug": {
             "compilerOptions": "-std=c++11 -Wall -g -D_DEBUG_",
             "linkerOptions": "",
-            "dependerOptions": "-MM"
+            "dependerOptions": "-MM",
+            "libraryOptions": ""
         },
         "release": {
             "compilerOptions": "-std=c++11 -Wall -O3 -D_NDEBUG_",
             "linkerOptions": "",
-            "dependerOptions": "-MM"
+            "dependerOptions": "-MM",
+            "libraryOptions": ""
         }
     }
 }
