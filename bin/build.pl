@@ -16,6 +16,7 @@ use Cwd qw(abs_path);
 # search under the script directory location for the "my" libs
 use lib dirname (abs_path(__FILE__)) . "/my";
 use BuildConfiguration qw(conf);
+use Slurp qw(slurp);
 
 # build.pl, a comprehensive build script in perl for Gnu-based C++ projects on UNIX systems (MacOS 
 # and Linux). written by Bretton Wade, July 2018
@@ -109,6 +110,7 @@ use BuildConfiguration qw(conf);
 #                                +- (copied resources)
 #
 
+#---------------------------------------------------------------------------------------------------
 # load a default global configuration into a configuration stack from the script source directory
 BuildConfiguration::enter (dirname(abs_path(__FILE__)));
 
@@ -131,6 +133,7 @@ BuildConfiguration::begin ($commandLineBuildConfiguration);
 # now load the project local build configuration file into the configuration stack
 BuildConfiguration::enter (".");
 
+#---------------------------------------------------------------------------------------------------
 # read the source path looking for subdirs, and loading their build configurations
 my $targets = {};
 my $sourcePath = conf ("sourcePath");
@@ -171,40 +174,78 @@ for my $target (@$targetsToBuild) {
 }
 
 #---------------------------------------------------------------------------------------------------
-# an example object dependencies file:
-# ReferenceCountedObject.o: source/common/ReferenceCountedObject.cpp \
-#  source/common/ReferenceCountedObject.h source/common/Types.h
-
-# function to read a dependencies file
-sub readObjectDependencies {
-    my ($sourceTargetPath, $sourceTargetFile, $objectPath) = @_;
+sub outputFileName {
+    my ($sourceTargetFile, $outputExtensionName) = @_;
     my $sourceExtension = conf ("sourceExtension");
-    my $dependencyExtension = conf ("dependencyExtension");
-    my $dependencyFile = $sourceTargetFile;
-    $dependencyFile =~ s/$sourceExtension$/$dependencyExtension/;
-    if (open (DEPENDENCY_FILE, "$objectPath/$dependencyFile")) {
-        my $dependencyLine = "";
-        while (<DEPENDENCY_FILE>) {
-            chomp;
-            $dependencyLine .= $_;
-            last if ($dependencyLine !~ /\\$/);
+    my $outputExtension = conf ($outputExtensionName);
+    return $sourceTargetFile =~ s/$sourceExtension$/$outputExtension/r;
+}
+
+sub targetPath {
+    my ($target, $configuration) = @_;
+    return conf ("targetPath") . "/$target/$configuration";
+}
+
+sub objectPath {
+    my ($target, $configuration) = @_;
+    return targetPath ($target, $configuration) . "/" . conf ("objectsPath");
+}
+
+#---------------------------------------------------------------------------------------------------
+# functions to deal with object dependencies
+sub readObjectDependencies {
+    my ($target, $configuration, $sourceTargetFile) = @_;
+    my $dependencyFile = objectPath ($target, $configuration) . "/" . outputFileName ($sourceTargetFile, "dependencyExtension");
+    my $dependencies = slurp ($dependencyFile) || "$sourcePath/$target/$sourceTargetFile";
+    $dependencies = ((($dependencies =~ s/\\//gr) =~ s/\s+/ /gr) =~ s/.*: +//gr);
+    #print STDERR "        DEPENDENCIES: $dependencies\n";
+    return [split (/ /, $dependencies)];
+}
+
+sub checkObjectDependencies {
+    my ($target, $configuration, $sourceTargetFile) = @_;
+
+    # if the object file exists, compare its age to the dependencies
+    my $objectFile = objectPath ($target, $configuration) . "/" . outputFileName ($sourceTargetFile, "objectExtension");
+    if (-e $objectFile) {
+        my $objectAgeDelta = (-M $objectFile);
+        my $dependencies = readObjectDependencies ($target, $configuration, $sourceTargetFile);
+        for my $dependency (@$dependencies) {
+            if ((-M $dependency) < $objectAgeDelta) {
+                # this dependency is younger than the object file, so the file should be rebuilt
+                return 1;
+            }
         }
-        close (DEPENDENCY_FILE);
-        
-        # process the dependency line into an array of dependencies
-        print STDERR "       DEPENDENCIES: $dependencyLine\n";
-        return [split (/ /, $dependencyLine)];
+        # none of the dependencies is younger than this file, so it does not need to be rebuilt
+        return 0;
+    } else {
+        # the object doesn't exist, it should be built
+        return 1;
     }
-    return [$sourceTargetFile];
 }
 
 sub writeObjectDependencies {
+    my ($target, $configuration, $sourceTargetFile, $includes) = @_;
+    my $dependencyFile = objectPath ($target, $configuration) . "/" . outputFileName ($sourceTargetFile, "dependencyExtension");
+    my $dependsGenerator = conf ("compiler") . " $includes " . conf ("configurations")->{$configuration}->{compilerOptions} . " " . conf ("configurations")->{$configuration}->{dependerOptions} . " $sourcePath/$target/$sourceTargetFile > $dependencyFile";
+    #print STDERR "$dependsGenerator\n";
+    qx/$dependsGenerator/;
 }
 
+#---------------------------------------------------------------------------------------------------
+sub compileObject {
+    my ($target, $configuration, $sourceTargetFile, $includes) = @_;
+    my $objectFile = objectPath ($target, $configuration) . "/" . outputFileName ($sourceTargetFile, "objectExtension");
+    my $objectGenerator = conf ("compiler") . " $includes " . conf ("configurations")->{$configuration}->{compilerOptions} . " -c $sourcePath/$target/$sourceTargetFile  -o $objectFile";
+    print STDERR "    COMPILE $sourceTargetFile: $objectGenerator\n";
+    qx/$objectGenerator/;
+}
+
+#---------------------------------------------------------------------------------------------------
 # now walk the targets in dependency order
 for my $target (@$targetsInDependencyOrder) {
+    # setup the build configuration for this target (we loaded this in a previous step)
     BuildConfiguration::begin ($targets->{$target});
-    my $targetPath = conf ("targetPath");
 
     # determine what configurations to build
     my $configurations = conf ("configurations");
@@ -212,35 +253,75 @@ for my $target (@$targetsInDependencyOrder) {
     $configurationToBuild = (ref $configurationToBuild eq "ARRAY") ? $configurationToBuild : (($configurationToBuild ne "*") ? [ split(/, ?/, $configurationToBuild) ] : [ sort keys (%$configurations) ]);
     for my $configuration (@$configurationToBuild) {
         print STDERR "BUILD $target/$configuration\n";
-        my $objectPath = "$targetPath/$target/$configuration/objects";
-    	make_path ($objectPath);
+
+        # ensure the target directory is present
+    	make_path (objectPath ($target, $configuration));
        	
-       	# gather up all the source files in the source path
+       	# gather up all the source files in the source path, and check to see if they need to be
+        # compiled by comparing the modification dates of the dependencies
        	my $sourceTargetPath = "$sourcePath/$target";
        	my $sourceExtension = conf ("sourceExtension");
-       	my $sourceTargetFiles = {};
+       	my @sourceTargetFiles;
         if (opendir(SOURCE_TARGET_DIR, $sourceTargetPath)) {
             while (my $sourceTargetFile = readdir(SOURCE_TARGET_DIR)) {
                 if ($sourceTargetFile =~ /$sourceExtension$/) {
-                    $sourceTargetFiles->{$sourceTargetFile} = readObjectDependencies ($sourceTargetPath, $sourceTargetFile, $objectPath);
-                    print STDERR "    Source: $sourceTargetFile\n";
+                    #print STDERR "    Source: $sourceTargetFile\n";
+                    if (checkObjectDependencies ($target, $configuration, $sourceTargetFile)) {
+                        push (@sourceTargetFiles, $sourceTargetFile);
+                    }
                 }
             }
             closedir(SOURCE_TARGET_DIR);
         } else {
             print STDERR "Can't open target source directory ($sourceTargetPath), $!\n";
         }
-       	
-       	# XXX TODO need to build an "includes (-I 'dir') line of data based on the target dependencies
-       	
-        # now the sourceTargetFiles have a dependency line, we only need to compare the dates of 
-        # those files to the date of the object file, if it exists.
-        for my $sourceTargetFile (sort keys %$sourceTargetFiles) {
-            my $dependsGenerator = conf ("compiler") . " -I$sourcePath " . conf ("configurations")->{$configuration}->{compilerOptions} . " " . conf ("configurations")->{$configuration}->{dependerOptions} . " $sourceTargetPath/$sourceTargetFile > $objectPath/$sourceTargetFile";
-            print STDERR "$dependsGenerator\n"; 
-            qx/$dependsGenerator/;
+
+        # build out the "includes" string to be passed with the compilation steps
+        my $includes = "-I$sourcePath";
+        my $dependencies = exists($targets->{$target}->{dependencies}) ? $targets->{$target}->{dependencies} : [];
+        for my $dependency (@$dependencies) {
+            $includes .= " -I$sourcePath/$dependency"
         }
-        ### XXX TODO
+        #print STDERR "    INCLUDES: $includes\n";
+       	
+        # for all the sources that are "dirty", we need to rewrite their dependencies and then
+        # compile them into object files... In the future, do this with multiple threads...
+        for my $sourceTargetFile (sort @sourceTargetFiles) {
+            writeObjectDependencies ($target, $configuration, $sourceTargetFile, $includes);
+            compileObject($target, $configuration, $sourceTargetFile, $includes);
+        }
+
+        # we want to link the targets according to their type, so do a little work to get ready to
+        # do that
+        my $targetFile;
+        my $linkOptions = conf ("configurations")->{$configuration}->{linkerOptions};
+        my $type = conf ("type");
+        if ($type eq "application") {
+            $targetFile = targetPath ($target, $configuration) . "/" . $target;
+            $linkOptions .= " " .  conf ("configurations")->{$configuration}->{applicationOptions};
+        } elsif ($type eq "library") {
+            $targetFile = targetPath ($target, $configuration) . "/lib" . $target . conf("libraryExtension");
+            $linkOptions .= " " .  conf ("configurations")->{$configuration}->{libraryOptions};
+        } else {
+            die "invalid target type";
+        }
+
+        # build out the "libraries" string to be passed with the linking step
+        # -Lbin/shared -ltq84
+        my $libraries = "";
+        for my $dependency (@$dependencies) {
+            $libraries .= " -L" . targetPath($dependency, $configuration) . " -l$dependency";
+        }
+        #print STDERR "    INCLUDES: $includes\n";
+
+        # check to see if the final target needs to be built
+        if ((! -e $targetFile) || (scalar (@sourceTargetFiles) > 0)) {
+            my $targetGenerator = conf ("compiler") . " $linkOptions -o $targetFile $libraries " . objectPath ($target, $configuration) . "/*" . conf ("objectExtension");
+            print STDERR "    LINK $target: $targetGenerator\n";
+            qx/$targetGenerator/;
+        }
+
+        ### XXX TODO - gather the built files into a library or an application
     }
 
     BuildConfiguration::end ();
