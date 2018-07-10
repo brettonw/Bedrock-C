@@ -109,9 +109,8 @@ use my::JsonFile;
 
 # get the build script source directory
 my $buildScriptSourceDirectory = dirname(abs_path(__FILE__));
-#print STDERR "Executing: $buildScriptSourceDirectory\n";
 
-# load a default global configuration into a configuration stack
+# load a default global configuration as the first entry in a configuration stack
 my $buildConfigurationStack = [];
 push (@$buildConfigurationStack, JsonFile::read("$buildScriptSourceDirectory/build.json"));
 
