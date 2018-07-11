@@ -1,0 +1,12 @@
+{
+    "debug": {
+        "compilerOptions": "-std=c++11 -Wall -g -D_DEBUG_",
+        "linkerOptions": "",
+        "dependerOptions": "-std=c++11 -Wall -g -D_DEBUG_"
+    },
+    "release": {
+        "compilerOptions": "-std=c++11 -Wall -O3 -D_NDEBUG_",
+        "linkerOptions": "",
+        "dependerOptions": "-std=c++11 -Wall -O3 -D_NDEBUG_"
+    }
+}

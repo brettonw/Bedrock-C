@@ -18,97 +18,39 @@ use lib dirname (abs_path(__FILE__)) . "/my";
 use BuildConfiguration qw(conf);
 use Slurp qw(slurp);
 
-# build.pl, a comprehensive build script in perl for Gnu-based C++ projects on UNIX systems (MacOS 
-# and Linux). written by Bretton Wade, July 2018
-#
-# configurations -
-#   files:
-#           build configuration files in json format, "build.json", are read at multiple levels. the
-#           first default is in the build script binary directory and contains global defaults. the
-#           second default is at the root of the project directory, and the final build
-#           configuration can be found inside each individual target. each variable requested is
-#           processed to the lowest level configuration in which it is found, so that most defaults
-#           can be specified at the root config level, and overridden at the lower levels if
-#           necessary, possibly using the parent value in its redefinition. configuration variables
-#           can also be redefined at the command line.
-#
-#           example build.json:
-#           {
-#               "type": "library",
-#               "dependencies":[],
-#               "configurations": {
-#                   "debug": {
-#                       "compilerOptions": "-g -D_DEBUG_",
-#                       "linkerOptions": ""
-#                   },
-#                   "release": {
-#                       "compilerOptions": "-O3 -D_NDEBUG_",
-#                       "linkerOptions": ""
-#                   }
-#               }
-#           }
-#
-#   names:
-#           source directories are named for the final product name (e.g. directory "math" builds a
-#           library called "math", but this can be overridden with a build configuration option
-#           called "name".
-#   variables:
-#           configuration variables are mostly defined statically, but can be specified to be
-#           interpreted by a shell or by variable replacement, by wrapping the value with "$()" or
-#           prepending with "$", respectively.
-#   dependencies:
-#           targets (library or application) might depend on another target being built first, so
-#           dependencies can be named in the array variable "dependencies". the default include path
-#           sent to the compiler will include the dependency directories as -I includes. (another
-#           option would be to set the include path to be the sourceDir, and require that all 
-#           external includes be referenced with a relative path, i.e. #include "common/Types.h"
-#
-# tree structure -
-# i was originally going to try to mimic a maven project and allow other languages to be present
-# (java, etc.), but decided that a separate directory is ultimately cleaner.
-# NOTE: *ALL* built files are deposited in "target", so clean builds are made by removing "target".
-#
-# source -+- (lib)
-#         +- (lib)
-#         +- (app)   --- (app.cpp)
-#         |
-#         +- (app)   -+- (app.cpp)
-#                     +- resources
-#
-# target -+- (lib) -+- (config) -+- objects -+- *.o
-#         |         |            |           +- *.d
-#         |         |            +- (built)
-#         |         |
-#         |         +- (config) -+- objects -+- *.o
-#         |                      |           +- *.d
-#         |                      +- (built)
-#         |
-#         +- (lib) -+- (config) -+- objects -+- *.o
-#         |         |            |           +- *.d
-#         |         |            +- (built)
-#         |         |
-#         |         +- (config) -+- objects -+- *.o
-#         |                      |           +- *.d
-#         |                      +- (built)
-#         |
-#         +- (app) -+- (config) -+- objects -+- *.o
-#         |         |            |           +- *.d
-#         |         |            +- (built)
-#         |         |
-#         |         +- (config) -+- objects -+- *.o
-#         |                      |           +- *.d
-#         |                      +- (built)
-#         |
-#         +- (app) -+- (config) -+- objects -+- *.o
-#                   |            |           +- *.d
-#                   |            +- (built)
-#                   |            +- (copied resources)
-#                   |
-#                   +- (config) -+- objects -+- *.o
-#                                |           +- *.d
-#                                +- (built)
-#                                +- (copied resources)
-#
+# just some temporary testing stuff
+sub printConfig {
+    my ($name) = @_;
+    print STDERR "CONFIG - $name\n";
+    my $b = BuildConfiguration::get($name);
+    for my $key (sort keys %$b) {
+        print STDERR "$key: ($b->{$key})\n";
+    }
+    print STDERR "\n";
+}
+
+BuildConfiguration::add("GLOBAL_VALUES", BuildConfiguration::load (dirname(abs_path(__FILE__)) . "/build.json"));
+printConfig ("GLOBAL_VALUES");
+
+BuildConfiguration::add("PROJECT_VALUES", BuildConfiguration::load ("./build.json"));
+printConfig ("PROJECT_VALUES");
+
+BuildConfiguration::add("GLOBAL_CONFIGURATIONS", BuildConfiguration::load (dirname(abs_path(__FILE__)) . "/configurations.json"));
+printConfig ("GLOBAL_CONFIGURATIONS");
+
+BuildConfiguration::add("GLOBAL_TYPES", BuildConfiguration::load (dirname(abs_path(__FILE__)) . "/types.json"));
+printConfig ("GLOBAL_TYPES");
+
+BuildConfiguration::concatenate("A", "GLOBAL_VALUES", BuildConfiguration::get("PROJECT_VALUES")->{debug});
+printConfig ("A");
+
+BuildConfiguration::concatenate("B", "A", BuildConfiguration::get("GLOBAL_CONFIGURATIONS")->{debug});
+printConfig ("B");
+
+BuildConfiguration::concatenate("C", "B", BuildConfiguration::get("GLOBAL_TYPES")->{application});
+printConfig ("C");
+
+exit (0);
 
 #---------------------------------------------------------------------------------------------------
 # load a default global configuration into a configuration stack from the script source directory

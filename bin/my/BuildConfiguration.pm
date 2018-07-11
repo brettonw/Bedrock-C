@@ -11,37 +11,87 @@ package BuildConfiguration;
 use Exporter 'import';
 our @EXPORT_OK = qw(conf);
 
-# configurations -
-#   files:
-#           build configuration files in json format, "build.json", are read at multiple levels. the
-#           first default is in the build script binary directory and contains global defaults. the
-#           second default is at the root of the project directory, and the final build
-#           configuration can be found inside each individual target. each variable requested is
-#           processed to the lowest level configuration in which it is found, so that most defaults
-#           can be specified at the root config level, and overridden at the lower levels if
-#           necessary, possibly using the parent value in its redefinition. configuration variables
-#           can also be redefined at the command line.
-#
-#           example build.json:
-#           {
-#               "type": "library",
-#               "dependencies":[],
-#               "configurations": {
-#                   "debug": {
-#                       "compilerOptions": "-g -D_DEBUG_",
-#                       "linkerOptions": ""
-#                   },
-#                   "release": {
-#                       "compilerOptions": "-O3 -D_NDEBUG_",
-#                       "linkerOptions": ""
-#                   }
-#               }
-#           }
-#
-#   variables:
-#           configuration variables are mostly defined statically, but can be specified to be
-#           interpreted by a shell or by variable replacement, by wrapping the value with "$()" or
-#           prepending with "$", respectively.
+my %buildConfigurations;
+
+sub add {
+    my ($name, $buildConfiguration) = @_;
+    $buildConfigurations{$name} = $buildConfiguration;
+}
+
+sub get {
+    my ($name) = @_;
+    return $buildConfigurations{$name} || {};
+}
+
+# given a value and a context, reduce the value as much as possible by performing replacements
+# XXX TODO - this needs to be a bit more fantastical
+sub reduceValue {
+    my ($value, $context) = @_;
+
+    # do variable substitutions, .
+    my $replacementCount;
+    do {
+        $replacementCount = 0;
+        # this list is reverse sorted so that variable names that are substrings of longer variable
+        # names will be replaced after the longer variable names are replaced, hopefully this isn't
+        # just too clever by half.
+        my @variableNames = reverse sort $value =~ /\$([a-z][A-Za-z0-9]*)/g;
+        for my $variableName (@variableNames) {
+            if ((exists($context->{$variableName})) && ($context->{$variableName} ne "*")) {
+                $value =~ s/\$$variableName/$context->{$variableName}/ge;
+                ++$replacementCount;
+            }
+        }
+    } while ($replacementCount > 0);
+
+    # do a substitution with a shell command if one is requested, until no more happen
+    while ($value =~ s/\$\(([^\)]*)\)/my $x = qx%$1%; chomp $x; $x/e) {}
+
+    # return the reduced value
+    return $value;
+}
+
+# given a left context and a right context, create a new context that "applies" left to right,
+# where right contains variable names needing substitution, and left possibly supplies values.
+sub apply {
+    my ($left, $right) = @_;
+
+    my $new = {};
+    for my $key (keys (%$right)) {
+        # allow for "reduce" to result in undef
+        print STDERR "    RIGHT($key) = $right->{$key}\n";
+        my $value = reduceValue ($right->{$key}, $left);
+        if (defined $value) {
+            print STDERR "        NEW($key) = $value\n";
+            $new->{$key} = $value;
+        }
+    }
+    for my $key (keys (%$left)) {
+        if (! exists ($new->{$key})) {
+            print STDERR "    LEFT($key) = $left->{$key}\n";
+            my $value = reduceValue($left->{$key}, $left);
+            if (defined $value) {
+                print STDERR "        NEW($key) = $value\n";
+                $new->{$key} = $value;
+            }
+        }
+    }
+    return $new;
+}
+
+sub concatenate {
+    my ($name, $leftName, $buildConfiguration) = @_;
+    print STDERR "CONCATENATE ($leftName with XXX into $name)\n";
+
+    # we assume the left build configuration has already been resolved as fully as possible.
+    $buildConfigurations{$name} = apply (get ($leftName), $buildConfiguration);
+}
+
+
+# load a build configuration file
+sub load {
+    return JsonFile::read(@_);
+}
 
 # establish the build configuration stack
 my @buildConfigurationStack;

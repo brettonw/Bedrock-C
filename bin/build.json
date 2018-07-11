@@ -1,31 +1,13 @@
 {
     "buildConfigurationFileName": "build.json",
-    "compiler": "$(find /usr/local/bin /usr/bin | grep -P \"\\/g\\+\\+\" | head -n 1)",
     "sourcePath": "source",
     "targetPath": "target",
     "objectsPath": "objects",
     "sourceExtension": ".cpp",
     "objectExtension": ".o",
     "dependencyExtension": ".d",
-    "libraryExtension": ".so",
     "target": "*",
-    "configuration": "*",
-    "type": "application",
     "dependencies": [],
-    "configurations": {
-        "debug": {
-            "compilerOptions": "-std=c++11 -Wall -fPIC -g -D_DEBUG_",
-            "linkerOptions": "",
-            "dependerOptions": "-MM",
-            "applicationOptions": "",
-            "libraryOptions": "-shared"
-        },
-        "release": {
-            "compilerOptions": "-std=c++11 -Wall -fPIC -O3 -D_NDEBUG_",
-            "linkerOptions": "",
-            "dependerOptions": "-MM",
-            "applicationOptions": "",
-            "libraryOptions": "-shared"
-        }
-    }
+    "type": "application",
+    "configuration": "*"
 }
