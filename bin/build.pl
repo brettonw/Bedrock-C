@@ -41,13 +41,13 @@ printConfig ("GLOBAL_CONFIGURATIONS");
 BuildConfiguration::add("GLOBAL_TYPES", BuildConfiguration::load (dirname(abs_path(__FILE__)) . "/types.json"));
 printConfig ("GLOBAL_TYPES");
 
-BuildConfiguration::concatenate("A", "GLOBAL_VALUES", BuildConfiguration::get("PROJECT_VALUES")->{debug});
+BuildConfiguration::concatenate("A", "GLOBAL_VALUES", BuildConfiguration::get("PROJECT_VALUES"));
 printConfig ("A");
 
 BuildConfiguration::concatenate("B", "A", BuildConfiguration::get("GLOBAL_CONFIGURATIONS")->{debug});
 printConfig ("B");
 
-BuildConfiguration::concatenate("C", "B", BuildConfiguration::get("GLOBAL_TYPES")->{application});
+BuildConfiguration::concatenate("C", "B", BuildConfiguration::get("GLOBAL_TYPES")->{sharedLibrary});
 printConfig ("C");
 
 exit (0);
