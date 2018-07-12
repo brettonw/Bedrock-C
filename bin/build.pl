@@ -2,7 +2,7 @@
 
 use strict;
 use warnings FATAL => 'all';
-use diagnostics;
+#use diagnostics;
 
 # utf8 everything...
 binmode STDOUT, ":utf8";
@@ -49,6 +49,9 @@ printConfig ("B");
 
 BuildConfiguration::concatenate("C", "B", BuildConfiguration::get("GLOBAL_TYPES")->{sharedLibrary});
 printConfig ("C");
+
+BuildConfiguration::add("D", BuildConfiguration::reduce (BuildConfiguration::get("C")));
+printConfig ("D");
 
 exit (0);
 

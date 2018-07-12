@@ -59,19 +59,19 @@ sub apply {
     my $new = {};
     for my $key (keys (%$right)) {
         # allow for "reduce" to result in undef
-        print STDERR "    RIGHT($key) = $right->{$key}\n";
+        #print STDERR "    RIGHT($key) = $right->{$key}\n";
         my $value = reduceValue ($right->{$key}, $left);
         if (defined $value) {
-            print STDERR "        NEW($key) = $value\n";
+            #print STDERR "        NEW($key) = $value\n";
             $new->{$key} = $value;
         }
     }
     for my $key (keys (%$left)) {
         if (! exists ($new->{$key})) {
-            print STDERR "    LEFT($key) = $left->{$key}\n";
+            #print STDERR "    LEFT($key) = $left->{$key}\n";
             my $value = reduceValue($left->{$key}, $left);
             if (defined $value) {
-                print STDERR "        NEW($key) = $value\n";
+                #print STDERR "        NEW($key) = $value\n";
                 $new->{$key} = $value;
             }
         }
@@ -87,6 +87,31 @@ sub concatenate {
     $buildConfigurations{$name} = apply (get ($leftName), $buildConfiguration);
 }
 
+sub copy {
+    my ($buildConfiguration) = @_;
+    my $new = {};
+    for my $key (keys (%$buildConfiguration)) {
+        $new->{$key} = $buildConfiguration->{$key};
+    }
+    return $new;
+}
+
+# reduce all the ariables within a build configuration using itself as the context
+# this should be the final step in using a build context
+sub reduce {
+    my ($buildConfiguration) = @_;
+    my $new = copy ($buildConfiguration);
+    for my $key (keys (%$new)) {
+        # allow for "reduce" to result in undef
+        print STDERR "    VALUE($key) = $new->{$key}\n";
+        my $value = reduceValue ($new->{$key}, $new);
+        if ($value ne $new->{$key}) {
+            print STDERR "        NEW($key) = $value\n";
+            $new->{$key} = $value;
+        }
+    }
+    return $new;
+}
 
 # load a build configuration file
 sub load {
