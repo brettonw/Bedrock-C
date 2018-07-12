@@ -1,4 +1,6 @@
 {
-    "target": "test",
-    "configuration": "debug"
+    "values": {
+        "target": "test",
+        "configuration": "debug"
+    }
 }

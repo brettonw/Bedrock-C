@@ -34,13 +34,6 @@ configuration variables are a "$" followed by any valid camel-case identifiers:
 
 `$[a-z][A-Za-z0-9]+`
 
-configuration variables are referenced against a JSON-formatted data structure that
-might contain hierarchical content. the sub-configuration dictionaries are treated with
-the same naming rule as above, these can be referenced using quoting and a hierarchy
-indicator:
-
-`$"left->right->optionX"`
-
 configuration variables are mostly defined statically, but can be specified to be
 interpreted by a shell or by variable replacement. replacements are processed
 recursively starting with step (1) until no more substitutions are performed:

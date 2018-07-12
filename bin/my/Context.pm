@@ -5,22 +5,30 @@ use warnings FATAL => 'all';
 # don't need to do that again here.
 use JsonFile;
 
-package BuildConfiguration;
+package Context;
 
-# export the 'conf' function so it can be used without qualification
-use Exporter 'import';
-our @EXPORT_OK = qw(conf);
+# export parts so they can be used without qualification
+use Exporter qw(import);
+our @EXPORT = ();
+our @EXPORT_OK = qw(%ContextType conf);
 
-my %buildConfigurations;
+our %ContextType = (
+    BUILD          => "build",
+    VALUES         => "values",
+    CONFIGURATIONS => "configurations",
+    TYPES          => "types"
+);
+
+my %contexts;
 
 sub add {
-    my ($name, $buildConfiguration) = @_;
-    $buildConfigurations{$name} = $buildConfiguration;
+    my ($name, $context) = @_;
+    $contexts{$name} = $context;
 }
 
 sub get {
     my ($name) = @_;
-    return $buildConfigurations{$name} || {};
+    return $contexts{$name} || {};
 }
 
 # given a value and a context, reduce the value as much as possible by performing replacements
@@ -80,27 +88,27 @@ sub apply {
 }
 
 sub concatenate {
-    my ($name, $leftName, $buildConfiguration) = @_;
+    my ($name, $leftName, $context) = @_;
     print STDERR "CONCATENATE ($leftName with XXX into $name)\n";
 
-    # we assume the left build configuration has already been resolved as fully as possible.
-    $buildConfigurations{$name} = apply (get ($leftName), $buildConfiguration);
+    # we assume the left context has already been resolved as fully as possible.
+    $contexts{$name} = apply (get ($leftName), $context);
 }
 
 sub copy {
-    my ($buildConfiguration) = @_;
+    my ($context) = @_;
     my $new = {};
-    for my $key (keys (%$buildConfiguration)) {
-        $new->{$key} = $buildConfiguration->{$key};
+    for my $key (keys (%$context)) {
+        $new->{$key} = $context->{$key};
     }
     return $new;
 }
 
-# reduce all the ariables within a build configuration using itself as the context
+# reduce all the variables within a context using itself as the context
 # this should be the final step in using a build context
 sub reduce {
-    my ($buildConfiguration) = @_;
-    my $new = copy ($buildConfiguration);
+    my ($context) = @_;
+    my $new = copy ($context);
     for my $key (keys (%$new)) {
         # allow for "reduce" to result in undef
         print STDERR "    VALUE($key) = $new->{$key}\n";
@@ -113,9 +121,30 @@ sub reduce {
     return $new;
 }
 
-# load a build configuration file
+# load a context file
+sub loadFile {
+    my ($name, $path, $type) = @_;
+    my $context = JsonFile::read("$path/$type.json");
+    add ($name, $context);
+    return $context;
+}
+
 sub load {
-    return JsonFile::read(@_);
+    my ($baseName, $configPath) = @_;
+    my $context = loadFile ($baseName . "-" . $ContextType{BUILD}, $configPath, $ContextType{BUILD});
+    add($baseName . "-" . $ContextType{VALUES}, $context->{$ContextType{VALUES}});
+    add($baseName . "-" . $ContextType{CONFIGURATIONS}, $context->{$ContextType{CONFIGURATIONS}});
+    add($baseName . "-" . $ContextType{TYPES}, $context->{$ContextType{TYPES}});
+}
+
+sub print {
+    my ($name) = @_;
+    print STDERR "CONTEXT ($name)\n";
+    my $b = get($name);
+    for my $key (sort keys %$b) {
+        print STDERR "$key: ($b->{$key})\n";
+    }
+    print STDERR "\n";
 }
 
 # establish the build configuration stack
@@ -131,10 +160,10 @@ sub conf {
 
     # loop over the build configuration stack
     my $value = undef;
-    for my $buildConfiguration (@buildConfigurationStack) {
-        if (exists ($buildConfiguration->{$variableName})) {
+    for my $context (@buildConfigurationStack) {
+        if (exists ($context->{$variableName})) {
             my $existingValue = $value;
-            $value = $buildConfiguration->{$variableName};
+            $value = $context->{$variableName};
             if (ref($value) ne "HASH") {
                 # do variable substitution if the existing value should be used in the replacement
                 $value =~ s/\$$variableName/$existingValue/g;
@@ -151,20 +180,20 @@ sub conf {
 
 # function to push a new configuration on the stack and return it (for chaining)
 sub begin {
-    my ($buildConfiguration) = @_;
-    if ($buildConfiguration) {
-        push (@buildConfigurationStack, $buildConfiguration);
+    my ($context) = @_;
+    if ($context) {
+        push (@buildConfigurationStack, $context);
     }
-    return $buildConfiguration;
+    return $context;
 }
 
 # function to read a build configuration file in the specified directory - if the 
 # buildConfigurationName is not already defined, it will default to "build.json".
 sub read {
-    my ($buildConfigurationDirectory) = @_;
-    my $buildConfigurationFileName = conf ("buildConfigurationFileName") || "build.json";
-    my $buildConfiguration = JsonFile::read("$buildConfigurationDirectory/$buildConfigurationFileName");
-    return $buildConfiguration;
+    my ($contextDirectory) = @_;
+    my $contextFileName = conf ("buildConfigurationFileName") || "build.json";
+    my $context = JsonFile::read("$contextDirectory/$contextFileName");
+    return $context;
 }
 
 # function to read a build configuration file in the specified directory and push it on the 

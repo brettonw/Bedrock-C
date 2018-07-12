@@ -15,68 +15,75 @@ use Cwd qw(abs_path);
 
 # search under the script directory location for the "my" libs
 use lib dirname (abs_path(__FILE__)) . "/my";
-use BuildConfiguration qw(conf);
+use Context qw(conf %ContextType);
 use Slurp qw(slurp);
 
-# just some temporary testing stuff
-sub printConfig {
-    my ($name) = @_;
-    print STDERR "CONFIG - $name\n";
-    my $b = BuildConfiguration::get($name);
-    for my $key (sort keys %$b) {
-        print STDERR "$key: ($b->{$key})\n";
-    }
-    print STDERR "\n";
-}
-
-BuildConfiguration::add("GLOBAL_VALUES", BuildConfiguration::load (dirname(abs_path(__FILE__)) . "/build.json"));
-printConfig ("GLOBAL_VALUES");
-
-BuildConfiguration::add("PROJECT_VALUES", BuildConfiguration::load ("./build.json"));
-printConfig ("PROJECT_VALUES");
-
-BuildConfiguration::add("GLOBAL_CONFIGURATIONS", BuildConfiguration::load (dirname(abs_path(__FILE__)) . "/configurations.json"));
-printConfig ("GLOBAL_CONFIGURATIONS");
-
-BuildConfiguration::add("GLOBAL_TYPES", BuildConfiguration::load (dirname(abs_path(__FILE__)) . "/types.json"));
-printConfig ("GLOBAL_TYPES");
-
-BuildConfiguration::concatenate("A", "GLOBAL_VALUES", BuildConfiguration::get("PROJECT_VALUES"));
-printConfig ("A");
-
-BuildConfiguration::concatenate("B", "A", BuildConfiguration::get("GLOBAL_CONFIGURATIONS")->{debug});
-printConfig ("B");
-
-BuildConfiguration::concatenate("C", "B", BuildConfiguration::get("GLOBAL_TYPES")->{sharedLibrary});
-printConfig ("C");
-
-BuildConfiguration::add("D", BuildConfiguration::reduce (BuildConfiguration::get("C")));
-printConfig ("D");
+# root configs
+Context::load ("root", dirname(abs_path(__FILE__)));
+Context::print ("root-values");
+Context::print ("root-configurations");
+Context::print ("root-types");
 
 exit (0);
+# project configs
+loadContexts ("project", ".");
+#Context::print ("project-build");
+#Context::print ("project-configurations");
+#Context::print ("project-types");
 
-#---------------------------------------------------------------------------------------------------
-# load a default global configuration into a configuration stack from the script source directory
-BuildConfiguration::enter (dirname(abs_path(__FILE__)));
-
-# process the command line options into a configuration hash in the configuration stack
-my $commandLineBuildConfiguration = {};
+# process the command line options into a configuration and store it
+my $commandLineContext = {};
 foreach my $argument (@ARGV) {
     if ($argument =~ /^([^=]*)=([^=]*)$/) {
         my $key = $1;
         my $value = $2;
         if (conf($1) ne "") {
-            $commandLineBuildConfiguration->{$1} = $2;
+            $commandLineContext->{$1} = $2;
             print STDERR "$1 = $2\n";
         } else {
             print STDERR "Ignoring unknown build configuration variable: $key\n";
         }
     }
 }
-BuildConfiguration::begin ($commandLineBuildConfiguration);
+Context::add("commandline-" . $ContextType{BUILD}, $commandLineContext);
+
+
+Context::concatenate("A", "ROOT_VALUES", Context::get("PROJECT_VALUES"));
+Context::print ("A");
+
+Context::concatenate("B", "A", Context::get("ROOT_CONFIGURATIONS")->{debug});
+Context::print ("B");
+
+Context::concatenate("C", "B", Context::get("ROOT_TYPES")->{sharedLibrary});
+Context::print ("C");
+
+Context::add("D", Context::reduce (Context::get("C")));
+Context::print ("D");
+
+exit (0);
+
+#---------------------------------------------------------------------------------------------------
+# load a default global configuration into a configuration stack from the script source directory
+Context::enter (dirname(abs_path(__FILE__)));
+
+# process the command line options into a configuration hash in the configuration stack
+my $commandLineContexts = {};
+foreach my $argument (@ARGV) {
+    if ($argument =~ /^([^=]*)=([^=]*)$/) {
+        my $key = $1;
+        my $value = $2;
+        if (conf($1) ne "") {
+            $commandLineContext->{$1} = $2;
+            print STDERR "$1 = $2\n";
+        } else {
+            print STDERR "Ignoring unknown build configuration variable: $key\n";
+        }
+    }
+}
+Context::begin ($commandLineContexts);
 
 # now load the project local build configuration file into the configuration stack
-BuildConfiguration::enter (".");
+Context::enter (".");
 
 #---------------------------------------------------------------------------------------------------
 # read the source path looking for subdirs, and loading their build configurations
@@ -85,7 +92,7 @@ my $sourcePath = conf ("sourcePath");
 if (opendir(SOURCE_PATH, $sourcePath)) {
     while (my $file = readdir(SOURCE_PATH)) {
         next unless (($file !~ /^\./) && (-d "$sourcePath/$file"));
-        $targets->{$file} = BuildConfiguration::read("$sourcePath/$file/");
+        $targets->{$file} = Context::read("$sourcePath/$file/");
     }
     closedir(SOURCE_PATH);
 } else {
@@ -190,7 +197,7 @@ sub compileObject {
 # now walk the targets in dependency order
 for my $target (@$targetsInDependencyOrder) {
     # setup the build configuration for this target (we loaded this in a previous step)
-    BuildConfiguration::begin ($targets->{$target});
+    Context::begin ($targets->{$target});
 
     # determine what configurations to build
     my $configurations = conf ("configurations");
@@ -269,5 +276,5 @@ for my $target (@$targetsInDependencyOrder) {
         ### XXX TODO - gather the built files into a library or an application
     }
 
-    BuildConfiguration::end ();
+    Context::end ();
 }
