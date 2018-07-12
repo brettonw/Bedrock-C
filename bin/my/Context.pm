@@ -10,30 +10,11 @@ package Context;
 # export parts so they can be used without qualification
 use Exporter qw(import);
 our @EXPORT = ();
-our @EXPORT_OK = qw(%ContextType conf);
-
-our %ContextType = (
-    BUILD          => "build",
-    VALUES         => "values",
-    CONFIGURATIONS => "configurations",
-    TYPES          => "types"
-);
-
-my %contexts;
-
-sub add {
-    my ($name, $context) = @_;
-    $contexts{$name} = $context;
-}
-
-sub get {
-    my ($name) = @_;
-    return $contexts{$name} || {};
-}
+our @EXPORT_OK = qw(%ContextType reduce apply concatenate conf);
 
 # given a value and a context, reduce the value as much as possible by performing replacements
 # XXX TODO - this needs to be a bit more fantastical
-sub reduceValue {
+sub replaceValues {
     my ($value, $context) = @_;
 
     # do variable substitutions, .
@@ -59,6 +40,25 @@ sub reduceValue {
     return $value;
 }
 
+sub reduce {
+    my ($context) = @_;
+    # make a shallow copy of the context
+    my $new = {%$context};
+
+    # iterate over all the keys
+    # XXX TODO - need to do this repeatedly until no more values change
+    for my $key (keys (%$new)) {
+        # allow for "reduce" to result in undef
+        print STDERR "    VALUE($key) = $new->{$key}\n";
+        my $value = replaceValues ($new->{$key}, $new);
+        if ($value ne $new->{$key}) {
+            print STDERR "        NEW($key) = $value\n";
+            $new->{$key} = $value;
+        }
+    }
+    return $new;
+}
+
 # given a left context and a right context, create a new context that "applies" left to right,
 # where right contains variable names needing substitution, and left possibly supplies values.
 sub apply {
@@ -68,7 +68,7 @@ sub apply {
     for my $key (keys (%$right)) {
         # allow for "reduce" to result in undef
         #print STDERR "    RIGHT($key) = $right->{$key}\n";
-        my $value = reduceValue ($right->{$key}, $left);
+        my $value = replaceValues ($right->{$key}, $left);
         if (defined $value) {
             #print STDERR "        NEW($key) = $value\n";
             $new->{$key} = $value;
@@ -77,7 +77,7 @@ sub apply {
     for my $key (keys (%$left)) {
         if (! exists ($new->{$key})) {
             #print STDERR "    LEFT($key) = $left->{$key}\n";
-            my $value = reduceValue($left->{$key}, $left);
+            my $value = replaceValues($left->{$key}, $left);
             if (defined $value) {
                 #print STDERR "        NEW($key) = $value\n";
                 $new->{$key} = $value;
@@ -87,124 +87,106 @@ sub apply {
     return $new;
 }
 
+# apply an array of contexts left to right
 sub concatenate {
-    my ($name, $leftName, $context) = @_;
-    print STDERR "CONCATENATE ($leftName with XXX into $name)\n";
-
-    # we assume the left context has already been resolved as fully as possible.
-    $contexts{$name} = apply (get ($leftName), $context);
-}
-
-sub copy {
-    my ($context) = @_;
-    my $new = {};
-    for my $key (keys (%$context)) {
-        $new->{$key} = $context->{$key};
+    my $result = {};
+    for my $context (@_) {
+        $result = apply ($result, $context);
     }
-    return $new;
+    return $result;
 }
 
-# reduce all the variables within a context using itself as the context
-# this should be the final step in using a build context
-sub reduce {
+sub display {
     my ($context) = @_;
-    my $new = copy ($context);
-    for my $key (keys (%$new)) {
-        # allow for "reduce" to result in undef
-        print STDERR "    VALUE($key) = $new->{$key}\n";
-        my $value = reduceValue ($new->{$key}, $new);
-        if ($value ne $new->{$key}) {
-            print STDERR "        NEW($key) = $value\n";
-            $new->{$key} = $value;
-        }
-    }
-    return $new;
-}
-
-# load a context file
-sub loadFile {
-    my ($name, $path, $type) = @_;
-    my $context = JsonFile::read("$path/$type.json");
-    add ($name, $context);
-    return $context;
-}
-
-sub load {
-    my ($baseName, $configPath) = @_;
-    my $context = loadFile ($baseName . "-" . $ContextType{BUILD}, $configPath, $ContextType{BUILD});
-    add($baseName . "-" . $ContextType{VALUES}, $context->{$ContextType{VALUES}});
-    add($baseName . "-" . $ContextType{CONFIGURATIONS}, $context->{$ContextType{CONFIGURATIONS}});
-    add($baseName . "-" . $ContextType{TYPES}, $context->{$ContextType{TYPES}});
-}
-
-sub print {
-    my ($name) = @_;
-    print STDERR "CONTEXT ($name)\n";
-    my $b = get($name);
-    for my $key (sort keys %$b) {
-        print STDERR "$key: ($b->{$key})\n";
+    for my $key (sort keys %$context) {
+        print STDERR "$key: ($context->{$key})\n";
     }
     print STDERR "\n";
 }
 
-# establish the build configuration stack
-my @buildConfigurationStack;
+#---------------------------------------------------------------------------------------------------
+# HELPER FUNCTIONS FOR WORKING WITH STORED CONTEXTS
 
-# function to traverse the configuration stack from the root to the tail to retrieve a defined value
-# for the requested variable name - note this differs from most stack-based dictionary schemes in
-# programming languages like PostScript or Javascript in that it evaluates all the dictionaries,
-# rather than stopping after the first definition. this allows us to override and extend the
-# definitions given at higher levels.
+our %ContextType = (
+    BUILD          => "build",
+    VALUES         => "values",
+    CONFIGURATIONS => "configurations",
+    TYPES          => "types"
+);
+
+my %contexts;
+
+# add a named context to the global context store
+sub addNamed {
+    my ($name, $context) = @_;
+    $contexts{$name} = $context;
+    return $context;
+}
+
+sub addTypeNamed {
+    my ($baseName, $type, $context) = @_;
+    return addNamed ("$baseName-$type", $context);
+}
+
+# get a named context from the global context store, or return an empty context
+sub getNamed {
+    my ($name) = @_;
+    return $contexts{$name} || {};
+}
+
+sub getTypeNamed {
+    my ($baseName, $type) = @_;
+    return getNamed ("$baseName-$type");
+}
+
+# get a value from a named context
 sub conf {
-    my ($variableName) = @_;
-
-    # loop over the build configuration stack
-    my $value = undef;
-    for my $context (@buildConfigurationStack) {
-        if (exists ($context->{$variableName})) {
-            my $existingValue = $value;
-            $value = $context->{$variableName};
-            if (ref($value) ne "HASH") {
-                # do variable substitution if the existing value should be used in the replacement
-                $value =~ s/\$$variableName/$existingValue/g;
-                
-                # do variable substitutions using any variable name already defined at the root
-
-                # do a substitution with a shell command if one is requested
-                $value =~ s/\$\(([^\)]*)\)/my $x = qx%$1%; chomp $x; $x/e;
-            }
-        }
-    }
-    return $value;
+    my ($name, $variableName) = @_;
+    return getNamed($name)->{$variableName};
 }
 
-# function to push a new configuration on the stack and return it (for chaining)
-sub begin {
-    my ($context) = @_;
-    if ($context) {
-        push (@buildConfigurationStack, $context);
+sub confType {
+    my ($baseName, $type, $variableName) = @_;
+    return getTypeNamed($baseName, $type)->{$variableName};
+}
+
+# concatenate an array of named contexts
+sub concatenateNamed {
+    my @contexts;
+    for my $contextName (@_) {
+        push (@contexts, getNamed($contextName));
     }
+    return concatenate (@contexts);
+}
+
+# load a context file, without regard to its contents
+sub loadFile {
+    my ($baseName, $path, $type) = @_;
+    my $context = JsonFile::read("$path/$type.json");
+    return addTypeNamed ($baseName, $type, $context);
+}
+
+# load a context file, and then break it into its parts
+sub load {
+    my ($baseName, $configPath) = @_;
+    my $context = loadFile ($baseName, $configPath, $ContextType{BUILD});
+    addTypeNamed($baseName, $ContextType{VALUES}, $context->{$ContextType{VALUES}});
+    addTypeNamed($baseName, $ContextType{CONFIGURATIONS}, $context->{$ContextType{CONFIGURATIONS}});
+    addTypeNamed($baseName, $ContextType{TYPES}, $context->{$ContextType{TYPES}});
     return $context;
 }
 
-# function to read a build configuration file in the specified directory - if the 
-# buildConfigurationName is not already defined, it will default to "build.json".
-sub read {
-    my ($contextDirectory) = @_;
-    my $contextFileName = conf ("buildConfigurationFileName") || "build.json";
-    my $context = JsonFile::read("$contextDirectory/$contextFileName");
-    return $context;
+# stupid utility function to print a context
+sub displayNamed {
+    my ($name) = @_;
+    print STDERR "CONTEXT ($name)\n";
+    display (getNamed($name));
 }
 
-# function to read a build configuration file in the specified directory and push it on the 
-# configuration stack, returns the read configuration;
-sub enter {
-return begin (&read (@_));
-}
-
-# function to pop a configuration off the stack
-sub end {
-    pop (@buildConfigurationStack);
+sub displayTypeNamed {
+    my ($baseName, $type) = @_;
+    print STDERR "CONTEXT ($baseName-$type)\n";
+    display (getTypeNamed($baseName, $type));
 }
 
 1;

@@ -20,18 +20,17 @@ use Slurp qw(slurp);
 
 # root configs
 Context::load ("root", dirname(abs_path(__FILE__)));
-Context::print ("root-values");
-Context::print ("root-configurations");
-Context::print ("root-types");
+#Context::displayTypeNamed("root", $ContextType{VALUES});
+#Context::displayTypeNamed("root", $ContextType{CONFIGURATIONS});
+#Context::displayTypeNamed("root", $ContextType{TYPES});
 
-exit (0);
 # project configs
-loadContexts ("project", ".");
-#Context::print ("project-build");
-#Context::print ("project-configurations");
-#Context::print ("project-types");
+Context::load ("project", ".");
+#Context::displayTypeNamed("project", $ContextType{VALUES});
+#Context::displayTypeNamed("project", $ContextType{CONFIGURATIONS});
+#Context::displayTypeNamed("project", $ContextType{TYPES});
 
-# process the command line options into a configuration and store it
+# process the command line options into a values configuration and store it
 my $commandLineContext = {};
 foreach my $argument (@ARGV) {
     if ($argument =~ /^([^=]*)=([^=]*)$/) {
@@ -45,60 +44,46 @@ foreach my $argument (@ARGV) {
         }
     }
 }
-Context::add("commandline-" . $ContextType{BUILD}, $commandLineContext);
+Context::addTypeNamed("commandline", $ContextType{VALUES}, $commandLineContext);
+#Context::displayTypeNamed("commandline", $ContextType{VALUES});
 
-
-Context::concatenate("A", "ROOT_VALUES", Context::get("PROJECT_VALUES"));
-Context::print ("A");
-
-Context::concatenate("B", "A", Context::get("ROOT_CONFIGURATIONS")->{debug});
-Context::print ("B");
-
-Context::concatenate("C", "B", Context::get("ROOT_TYPES")->{sharedLibrary});
-Context::print ("C");
-
-Context::add("D", Context::reduce (Context::get("C")));
-Context::print ("D");
-
-exit (0);
+# finalize project-values, project-types, and project-configurations
+Context::addTypeNamed("project", $ContextType{VALUES}, Context::concatenateNamed ("root-" . $ContextType{VALUES}, "project-" . $ContextType{VALUES}, "commandline-" . $ContextType{VALUES}));
+Context::displayTypeNamed("project", $ContextType{VALUES});
+#Context::addTypeNamed("project", $ContextType{CONFIGURATIONS}, Context::concatenateNamed ("root-$ContextType{CONFIGURATIONS}", "project-$ContextType{CONFIGURATIONS}"));
+#Context::displayTypeNamed("project", $ContextType{CONFIGURATIONS});
+#Context::addTypeNamed("project", $ContextType{TYPES}, Context::concatenateNamed ("root-$ContextType{TYPES}", "project-$ContextType{TYPES}"));
+#Context::displayTypeNamed("project", $ContextType{TYPES});
 
 #---------------------------------------------------------------------------------------------------
-# load a default global configuration into a configuration stack from the script source directory
-Context::enter (dirname(abs_path(__FILE__)));
-
-# process the command line options into a configuration hash in the configuration stack
-my $commandLineContexts = {};
-foreach my $argument (@ARGV) {
-    if ($argument =~ /^([^=]*)=([^=]*)$/) {
-        my $key = $1;
-        my $value = $2;
-        if (conf($1) ne "") {
-            $commandLineContext->{$1} = $2;
-            print STDERR "$1 = $2\n";
-        } else {
-            print STDERR "Ignoring unknown build configuration variable: $key\n";
-        }
-    }
-}
-Context::begin ($commandLineContexts);
-
-# now load the project local build configuration file into the configuration stack
-Context::enter (".");
-
-#---------------------------------------------------------------------------------------------------
-# read the source path looking for subdirs, and loading their build configurations
+# read the source path looking for subdirs, and loading their values context
 my $targets = {};
-my $sourcePath = conf ("sourcePath");
+my $targetPrefix = "#";
+my $sourcePath = Context::confType ("project", $ContextType{VALUES}, "sourcePath");
 if (opendir(SOURCE_PATH, $sourcePath)) {
-    while (my $file = readdir(SOURCE_PATH)) {
-        next unless (($file !~ /^\./) && (-d "$sourcePath/$file"));
-        $targets->{$file} = Context::read("$sourcePath/$file/");
+    while (my $target = readdir(SOURCE_PATH)) {
+        next unless (($target !~ /^\./) && (-d "$sourcePath/$target"));
+        Context::load ("$targetPrefix$target", "$sourcePath/$target/");
+        my $targetContext = Context::concatenateNamed ("project-" . $ContextType{VALUES}, "$targetPrefix$target-" . $ContextType{VALUES});
+        $targetContext->{target} = $target;
+
+        # XXX TODO need to concatenate configurations, then types
+        #Context::concatenate (
+        #    Context::getTypeNamed("root", $ContextType{TYPES})->{$targetContext->{type}},
+        #    Context::getTypeNamed("root", $ContextType{TYPES})->{$targetContext->{type}},
+        #    Context::getTypeNamed("target-$target", $ContextType{TYPES})->{$targetContext->{type}}
+        #);
+
+        $targets->{$target} = $targetContext;
+
+        Context::display($targetContext);
     }
     closedir(SOURCE_PATH);
 } else {
     print STDERR "Can't open source directory ($sourcePath), $!\n";
 }
 
+#---------------------------------------------------------------------------------------------------
 # identify the targets to build, and the dependency order to do it. the dependency graph is implicit
 # in the dependencies array for each target, so we traverse it in depth first order, emitting build
 # targets on return (marking them as visited).
@@ -119,12 +104,16 @@ sub traverseTargetDependencies {
     }
 }
 
-my $targetsToBuild = conf ("target");
+my $targetsToBuild = Context::confType ("project", $ContextType{VALUES}, "target");
 $targetsToBuild = (ref $targetsToBuild eq "ARRAY") ? $targetsToBuild : (($targetsToBuild ne "*") ? [split (/, ?/, $targetsToBuild)] : [sort keys (%$targets)]);
 for my $target (@$targetsToBuild) {
     traverseTargetDependencies ($target);
 }
 
+for my $target (@$targetsInDependencyOrder) {
+    print STDERR "TARGET: $target\n";
+}
+exit (0);
 #---------------------------------------------------------------------------------------------------
 sub outputFileName {
     my ($sourceTargetFile, $outputExtensionName) = @_;
