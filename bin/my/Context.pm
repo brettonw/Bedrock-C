@@ -64,26 +64,24 @@ sub reduce {
 sub apply {
     my ($left, $right) = @_;
 
+    print STDERR "apply...\n";
     my $new = {};
     for my $key (keys (%$right)) {
         # allow for "reduce" to result in undef
-        #print STDERR "    RIGHT($key) = $right->{$key}\n";
+        print STDERR "    RIGHT($key) = $right->{$key}\n";
         my $value = replaceValues ($right->{$key}, $left);
         if (defined $value) {
-            #print STDERR "        NEW($key) = $value\n";
+            print STDERR "        NEW($key) = $value\n";
             $new->{$key} = $value;
         }
     }
     for my $key (keys (%$left)) {
         if (! exists ($new->{$key})) {
-            #print STDERR "    LEFT($key) = $left->{$key}\n";
-            my $value = replaceValues($left->{$key}, $left);
-            if (defined $value) {
-                #print STDERR "        NEW($key) = $value\n";
-                $new->{$key} = $value;
-            }
+            print STDERR "    LEFT($key) = $left->{$key}\n";
+            $new->{$key} = $left->{$key};
         }
     }
+    print STDERR "\n";
     return $new;
 }
 
