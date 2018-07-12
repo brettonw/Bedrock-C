@@ -49,11 +49,7 @@ Context::addTypeNamed("commandline", $ContextType{VALUES}, $commandLineContext);
 
 # finalize project-values, project-types, and project-configurations
 Context::addTypeNamed("project", $ContextType{VALUES}, Context::concatenateNamed ("root-" . $ContextType{VALUES}, "project-" . $ContextType{VALUES}, "commandline-" . $ContextType{VALUES}));
-Context::displayTypeNamed("project", $ContextType{VALUES});
-#Context::addTypeNamed("project", $ContextType{CONFIGURATIONS}, Context::concatenateNamed ("root-$ContextType{CONFIGURATIONS}", "project-$ContextType{CONFIGURATIONS}"));
-#Context::displayTypeNamed("project", $ContextType{CONFIGURATIONS});
-#Context::addTypeNamed("project", $ContextType{TYPES}, Context::concatenateNamed ("root-$ContextType{TYPES}", "project-$ContextType{TYPES}"));
-#Context::displayTypeNamed("project", $ContextType{TYPES});
+#Context::displayTypeNamed("project", $ContextType{VALUES});
 
 #---------------------------------------------------------------------------------------------------
 # read the source path looking for subdirs, and loading their values context
@@ -66,17 +62,8 @@ if (opendir(SOURCE_PATH, $sourcePath)) {
         Context::load ("$targetPrefix$target", "$sourcePath/$target/");
         my $targetContext = Context::concatenateNamed ("project-" . $ContextType{VALUES}, "$targetPrefix$target-" . $ContextType{VALUES});
         $targetContext->{target} = $target;
-
-        # XXX TODO need to concatenate configurations, then types
-        #Context::concatenate (
-        #    Context::getTypeNamed("root", $ContextType{TYPES})->{$targetContext->{type}},
-        #    Context::getTypeNamed("root", $ContextType{TYPES})->{$targetContext->{type}},
-        #    Context::getTypeNamed("target-$target", $ContextType{TYPES})->{$targetContext->{type}}
-        #);
-
         $targets->{$target} = $targetContext;
-
-        Context::display($targetContext);
+        #Context::display($targetContext);
     }
     closedir(SOURCE_PATH);
 } else {
@@ -110,9 +97,63 @@ for my $target (@$targetsToBuild) {
     traverseTargetDependencies ($target);
 }
 
+# now walk the targets in dependency order
 for my $target (@$targetsInDependencyOrder) {
     print STDERR "TARGET: $target\n";
+    my $targetContext = $targets->{$target};
+
+    # determine what configurations are available
+    my $configurations = Context::concatenate (
+        Context::getTypeNamed("root", $ContextType{CONFIGURATIONS}),
+        Context::getTypeNamed("project", $ContextType{CONFIGURATIONS}),
+        Context::getTypeNamed("$targetPrefix$target", $ContextType{CONFIGURATIONS})
+    );
+    my $configurationToBuild = $targets->{$target}->{configuration};
+    $configurationToBuild = (ref $configurationToBuild eq "ARRAY") ? $configurationToBuild : (($configurationToBuild ne "*") ? [ split(/, ?/, $configurationToBuild) ] : [ sort keys (%$configurations) ]);
+    for my $configuration (@$configurationToBuild) {
+        print STDERR "BUILD $target/$configuration\n";
+
+        # concatenate the target context, the actual configuration contexts, then the type contexts
+        print STDERR "REDUCE...\n";
+        $targetContext = Context::display (Context::reduce (
+            Context::concatenate (
+                Context::display ($targetContext),
+                Context::display (Context::concatenate (
+                    Context::getTypeNamed("root", $ContextType{CONFIGURATIONS})->{$configuration},
+                    Context::getTypeNamed("project", $ContextType{CONFIGURATIONS})->{$configuration},
+                    Context::getTypeNamed("$targetPrefix$target", $ContextType{CONFIGURATIONS})->{$configuration}
+                )),
+                Context::display (Context::concatenate (
+                    Context::getTypeNamed("root", $ContextType{TYPES})->{$targetContext->{type}},
+                    Context::getTypeNamed("project", $ContextType{TYPES})->{$targetContext->{type}},
+                    Context::getTypeNamed("$targetPrefix$target", $ContextType{TYPES})->{$targetContext->{type}}
+                )),
+            )
+        ));
+
+        # ensure the target directory is present
+        make_path ($targetContext->{objectsFullPath});
+
+        # gather up all the source files in the source path, and check to see if they need to be
+        # compiled by comparing the modification dates of the dependencies
+        my $sourceTargetPath = $targetContext->{sourceFullPath};
+        my @sourceTargetFiles;
+        if (opendir(SOURCE_TARGET_DIR, $targetContext->{sourceFullPath})) {
+            while (my $sourceTargetFile = readdir(SOURCE_TARGET_DIR)) {
+                if ($sourceTargetFile =~ /(.*)$targetContext->{"sourceExtension"}$/) {
+                    print STDERR "    Source: $sourceTargetFile ($1)\n";
+                    #if (checkObjectDependencies ($target, $configuration, $sourceTargetFile)) {
+                    #    push (@sourceTargetFiles, $sourceTargetFile);
+                    #}
+                }
+            }
+            closedir(SOURCE_TARGET_DIR);
+        } else {
+            print STDERR "Can't open target source directory ($targetContext->{sourceFullPath}), $!\n";
+        }
+    }
 }
+
 exit (0);
 #---------------------------------------------------------------------------------------------------
 sub outputFileName {

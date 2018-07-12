@@ -90,9 +90,12 @@ sub apply {
 # apply an array of contexts left to right
 sub concatenate {
     my $result = {};
+    print STDERR "concatenate\n";
     for my $context (@_) {
-        $result = apply ($result, $context);
+            print STDERR "    XXXX\n";
+            $result = apply ($result, $context);
     }
+    print STDERR "\n";
     return $result;
 }
 
@@ -102,6 +105,7 @@ sub display {
         print STDERR "$key: ($context->{$key})\n";
     }
     print STDERR "\n";
+    return $context;
 }
 
 #---------------------------------------------------------------------------------------------------
@@ -131,6 +135,7 @@ sub addTypeNamed {
 # get a named context from the global context store, or return an empty context
 sub getNamed {
     my ($name) = @_;
+    print STDERR "GET $name\n";
     return $contexts{$name} || {};
 }
 
@@ -180,13 +185,13 @@ sub load {
 sub displayNamed {
     my ($name) = @_;
     print STDERR "CONTEXT ($name)\n";
-    display (getNamed($name));
+    return display (getNamed($name));
 }
 
 sub displayTypeNamed {
     my ($baseName, $type) = @_;
     print STDERR "CONTEXT ($baseName-$type)\n";
-    display (getTypeNamed($baseName, $type));
+    return display (getTypeNamed($baseName, $type));
 }
 
 1;
