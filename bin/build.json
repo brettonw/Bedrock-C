@@ -1,7 +1,7 @@
 {
     "values": {
         "sourcePath": "source",
-        "targetPath": "target",
+        "buildPath": "target",
         "objectsPath": "objects",
         "sourceExtension": ".cpp",
         "objectExtension": ".o",
@@ -10,63 +10,49 @@
         "dependencies": [],
         "type": "application",
         "configuration": "*",
-        "verbose": 1
+        "verbose": 1,
+        "sourceFullPath": "$sourcePath/$target",
+        "objectsFullPath": "$buildPath/$target/$configuration/$objectsPath",
+        "sourceFile": "$sourceFullPath/$sourceBase$sourceExtension",
+        "dependencyFile": "$objectsFullPath/$sourceBase$dependencyExtension",
+        "objectFile": "$objectsFullPath/$sourceBase$objectExtension",
+        "linkTo": "-L$buildPath/$target/$configuration -l$target",
+        "toInclude": "-I$sourceFullPath",
+        "compiler": "$(find /usr/local/bin /usr/bin | grep -P \"\\/g\\+\\+\" | head -n 1)",
+        "depender": "$compiler",
+        "linker": "$compiler"
     },
     "configurations": {
         "debug": {
+            "configuration": "debug",
             "compilerOptions": "-std=c++11 -Wall -g -D_DEBUG_",
-            "linkerOptions": "",
-            "dependerOptions": "-std=c++11 -Wall -g -D_DEBUG_"
+            "linkerOptions": ""
         },
         "release": {
+            "release": "debug",
             "compilerOptions": "-std=c++11 -Wall -O3 -D_NDEBUG_",
-            "linkerOptions": "",
-            "dependerOptions": "-std=c++11 -Wall -O3 -D_NDEBUG_"
+            "linkerOptions": ""
         }
     },
     "types": {
         "application": {
-            "sourceFullPath": "$sourcePath/$target",
-            "objectsFullPath": "$targetPath/$target/$configuration/$objectsPath",
-            "objectFile": "objectsFullPath/$sourceFile$objectExtension",
-            "compiler": "$(find /usr/local/bin /usr/bin | grep -P \"\\/g\\+\\+\" | head -n 1)",
-            "compilerOptions": "$compilerOptions -c $sourceFullPath/$sourceFile$sourceExtension $includes -o $objectFile",
-            "dependencyFile": "$objectsFullPath/$sourceFile$dependencyExtension",
-            "depender": "$(find /usr/local/bin /usr/bin | grep -P \"\\/g\\+\\+\" | head -n 1)",
-            "dependerOptions": "$dependerOptions -MM $sourceFullPath/$sourceFile$sourceExtension > $dependencyFile",
-            "linker": "$(find /usr/local/bin /usr/bin | grep -P \"\\/g\\+\\+\" | head -n 1)",
-            "linkerOptions": "$linkerOptions -o $targetFile $objectsFullPath/*$objectExtension $libraries",
-            "targetFile": "$targetPath/$target/$configuration/$target"
+            "compilerOptions": "$compilerOptions -c $sourceFile $includes -o $objectFile",
+            "dependerOptions": "$compilerOptions -MM $sourceFile $includes > $dependencyFile",
+            "linkerOptions": "$linkerOptions -o $outputFile $objectsFullPath/*$objectExtension $libraries",
+            "outputFile": "$buildPath/$target/$configuration/$target"
         },
         "sharedLibrary": {
-            "sourceFullPath": "$sourcePath/$target",
-            "objectsFullPath": "$targetPath/$target/$configuration/$objectsPath",
-            "objectFile": "$objectsFullPath/$sourceFile$objectExtension",
-            "compiler": "$(find /usr/local/bin /usr/bin | grep -P \"\\/g\\+\\+\" | head -n 1)",
-            "compilerOptions": "$compilerOptions -fPIC -c $sourceFullPath/$sourceFile$sourceExtension $includes -o $objectFile",
-            "dependencyFile": "$objectsFullPath/$sourceFile$dependencyExtension",
-            "depender": "$(find /usr/local/bin /usr/bin | grep -P \"\\/g\\+\\+\" | head -n 1)",
-            "dependerOptions": "$compilerOptions -MM $sourceFullPath/$sourceFile$sourceExtension > $dependencyFile",
-            "linker": "$(find /usr/local/bin /usr/bin | grep -P \"\\/g\\+\\+\" | head -n 1)",
-            "linkerOptions": "$linkerOptions -shared -o $targetFile $objectsFullPath/*$objectExtension",
-            "targetFile": "$targetPath/$target/$configuration/lib$target.so",
-            "linkTo": "-L$targetPath/$target/$configuration -l$target",
-            "toInclude": "-I$sourceFullPath"
+            "compilerOptions": "$compilerOptions -fPIC -c $sourceFile $includes -o $objectFile",
+            "dependerOptions": "$compilerOptions -MM $sourceFile $includes > $dependencyFile",
+            "linkerOptions": "$linkerOptions -shared -o $outputFile $objectsFullPath/*$objectExtension",
+            "outputFile": "$buildPath/$target/$configuration/lib$target.so"
         },
         "staticLibrary": {
-            "sourceFullPath": "$sourcePath/$target",
-            "objectsFullPath": "$targetPath/$target/$configuration/$objectsPath",
-            "objectFile": "objectsFullPath/$sourceFile$objectExtension",
-            "compiler": "$(find /usr/local/bin /usr/bin | grep -P \"\\/g\\+\\+\" | head -n 1)",
-            "compilerOptions": "$compilerOptions -c $sourceFullPath/$sourceFile$sourceExtension $includes -o $objectFile",
-            "dependencyFile": "$objectsFullPath/$sourceFile$dependencyExtension",
-            "depender": "$(find /usr/local/bin /usr/bin | grep -P \"\\/g\\+\\+\" | head -n 1)",
-            "dependerOptions": "$compilerOptions -MM $sourceFullPath/$sourceFile$sourceExtension > $dependencyFile",
+            "compilerOptions": "$compilerOptions -c $sourceFile $includes -o $objectFile",
+            "dependerOptions": "$compilerOptions -MM $sourceFile $includes > $dependencyFile",
             "linker": "$(find /usr/local/bin /usr/bin | grep -P \"\\/ar$\" | head -n 1)",
-            "linkerOptions": "$linkerOptions rcs $targetFile $objectsFullPath/*$objectExtension",
-            "targetFile": "$targetPath/$target/$configuration/lib$target.a",
-            "linkTo": "-L$targetPath/$target/$configuration -l$target",
-            "toInclude": "-I$sourceFullPath"
+            "linkerOptions": "$linkerOptions rcs $outputFile $objectsFullPath/*$objectExtension",
+            "outputFile": "$buildPath/$target/$configuration/lib$target.a"
         }
     }
 }
