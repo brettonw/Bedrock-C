@@ -196,6 +196,9 @@ for my $target (@$targetsInDependencyOrder) {
             my $linkNeeded = 0;
             my $compilationSuccessful = 1;
 
+            # a little bit of setup for forking the compilations
+            my $forks = 0;
+
             # loop over all the source files in the source path to compile them, if needed
             if (opendir(SOURCE_TARGET_DIR, $targetContext->{sourceFullPath})) {
                 while (my $sourceTargetFile = readdir(SOURCE_TARGET_DIR)) {
@@ -210,27 +213,46 @@ for my $target (@$targetsInDependencyOrder) {
 
                         # load the source dependency file and check if we need to rebuild it
                         if (checkObjectDependencies($sourceContext)) {
-                            # compile the source file, and check if it succeeds
-                            my $compile = $sourceContext->{compiler} . " " . $sourceContext->{compilerOptions};
-                            print STDERR "    COMPILE: $compile\n";
-                            if (system($compile) == 0) {
-                                # update the linkNeeded and compilationSuccessful flags, once the
-                                # compilationSuccessful gets set to 0, it should stay 0...
-                                $linkNeeded = 1;
-                                $compilationSuccessful = $compilationSuccessful & $linkNeeded;
 
-                                # update the dependencies... this should succeed if the compilation
-                                # did - but the output is directed to the dependency file, so we want to
-                                # remove that if it fails
-                                my $depend = $sourceContext->{depender} . " " . $sourceContext->{dependerOptions};
-                                if (system($depend) != 0) {
-                                    print STDERR "    DEPEND FAILED: $depend\n";
-                                    unlink($sourceContext->{dependencyFile});
-                                }
+                            # brutal - create a new thread for all the compilations needed
+                            my $pid = fork;
+                            if (not defined $pid) {
+                                print STDERR "Could not fork for " . $sourceBaseContext->{sourceBase} . "\n";
+                                next;
                             }
-                            else {
-                                # make sure compilationSuccessful sets to 0 and stays that way
-                                $compilationSuccessful = 0;
+
+                            # behave differently depending on whether this is the parent process or
+                            # child process
+                            if ($pid) {
+                                # this is the parent process, increment the process wait counter
+                                $forks++;
+                            } else {
+                                # this is the child process - do the hard work...
+                                $compiledFile = $sourceBaseContext->{sourceBase};
+
+                                # compile the source file, and check if it succeeds
+                                my $compile = $sourceContext->{compiler} . " " . $sourceContext->{compilerOptions};
+                                print STDERR "    COMPILE: $compile\n";
+                                if (system($compile) == 0) {
+                                    # update the linkNeeded and compilationSuccessful flags, once the
+                                    # compilationSuccessful gets set to 0, it should stay 0...
+                                    $linkNeeded = 1;
+                                    $compilationSuccessful = $compilationSuccessful & $linkNeeded;
+
+                                    # update the dependencies... this should succeed if the compilation
+                                    # did - but the output is directed to the dependency file, so we want to
+                                    # remove that if it fails
+                                    my $depend = $sourceContext->{depender} . " " . $sourceContext->{dependerOptions};
+                                    if (system($depend) != 0) {
+                                        print STDERR "    DEPEND FAILED: $depend\n";
+                                        unlink($sourceContext->{dependencyFile});
+                                    }
+                                }
+                                else {
+                                    # make sure compilationSuccessful sets to 0 and stays that way
+                                    $compilationSuccessful = 0;
+                                }
+                                exit;
                             }
                         }
                     }
@@ -239,6 +261,11 @@ for my $target (@$targetsInDependencyOrder) {
             }
             else {
                 print STDERR "Can't open target source directory ($targetContext->{sourceFullPath}), $!\n";
+            }
+
+            # wait for the child processes to return
+            for (1 .. $forks) {
+                wait();
             }
 
             # check to see if we need to link...
