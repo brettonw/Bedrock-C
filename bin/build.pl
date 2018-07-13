@@ -86,7 +86,7 @@ sub traverseTargetDependencies {
 }
 
 my $targetsToBuild = Context::confType ("project", $ContextType{VALUES}, "target");
-$targetsToBuild = (ref $targetsToBuild eq "ARRAY") ? $targetsToBuild : (($targetsToBuild ne "*") ? [split (/, ?/, $targetsToBuild)] : [sort keys (%$targets)]);
+$targetsToBuild = (ref $targetsToBuild eq "ARRAY") ? $targetsToBuild : (($targetsToBuild ne "*") ? [split (/[, ]+/, $targetsToBuild)] : [sort keys (%$targets)]);
 for my $target (@$targetsToBuild) {
     traverseTargetDependencies ($target);
 }
@@ -134,17 +134,8 @@ for my $target (@$targetsInDependencyOrder) {
         Context::getTypeNamed("$targetPrefix$target", $ContextType{CONFIGURATIONS})
     );
 
-    #my @c = sort keys %$configurations;
-    #print STDERR "CONFIGURATIONS: ";
-    #my $separator = "";
-    #for my $d (@c) {
-    #    print STDERR $separator . $d;
-    #    $separator = " ";
-    #}
-    #print STDERR "\n";
-
     my $configurationToBuild = $targets->{$target}->{configuration};
-    $configurationToBuild = (ref $configurationToBuild eq "ARRAY") ? $configurationToBuild : (($configurationToBuild ne "*") ? [ split(/[, ]/, $configurationToBuild) ] : [ sort keys (%$configurations) ]);
+    $configurationToBuild = (ref $configurationToBuild eq "ARRAY") ? $configurationToBuild : (($configurationToBuild ne "*") ? [ split(/[, ]+/, $configurationToBuild) ] : [ sort keys (%$configurations) ]);
     for my $configuration (@$configurationToBuild) {
         if (exists ($configurations->{$configuration})) {
             print STDERR "BUILD $target/$configuration\n";
@@ -170,9 +161,6 @@ for my $target (@$targetsInDependencyOrder) {
                     Context::getTypeNamed("$targetPrefix$target", $ContextType{TYPES})->{$targetContext->{type}}
                 )
             ));
-
-            #Context::display($targetContext);
-            #next;
 
             # ensure the target directory is present
             make_path($targetContext->{objectsFullPath});
