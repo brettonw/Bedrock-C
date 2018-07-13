@@ -19,13 +19,13 @@ use Context qw(%ContextType);
 use Slurp qw(slurp);
 
 #---------------------------------------------------------------------------------------------------
-# phase 1 - get the configs
+# phase 1 - get the contexts
 #---------------------------------------------------------------------------------------------------
-# root and project configs
+# root and project contexts
 Context::load ("root", dirname(abs_path(__FILE__)));
 Context::load ("project", ".");
 
-# process the command line options into a values configuration and store it
+# process the command line options into a context and store it
 # XXX TODO: figure out a way to do a sanity check on variables entered
 my $commandLineContext = {};
 foreach my $argument (@ARGV) {
@@ -36,7 +36,7 @@ foreach my $argument (@ARGV) {
 }
 Context::addTypeNamed("commandline", $ContextType{VALUES}, $commandLineContext);
 
-# put them all together and replace th project-values context
+# put them all together and replace the project-values context
 Context::addTypeNamed("project", $ContextType{VALUES}, Context::concatenateNamed (
     "root-" . $ContextType{VALUES},
     "project-" . $ContextType{VALUES},
