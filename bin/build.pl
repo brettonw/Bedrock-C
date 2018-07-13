@@ -146,7 +146,7 @@ for my $target (@$targetsInDependencyOrder) {
         print STDERR "BUILD $target/$configuration\n";
 
         # concatenate the target context, the actual configuration contexts, then the type contexts
-        $targets->{$target} = $targetContext = Context::reduce (Context::concatenate (
+        $targetContext = Context::reduce (Context::concatenate (
             $targetContext,
             Context::concatenate (
                 Context::getTypeNamed("root", $ContextType{CONFIGURATIONS})->{$configuration},
@@ -159,7 +159,7 @@ for my $target (@$targetsInDependencyOrder) {
                 Context::getTypeNamed("$targetPrefix$target", $ContextType{TYPES})->{$targetContext->{type}}
             )
         ));
-        Context::display ($targetContext);
+        #Context::display ($targetContext);
 
         # ensure the target directory is present
         make_path ($targetContext->{objectsFullPath});
@@ -185,6 +185,10 @@ for my $target (@$targetsInDependencyOrder) {
         # has to happen, and there really isn't a way to hide it behind a config option
         $targetContext->{includes} = $includes;
         $targetContext->{libraries} = $libraries;
+        $targetContext = Context::reduce ($targetContext);
+
+        # save the processed target context back tot he targets array
+        $targets->{$target} = $targetContext;
 
         # set a flag that we need to link - it's false by default, and will only be set to true if
         # some files need to be compiled, and they are all successful
@@ -237,7 +241,9 @@ for my $target (@$targetsInDependencyOrder) {
 
         # check to see if we need to link...
         if ((! -e $targetContext->{outputFile}) || ($linkNeeded & $compilationSuccessful)) {
-            print STDERR "LINK Needed\n";
+            my $link = $targetContext->{linker} . " " . $targetContext->{linkerOptions};
+            print STDERR "    LINK: $link\n";
+            system ($link);
         }
     }
 }
