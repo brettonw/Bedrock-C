@@ -24,12 +24,10 @@
     },
     "configurations": {
         "debug": {
-            "configuration": "debug",
             "compilerOptions": "-std=c++11 -Wall -g -D_DEBUG_",
             "linkerOptions": ""
         },
         "release": {
-            "release": "debug",
             "compilerOptions": "-std=c++11 -Wall -O3 -D_NDEBUG_",
             "linkerOptions": ""
         }

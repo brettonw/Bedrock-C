@@ -25,11 +25,6 @@ sub replaceValues {
         # names will be replaced after the longer variable names are replaced, hopefully this isn't
         # just too clever by half.
         my @variableNames = reverse sort $value =~ /\$([a-z][A-Za-z0-9]*)/g;
-        #print STDERR "replaceValues...\n";
-        for my $variableName (@variableNames) {
-            #print STDERR "    variable: $variableName\n";
-        }
-        #print STDERR "\n";
         for my $variableName (@variableNames) {
             if ((exists($context->{$variableName})) && ($context->{$variableName} ne "*")) {
                 $value =~ s/\$$variableName/$context->{$variableName}/ge;
@@ -54,10 +49,8 @@ sub reduce {
     # XXX TODO - need to do this repeatedly until no more values change
     for my $key (keys (%$new)) {
         # allow for "reduce" to result in undef
-        #print STDERR "    VALUE($key) = $new->{$key}\n";
         my $value = replaceValues ($new->{$key}, $new);
         if ($value ne $new->{$key}) {
-            #print STDERR "        NEW($key) = $value\n";
             $new->{$key} = $value;
         }
     }
@@ -69,36 +62,28 @@ sub reduce {
 sub apply {
     my ($left, $right) = @_;
 
-    #print STDERR "apply...\n";
     my $new = {};
     for my $key (keys (%$right)) {
         # allow for "reduce" to result in undef
-        #print STDERR "    RIGHT($key) = $right->{$key}\n";
         my $value = replaceValues ($right->{$key}, $left);
         if (defined $value) {
-            #print STDERR "        NEW($key) = $value\n";
             $new->{$key} = $value;
         }
     }
     for my $key (keys (%$left)) {
         if (! exists ($new->{$key})) {
-            #print STDERR "    LEFT($key) = $left->{$key}\n";
             $new->{$key} = $left->{$key};
         }
     }
-    #print STDERR "\n";
     return $new;
 }
 
 # apply an array of contexts left to right
 sub concatenate {
     my $result = {};
-    #print STDERR "concatenate\n";
     for my $context (@_) {
-            #print STDERR "    XXXX\n";
             $result = apply ($result, $context);
     }
-    #print STDERR "\n";
     return $result;
 }
 
@@ -138,7 +123,6 @@ sub addTypeNamed {
 # get a named context from the global context store, or return an empty context
 sub getNamed {
     my ($name) = @_;
-    #print STDERR "GET $name\n";
     return $contexts{$name} || {};
 }
 

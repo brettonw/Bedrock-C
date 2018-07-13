@@ -36,6 +36,13 @@ foreach my $argument (@ARGV) {
 }
 Context::addTypeNamed("commandline", $ContextType{VALUES}, $commandLineContext);
 
+# put them all together and replace th project-values context
+Context::addTypeNamed("project", $ContextType{VALUES}, Context::concatenateNamed (
+    "root-" . $ContextType{VALUES},
+    "project-" . $ContextType{VALUES},
+    "commandline-" . $ContextType{VALUES})
+);
+
 #---------------------------------------------------------------------------------------------------
 # phase 2 - read the source path looking for subdirs, and loading their contexts
 #---------------------------------------------------------------------------------------------------
@@ -49,7 +56,6 @@ if (opendir(SOURCE_PATH, $sourcePath)) {
         my $targetContext = Context::concatenateNamed ("project-" . $ContextType{VALUES}, "$targetPrefix$target-" . $ContextType{VALUES});
         $targetContext->{target} = $target;
         $targets->{$target} = $targetContext;
-        #Context::display($targetContext);
     }
     closedir(SOURCE_PATH);
 } else {
@@ -120,117 +126,144 @@ sub checkObjectDependencies {
 
 #---------------------------------------------------------------------------------------------------
 for my $target (@$targetsInDependencyOrder) {
-    #print STDERR "TARGET: $target\n";
-    my $targetContext = $targets->{$target};
-
-    # determine what configurations are available
+    # determine what configurations are available vs. what was requested, and loop over the
+    # intersection of those two sets
     my $configurations = Context::concatenate (
         Context::getTypeNamed("root", $ContextType{CONFIGURATIONS}),
         Context::getTypeNamed("project", $ContextType{CONFIGURATIONS}),
         Context::getTypeNamed("$targetPrefix$target", $ContextType{CONFIGURATIONS})
     );
+
+    #my @c = sort keys %$configurations;
+    #print STDERR "CONFIGURATIONS: ";
+    #my $separator = "";
+    #for my $d (@c) {
+    #    print STDERR $separator . $d;
+    #    $separator = " ";
+    #}
+    #print STDERR "\n";
+
     my $configurationToBuild = $targets->{$target}->{configuration};
-    $configurationToBuild = (ref $configurationToBuild eq "ARRAY") ? $configurationToBuild : (($configurationToBuild ne "*") ? [ split(/, ?/, $configurationToBuild) ] : [ sort keys (%$configurations) ]);
+    $configurationToBuild = (ref $configurationToBuild eq "ARRAY") ? $configurationToBuild : (($configurationToBuild ne "*") ? [ split(/[, ]/, $configurationToBuild) ] : [ sort keys (%$configurations) ]);
     for my $configuration (@$configurationToBuild) {
-        print STDERR "BUILD $target/$configuration\n";
+        if (exists ($configurations->{$configuration})) {
+            print STDERR "BUILD $target/$configuration\n";
 
-        # concatenate the target context, the actual configuration contexts, then the type contexts
-        $targetContext = Context::reduce (Context::concatenate (
-            $targetContext,
-            Context::concatenate (
-                Context::getTypeNamed("root", $ContextType{CONFIGURATIONS})->{$configuration},
-                Context::getTypeNamed("project", $ContextType{CONFIGURATIONS})->{$configuration},
-                Context::getTypeNamed("$targetPrefix$target", $ContextType{CONFIGURATIONS})->{$configuration}
-            ),
-            Context::concatenate (
-                Context::getTypeNamed("root", $ContextType{TYPES})->{$targetContext->{type}},
-                Context::getTypeNamed("project", $ContextType{TYPES})->{$targetContext->{type}},
-                Context::getTypeNamed("$targetPrefix$target", $ContextType{TYPES})->{$targetContext->{type}}
-            )
-        ));
+            # reload the target context, concatenate it with the correct configuration contexts, then
+            # the type contexts
+            Context::load("$targetPrefix$target", "$sourcePath/$target/");
+            my $targetContext = Context::concatenateNamed(
+                "project-" . $ContextType{VALUES},
+                "$targetPrefix$target-" . $ContextType{VALUES}
+            );
+            $targetContext = Context::reduce(Context::concatenate(
+                $targetContext,
+                { target => "$target", configuration => "$configuration" },
+                Context::concatenate(
+                    Context::getTypeNamed("root", $ContextType{CONFIGURATIONS})->{$configuration},
+                    Context::getTypeNamed("project", $ContextType{CONFIGURATIONS})->{$configuration},
+                    Context::getTypeNamed("$targetPrefix$target", $ContextType{CONFIGURATIONS})->{$configuration}
+                ),
+                Context::concatenate(
+                    Context::getTypeNamed("root", $ContextType{TYPES})->{$targetContext->{type}},
+                    Context::getTypeNamed("project", $ContextType{TYPES})->{$targetContext->{type}},
+                    Context::getTypeNamed("$targetPrefix$target", $ContextType{TYPES})->{$targetContext->{type}}
+                )
+            ));
 
-        # ensure the target directory is present
-        make_path ($targetContext->{objectsFullPath});
+            #Context::display($targetContext);
+            #next;
 
-        # gather up the target dependencies for includes and linkages - if a dependency exists, it
-        # should have already been fully built before we come to this project
-        # XXX TODO: is that true - link dependencies only exist for apps, so it is - but one library
-        # XXX TODO: could include headers from another (one presumes), and I can even see circular
-        # XXX TODO: dependencies arising out of that...
-        my $includes = "-I$sourcePath ";
-        my $libraries = "";
-        my $separator = "";
-        my $dependencies = exists($targetContext->{dependencies}) ? $targetContext->{dependencies} : [];
-        for my $dependency (@$dependencies) {
-            $includes .= $separator . $targets->{$dependency}->{toInclude};
-            $libraries .= $separator . $targets->{$dependency}->{linkTo};
-            $separator = " ";
-        }
-        #print STDERR "    INCLUDES: $includes\n";
-        #print STDERR "    LIBRARIES: $libraries\n";
+            # ensure the target directory is present
+            make_path($targetContext->{objectsFullPath});
 
-        # and we manually integrate these values into the target context, because we know this step
-        # has to happen, and there really isn't a way to hide it behind a config option
-        $targetContext->{includes} = $includes;
-        $targetContext->{libraries} = $libraries;
-        $targetContext = Context::reduce ($targetContext);
+            # gather up the target dependencies for includes and linkages - if a dependency exists, it
+            # should have already been fully built before we come to this project
+            # XXX TODO: is that true - link dependencies only exist for apps, so it is - but one library
+            # XXX TODO: could include headers from another (one presumes), and I can even see circular
+            # XXX TODO: dependencies arising out of that...
+            my $includes = "-I$sourcePath ";
+            my $libraries = "";
+            my $separator = "";
+            my $dependencies = exists($targetContext->{dependencies}) ? $targetContext->{dependencies} : [];
+            for my $dependency (@$dependencies) {
+                $includes .= $separator . $targets->{$dependency}->{toInclude};
+                $libraries .= $separator . $targets->{$dependency}->{linkTo};
+                $separator = " ";
+            }
+            #print STDERR "    INCLUDES: $includes\n";
+            #print STDERR "    LIBRARIES: $libraries\n";
 
-        # save the processed target context back tot he targets array
-        $targets->{$target} = $targetContext;
+            # and we manually integrate these values into the target context, because we know this step
+            # has to happen, and there really isn't a way to hide it behind a config option
+            $targetContext->{includes} = $includes;
+            $targetContext->{libraries} = $libraries;
+            $targetContext = Context::reduce($targetContext);
 
-        # set a flag that we need to link - it's false by default, and will only be set to true if
-        # some files need to be compiled, and they are all successful
-        my $linkNeeded = 0;
-        my $compilationSuccessful = 1;
+            #Context::display($targetContext);
+            #exit (0);
 
-        # loop over all the source files in the source path to compile them, if needed
-        if (opendir(SOURCE_TARGET_DIR, $targetContext->{sourceFullPath})) {
-            while (my $sourceTargetFile = readdir(SOURCE_TARGET_DIR)) {
-                if ($sourceTargetFile =~ /(.*)$targetContext->{"sourceExtension"}$/) {
-                    my $sourceBaseContext = {sourceBase => "$1"};
-                    my $sourceContext = Context::reduce (
-                        Context::concatenate (
-                            $targetContext,
-                            $sourceBaseContext
-                        )
-                    );
+            # save the processed target context back tot he targets array
+            $targets->{$target} = $targetContext;
 
-                    # load the source dependency file and check if we need to rebuild it
-                    if (checkObjectDependencies ($sourceContext)) {
-                        # compile the source file, and check if it succeeds
-                        my $compile = $sourceContext->{compiler} . " " . $sourceContext->{compilerOptions};
-                        print STDERR "    COMPILE: $compile\n";
-                        if (system ($compile) == 0) {
-                            # update the linkNeeded and compilationSuccessful flags, once the
-                            # compilationSuccessful gets set to 0, it should stay 0...
-                            $linkNeeded = 1;
-                            $compilationSuccessful = $compilationSuccessful & $linkNeeded;
+            # set a flag that we need to link - it's false by default, and will only be set to true if
+            # some files need to be compiled, and they are all successful
+            my $linkNeeded = 0;
+            my $compilationSuccessful = 1;
 
-                            # update the dependencies... this should succeed if the compilation
-                            # did - but the output is directed to the dependency file, so we want to
-                            # remove that if it fails
-                            my $depend = $sourceContext->{depender} . " " . $sourceContext->{dependerOptions};
-                            if (system ($depend) != 0) {
-                                print STDERR "    DEPEND FAILED: $depend\n";
-                                unlink ($sourceContext->{dependencyFile});
+            # loop over all the source files in the source path to compile them, if needed
+            if (opendir(SOURCE_TARGET_DIR, $targetContext->{sourceFullPath})) {
+                while (my $sourceTargetFile = readdir(SOURCE_TARGET_DIR)) {
+                    if ($sourceTargetFile =~ /(.*)$targetContext->{"sourceExtension"}$/) {
+                        my $sourceBaseContext = { sourceBase => "$1" };
+                        my $sourceContext = Context::reduce(
+                            Context::concatenate(
+                                $targetContext,
+                                $sourceBaseContext
+                            )
+                        );
+
+                        # load the source dependency file and check if we need to rebuild it
+                        if (checkObjectDependencies($sourceContext)) {
+                            # compile the source file, and check if it succeeds
+                            my $compile = $sourceContext->{compiler} . " " . $sourceContext->{compilerOptions};
+                            print STDERR "    COMPILE: $compile\n";
+                            if (system($compile) == 0) {
+                                # update the linkNeeded and compilationSuccessful flags, once the
+                                # compilationSuccessful gets set to 0, it should stay 0...
+                                $linkNeeded = 1;
+                                $compilationSuccessful = $compilationSuccessful & $linkNeeded;
+
+                                # update the dependencies... this should succeed if the compilation
+                                # did - but the output is directed to the dependency file, so we want to
+                                # remove that if it fails
+                                my $depend = $sourceContext->{depender} . " " . $sourceContext->{dependerOptions};
+                                if (system($depend) != 0) {
+                                    print STDERR "    DEPEND FAILED: $depend\n";
+                                    unlink($sourceContext->{dependencyFile});
+                                }
                             }
-                        } else {
-                            # make sure compilationSuccessful sets to 0 and stays that way
-                            $compilationSuccessful = 0;
+                            else {
+                                # make sure compilationSuccessful sets to 0 and stays that way
+                                $compilationSuccessful = 0;
+                            }
                         }
                     }
                 }
+                closedir(SOURCE_TARGET_DIR);
             }
-            closedir(SOURCE_TARGET_DIR);
-        } else {
-            print STDERR "Can't open target source directory ($targetContext->{sourceFullPath}), $!\n";
-        }
+            else {
+                print STDERR "Can't open target source directory ($targetContext->{sourceFullPath}), $!\n";
+            }
 
-        # check to see if we need to link...
-        if ((! -e $targetContext->{outputFile}) || ($linkNeeded & $compilationSuccessful)) {
-            my $link = $targetContext->{linker} . " " . $targetContext->{linkerOptions};
-            print STDERR "    LINK: $link\n";
-            system ($link);
+            # check to see if we need to link...
+            if ((!-e $targetContext->{outputFile}) || ($linkNeeded & $compilationSuccessful)) {
+                my $link = $targetContext->{linker} . " " . $targetContext->{linkerOptions};
+                print STDERR "    LINK: $link\n";
+                system($link);
+            }
+        } else {
+            print STDERR "SKIP $target/$configuration (unknown configuration)\n";
         }
     }
 }
