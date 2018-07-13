@@ -9,6 +9,10 @@ binmode STDOUT, ":utf8";
 binmode STDERR, ":utf8";
 use utf8;
 
+# we will use multiple threads to compile the files
+use threads;
+use threads::shared;
+
 use File::Path qw(make_path);
 use File::Basename;
 use Cwd qw(abs_path);
@@ -191,13 +195,8 @@ for my $target (@$targetsInDependencyOrder) {
             # save the processed target context back to the targets array
             $targets->{$target} = $targetContext;
 
-            # set a flag that we need to link - it's false by default, and will only be set to true if
-            # some files need to be compiled, and they are all successful
-            my $linkNeeded = 0;
-            my $compilationSuccessful = 1;
-
-            # a little bit of setup for forking the compilations
-            my $forks = 0;
+            # a little bit of setup for threading the compilations
+            my @threads;
 
             # loop over all the source files in the source path to compile them, if needed
             if (opendir(SOURCE_TARGET_DIR, $targetContext->{sourceFullPath})) {
@@ -213,32 +212,13 @@ for my $target (@$targetsInDependencyOrder) {
 
                         # load the source dependency file and check if we need to rebuild it
                         if (checkObjectDependencies($sourceContext)) {
-
-                            # brutal - create a new thread for all the compilations needed
-                            my $pid = fork;
-                            if (not defined $pid) {
-                                print STDERR "Could not fork for " . $sourceBaseContext->{sourceBase} . "\n";
-                                next;
-                            }
-
-                            # behave differently depending on whether this is the parent process or
-                            # child process
-                            if ($pid) {
-                                # this is the parent process, increment the process wait counter
-                                $forks++;
-                            } else {
-                                # this is the child process - do the hard work...
-                                $compiledFile = $sourceBaseContext->{sourceBase};
-
+                            # spawn a thread here - a bit brutal, a new thread for every compilation
+                            my ($thread) = threads->create( sub {
                                 # compile the source file, and check if it succeeds
                                 my $compile = $sourceContext->{compiler} . " " . $sourceContext->{compilerOptions};
                                 print STDERR "    COMPILE: $compile\n";
-                                if (system($compile) == 0) {
-                                    # update the linkNeeded and compilationSuccessful flags, once the
-                                    # compilationSuccessful gets set to 0, it should stay 0...
-                                    $linkNeeded = 1;
-                                    $compilationSuccessful = $compilationSuccessful & $linkNeeded;
-
+                                my $result = system($compile);
+                                if ($result == 0) {
                                     # update the dependencies... this should succeed if the compilation
                                     # did - but the output is directed to the dependency file, so we want to
                                     # remove that if it fails
@@ -248,12 +228,9 @@ for my $target (@$targetsInDependencyOrder) {
                                         unlink($sourceContext->{dependencyFile});
                                     }
                                 }
-                                else {
-                                    # make sure compilationSuccessful sets to 0 and stays that way
-                                    $compilationSuccessful = 0;
-                                }
-                                exit;
-                            }
+                                return $result;
+                            });
+                            push (@threads, $thread);
                         }
                     }
                 }
@@ -263,10 +240,19 @@ for my $target (@$targetsInDependencyOrder) {
                 print STDERR "Can't open target source directory ($targetContext->{sourceFullPath}), $!\n";
             }
 
-            # wait for the child processes to return
-            for (1 .. $forks) {
-                wait();
+            # wait for the child threads to return, we set a flag that we need to link - it's false
+            # by default, and will only be set to true if some files needed to be compiled, and they
+            # were all successful.
+            # XXX TODO: this could be a bit more elegant, right now it blocks on the first thread in
+            # XXX TODO: the stack that isn't finished...
+            my $linkNeeded = 0;
+            my $compilationSuccessful = 1;
+            while (scalar (@threads) > 0) {
+                $linkNeeded = 1;
+                my $result = shift (@threads)->join ();
+                $compilationSuccessful = $compilationSuccessful & $result;
             }
+            $linkNeeded = $linkNeeded & $compilationSuccessful;
 
             # check to see if we need to link...
             if ((!-e $targetContext->{outputFile}) || ($linkNeeded & $compilationSuccessful)) {
