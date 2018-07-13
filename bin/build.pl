@@ -188,10 +188,7 @@ for my $target (@$targetsInDependencyOrder) {
             $targetContext->{libraries} = $libraries;
             $targetContext = Context::reduce($targetContext);
 
-            #Context::display($targetContext);
-            #exit (0);
-
-            # save the processed target context back tot he targets array
+            # save the processed target context back to the targets array
             $targets->{$target} = $targetContext;
 
             # set a flag that we need to link - it's false by default, and will only be set to true if
