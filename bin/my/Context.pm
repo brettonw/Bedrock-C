@@ -31,7 +31,7 @@ sub replaceValues {
                 ++$replacementCount;
             }
         }
-    } while ($replacementCount > 0);
+    } while (0);#($replacementCount > 0);
 
     # do a substitution with a shell command if one is requested, until no more happen
     while ($value =~ s/\$\(([^\)]*)\)/my $x = qx%$1%; chomp $x; $x/e) {}
