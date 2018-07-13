@@ -227,8 +227,9 @@ for my $target (@$targetsInDependencyOrder) {
                                         print STDERR "    DEPEND FAILED: $depend\n";
                                         unlink($sourceContext->{dependencyFile});
                                     }
+                                    return 1;
                                 }
-                                return $result;
+                                return 0;
                             });
                             push (@threads, $thread);
                         }
