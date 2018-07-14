@@ -11,7 +11,6 @@ use utf8;
 
 # we will use multiple threads to compile the files
 use threads;
-use threads::shared;
 
 use File::Path qw(make_path);
 use File::Basename;
