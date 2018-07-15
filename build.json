@@ -1,6 +1,6 @@
 {
     "values": {
-        "target": "test",
-        "configuration": "debug"
+    	"sourcePath": "source",
+        "target": "test"
     }
 }
