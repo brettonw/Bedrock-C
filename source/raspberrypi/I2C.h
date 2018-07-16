@@ -5,6 +5,9 @@
 #ifndef __APPLE__
 #include <linux/i2c.h>
 #include <linux/i2c-dev.h>
+#else
+#define     I2C_SLAVE	0x0703	/* Use this slave address */
+#define     I2C_TENBIT	0x0704	/* set to 0 for 7 bit addrs, != 0 for 10 bit */
 #endif
 
 #include <sys/ioctl.h>
