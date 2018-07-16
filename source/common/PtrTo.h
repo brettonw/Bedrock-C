@@ -1,6 +1,6 @@
-#include    "ReferenceCountedObject.h"
-
 #pragma once
+
+#include    "ReferenceCountedObject.h"
 
 // a smart pointer wrapper to a reference counted class
 template <class aType>

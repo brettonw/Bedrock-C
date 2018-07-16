@@ -1,6 +1,6 @@
-#include    "RawText.h"
-
 #pragma once
+
+#include    "RawText.h"
 
 class Text {
     private:

@@ -1,9 +1,9 @@
+#pragma once
+
 // XXX TODO - the output is not "pretty", formatted, or otherwise made especially
 // XXX TODO   human readable, though we could certainly do that.
 
 #include    "TextContainer.h"
-
-#pragma once
 
 MAKE_PTR_TO(BagThing) {
     public:

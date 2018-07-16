@@ -1,19 +1,19 @@
+#pragma once
+
 #include    "Types.h"
 
+// headers needed for open, close, and ioctl
+#include <fcntl.h>
 #include <unistd.h>
+#include <sys/ioctl.h>
 
 #ifndef __APPLE__
-#include <linux/i2c.h>
 #include <linux/i2c-dev.h>
 #else
+// shamelessly copied from a linux i2c-dev header
 #define     I2C_SLAVE	0x0703	/* Use this slave address */
 #define     I2C_TENBIT	0x0704	/* set to 0 for 7 bit addrs, != 0 for 10 bit */
 #endif
-
-#include <sys/ioctl.h>
-#include <fcntl.h>
-
-#pragma once
 
 #define DEVICE_I2C_ERROR                    -1
 #define DEVICE_I2C_BUFFER_SIZE              256

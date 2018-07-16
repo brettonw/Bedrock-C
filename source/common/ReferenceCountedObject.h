@@ -1,6 +1,6 @@
-#include    "Types.h"
-
 #pragma once
+
+#include    "Types.h"
 
 class ReferenceCountedObject
 {

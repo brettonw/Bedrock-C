@@ -1,6 +1,6 @@
-#include    "PtrTo.h"
-
 #pragma once
+
+#include    "PtrTo.h"
 
 // RawText is generally presumed to be a buffer containing a valid UTF-8 encoding of text. As such,
 // no wide-char support is provided, nor is there a direct indexing capability. the user must read
