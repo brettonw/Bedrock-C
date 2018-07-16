@@ -44,9 +44,11 @@ class DeviceI2C {
             snprintf(devicePath, DEVICE_I2C_FILE_PATH_BUFFER_SIZE, DEVICE_I2C_FILE_PATH, deviceNumber);
             device = open (devicePath, O_RDWR);
             if (((device = open (devicePath, O_RDWR)) >= 0) && (ioctl(device, I2C_TENBIT, 0) >= 0) && (ioctl(device, I2C_SLAVE, deviceAddress) >= 0)) {
-                cerr << "Opened device " << devicePath << " at address 0x" << hex << deviceAddress << " (0x" << hex << device << ")" << endl;
+                cerr << "Opened device " << devicePath << " at address 0x" << setfill ('0') << setw (2) << hex << deviceAddress << " (0x" << setfill ('0') << setw (2) << hex << device << ")" << endl;
             } else {
-                throw runtime_error ("DeviceI2C: can't open device");
+                ostringstream out;
+                out << "DeviceI2C: can't open device (0x" << setfill ('0') << setw (2) << hex << deviceNumber << ")";
+                throw runtime_error (out.str());
             }
         }
 

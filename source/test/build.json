@@ -1,1 +1,5 @@
-{ "values": {"dependencies": ["common"]}}
+{ 
+    "values": {
+        "dependencies": ["common", "raspberrypi"]
+    }
+}

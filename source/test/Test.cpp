@@ -6,6 +6,8 @@ TEST_CASE(ForceFailure) {
 }
 */
 
+UnitTest* UnitTest::currentUnitTest = 0;
+
 int main (int argc, char** argv) {
 	cerr << "TESTS COMPLETED SUCCESSFULLY!" << endl << endl;
 	return EXIT_SUCCESS;
