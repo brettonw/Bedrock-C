@@ -1,5 +1,5 @@
 #include "Test.h"
-#include "I2C.h"
+#include "DeviceI2C.h"
 
 // utf-8 test file: https://www.w3.org/2001/06/utf-8-wrong/UTF-8-test.html
 // https://en.wikipedia.org/wiki/UTF-8
