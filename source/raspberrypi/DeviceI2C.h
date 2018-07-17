@@ -47,7 +47,7 @@ class DeviceI2C {
                 cerr << "Opened device " << devicePath << " at address 0x" << setfill ('0') << setw (2) << hex << deviceAddress << " (0x" << setfill ('0') << setw (2) << hex << device << ")" << endl;
             } else {
                 ostringstream out;
-                out << "DeviceI2C: can't open device (0x" << setfill ('0') << setw (2) << hex << deviceNumber << ")";
+                out << "DeviceI2C: can't open device (0x" << setfill ('0') << setw (2) << hex << deviceNumber << ") at " << devicePath;
                 throw runtime_error (out.str());
             }
         }
