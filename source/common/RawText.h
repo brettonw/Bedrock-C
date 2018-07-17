@@ -111,9 +111,9 @@ MAKE_PTR_TO(RawText) {
             uint minLength = min (length, sourceLength);
             int comparison = memcmp (bytes, source, minLength);
             if ((comparison != 0) or (length == sourceLength)) {
-                return comparison;
+                return sgn (comparison);
             } else {
-                return length - sourceLength;
+                return sgn ((int) length - (int) sourceLength);
             }
         }
 
