@@ -5,6 +5,10 @@ TEST_CASE(TestText0) {
     TEST_XY(sizeof(Text), sizeof(void*));
 }
 
+template <typename T> int sgn(T val) {
+    return (T(0) < val) - (val < T(0));
+}
+
 TEST_CASE(TestText1) {
     const char* hello = "Hello";
     const char* world = "World";
@@ -16,8 +20,8 @@ TEST_CASE(TestText1) {
     TEST_XYOP(worldText, world, ==);
     TEST_XY(worldText.length(), 5);
 
-    TEST_XY(helloText.compare(worldText), 'H' - 'W');
-    TEST_XY(worldText.compare(helloText), 'W' - 'H');
+    TEST_XY(sgn(helloText.compare(worldText)), sgn('H' - 'W'));
+    TEST_XY(sgn(worldText.compare(helloText)), sgn('W' - 'H'));
     TEST_XY(helloText < worldText, true);
     TEST_XY(helloText <= worldText, true);
     TEST_XY(worldText > helloText, true);
