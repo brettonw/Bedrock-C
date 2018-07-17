@@ -1,5 +1,6 @@
 { 
     "values": {
-        "dependencies": ["common", "raspberrypi"]
+        "type": "sharedLibrary",
+        "dependencies": ["common"]
     }
 }

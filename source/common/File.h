@@ -22,6 +22,4 @@ class File {
         bool isDirectory () {
             return stats.st_mode | S_IFDIR;
         }
-    }
-
 };
