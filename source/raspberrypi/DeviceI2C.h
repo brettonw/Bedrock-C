@@ -55,7 +55,7 @@ class DeviceI2C {
         ~DeviceI2C () {
             if (device >= 0) {
                 close (device);
-                cerr << "Closed device (0x" << hex << device << ")" << endl;
+                cerr << "Closed device (0x" << setfill ('0') << setw (2) << hex << device << ")" << endl;
             }
         }
 
