@@ -24,12 +24,12 @@
 class DeviceI2C {
     private:
         byte buffer[DEVICE_I2C_BUFFER_SIZE];
-        uint length;
+        int length;
         int device;
 
         void store (byte b) {
             if ((length + 1) <= DEVICE_I2C_BUFFER_SIZE) {
-                buffer[length] = b;
+                buffer[length++] = b;
             } else {
                 throw runtime_error ("DeviceI2C: out of buffer for writes");
             }
