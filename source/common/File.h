@@ -20,6 +20,14 @@ class File {
         }
 
         bool isDirectory () {
-            return stats.st_mode | S_IFDIR;
+            return exists and (stats.st_mode | S_IFDIR);
         }
+
+        // open, close
+        // read, write
+        // readText, writeText
+        // read directory
+        // delete
+        // rename
+
 };
