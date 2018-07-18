@@ -1,6 +1,6 @@
 #pragma once
 
-#include    "Types.h"
+#include    "File.h"
 
 // headers needed for open, close, and ioctl
 #include <fcntl.h>
@@ -16,10 +16,15 @@
 #endif
 
 #define DEVICE_I2C_ERROR                    -1
+#define DEVICE_I2C_MAX_DEVICES              256
 #define DEVICE_I2C_BUFFER_SIZE              256
 #define DEVICE_I2C_FILE_PATH_BUFFER_SIZE    32
-#define DEVICE_I2C_FILE_PATH                "/dev/i2c-%d"
+#define DEVICE_I2C_FILE_PATH                "/dev/i2c-"
 
+// http://i2c.info/
+// http://i2c.info/i2c-bus-specification
+// https://www.nxp.com/docs/en/user-guide/UM10204.pdf
+// https://www.kernel.org/doc/Documentation/i2c/dev-interface
 // XXX TODO: is it possible to open the device file descriptor and keep it open?
 class DeviceI2C {
     private:
@@ -35,23 +40,52 @@ class DeviceI2C {
             }
         }
 
-    public:
-        // deviceNumber may need to always be 1
-        DeviceI2C (uint deviceNumber, uint deviceAddress) : length (0) {
+        void init (uint deviceAddress, Text busPath) {
+            length = 0;
+
             // open the device, configure it to use 7 bit addresses (per i2c-dev.h), and set the
             // slave address to our requested I2C address
-            char devicePath[DEVICE_I2C_FILE_PATH_BUFFER_SIZE];
-            snprintf(devicePath, DEVICE_I2C_FILE_PATH_BUFFER_SIZE, DEVICE_I2C_FILE_PATH, deviceNumber);
-            device = open (devicePath, O_RDWR);
-            if (((device = open (devicePath, O_RDWR)) >= 0) && (ioctl(device, I2C_TENBIT, 0) >= 0) && (ioctl(device, I2C_SLAVE, deviceAddress) >= 0)) {
-                cerr << "Opened device " << devicePath << " at address 0x" << setfill ('0') << setw (2) << hex << deviceAddress << " (0x" << setfill ('0') << setw (2) << hex << device << ")" << endl;
+            if (((device = open (busPath, O_RDWR)) >= 0) && (ioctl(device, I2C_TENBIT, 0) >= 0) && (ioctl(device, I2C_SLAVE, deviceAddress) >= 0)) {
+                cerr << "Opened device " << busPath << " at address 0x" << setfill ('0') << setw (2) << hex << deviceAddress << " (0x" << setfill ('0') << setw (2) << hex << device << ")" << endl;
             } else {
                 ostringstream out;
-                out << "DeviceI2C: can't open device (0x" << setfill ('0') << setw (2) << hex << deviceNumber << ") at " << devicePath;
-                throw runtime_error (out.str());
+                out << "DeviceI2C: can't open device address (0x" << setfill ('0') << setw (2) << hex << deviceAddress << ") at " << busPath;
+                throw runtime_error (out.str ());
             }
         }
 
+    public:
+        DeviceI2C (uint deviceAddress, Text busPath) {
+            init (deviceAddress, busPath);
+        }
+
+        DeviceI2C (uint deviceAddress, uint deviceNumber = 0) {
+            vector<Text> availableBusPaths = getAvailableBusPaths ();
+            if (deviceNumber < availableBusPaths.size ()) {
+                init (deviceAddress, availableBusPaths[deviceNumber]);
+            } else {
+                ostringstream out;
+                out << "DeviceI2C: no I2C bus at 0x" << setfill ('0') << setw (2) << hex << deviceNumber;
+                throw runtime_error (out.str ());
+            }
+        }
+
+        static vector<Text> getAvailableBusPaths () {
+            vector<Text> availableBusPaths;
+            for (uint i = 0; i < DEVICE_I2C_MAX_DEVICES; ++i) {
+                Text devicePath  = Text (DEVICE_I2C_FILE_PATH) << i;
+                File deviceFile (devicePath);
+                if (deviceFile.getExists ()) {
+                    availableBusPaths.push_back (devicePath);
+                }
+            }
+            return availableBusPaths;
+        }
+
+        // XXX TODO: probably want a static constructor that takes the device address, and it tries
+        // XXX TODO: to create a device that connects to that address across all available buses
+        // XXX TODO: i don't want to be too clever, as I can't anticipate how this will be used, but
+        // XXX TODO: i believe there must be some way to identify the devices available...
         ~DeviceI2C () {
             if (device >= 0) {
                 close (device);

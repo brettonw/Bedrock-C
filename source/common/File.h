@@ -20,7 +20,18 @@ class File {
         }
 
         bool isDirectory () {
-            return exists and (stats.st_mode | S_IFDIR);
+            return exists and S_ISDIR(stats.st_mode);
+        }
+
+        vector<File> getFiles () {
+            if (isDirectory ()) {
+                vector<File> result;
+                //FILE*   directory = opendir
+                return result;
+            }
+            ostringstream out;
+            out << "File (" << path << ") is not a directory";
+            throw runtime_error (out.str ());
         }
 
         // open, close
