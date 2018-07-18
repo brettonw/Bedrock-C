@@ -1,6 +1,6 @@
 #pragma once
 
-#include    "Types.h"
+#include    "Text.h"
 
 // this UTF-8 handling is modeled after the javascript at: https://github.com/mathiasbynens/utf8.js
 // for the UTF-8 specification, see: https://encoding.spec.whatwg.org/#utf-8
