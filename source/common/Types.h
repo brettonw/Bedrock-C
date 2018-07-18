@@ -12,6 +12,7 @@
 #include    <set>
 #include    <map>
 #include    <stdexcept>
+#include    <algorithm>
 using namespace std;
 
 // a few basic types
@@ -20,8 +21,11 @@ typedef unsigned short ushort;
 typedef unsigned int uint;
 typedef unsigned long ulong;
 
+//------------------------------------------------------------------------------
+// helpers
+//------------------------------------------------------------------------------
+
 // signum
 template <typename T> int sgn(T value) {
     return (T(0) < value) - (value < T(0));
 }
-

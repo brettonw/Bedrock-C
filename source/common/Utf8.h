@@ -61,9 +61,7 @@ class Utf8Decoder {
                         codePoint = ((byte1 & 0x0f) << 12) | (byte2 << 6) | byte3;
                         if (codePoint >= 0x0800) {
                             if (codePoint >= 0xd800 and codePoint <= 0xdfff) {
-                                ostringstream out;
-                                out << "UTF-8: lone surrogate U+" << hex << codePoint << " is not a scalar value";
-                                throw runtime_error(out.str());
+                                throw runtime_error(Text () << "UTF-8: lone surrogate U+" << hex (codePoint) << " is not a scalar value");
                             }
                         } else {
                             throw runtime_error("UTF-8: invalid continuation");

@@ -46,11 +46,9 @@ class DeviceI2C {
             // open the device, configure it to use 7 bit addresses (per i2c-dev.h), and set the
             // slave address to our requested I2C address
             if (((device = open (busPath, O_RDWR)) >= 0) && (ioctl(device, I2C_TENBIT, 0) >= 0) && (ioctl(device, I2C_SLAVE, deviceAddress) >= 0)) {
-                cerr << "Opened device " << busPath << " at address 0x" << setfill ('0') << setw (2) << hex << deviceAddress << " (0x" << setfill ('0') << setw (2) << hex << device << ")" << endl;
+                cerr << "Opened device " << busPath << " at address " << hex (deviceAddress) << " (" << hex (device) << ")" << endl;
             } else {
-                ostringstream out;
-                out << "DeviceI2C: can't open device address (0x" << setfill ('0') << setw (2) << hex << deviceAddress << ") at " << busPath;
-                throw runtime_error (out.str ());
+                throw runtime_error (Text ("DeviceI2C: can't open device address (") << hex (deviceAddress) << ") at " << busPath);
             }
         }
 
@@ -64,9 +62,7 @@ class DeviceI2C {
             if (deviceNumber < availableBusPaths.size ()) {
                 init (deviceAddress, availableBusPaths[deviceNumber]);
             } else {
-                ostringstream out;
-                out << "DeviceI2C: no I2C bus at 0x" << setfill ('0') << setw (2) << hex << deviceNumber;
-                throw runtime_error (out.str ());
+                throw runtime_error (Text ("DeviceI2C: no I2C bus at ") << hex (deviceNumber));
             }
         }
 
@@ -89,7 +85,7 @@ class DeviceI2C {
         ~DeviceI2C () {
             if (device >= 0) {
                 close (device);
-                cerr << "Closed device (0x" << setfill ('0') << setw (2) << hex << device << ")" << endl;
+                cerr << "Closed device (" << hex (device) << ")" << endl;
             }
         }
 

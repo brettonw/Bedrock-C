@@ -29,9 +29,9 @@ class File {
                 //FILE*   directory = opendir
                 return result;
             }
-            ostringstream out;
+            Text out;
             out << "File (" << path << ") is not a directory";
-            throw runtime_error (out.str ());
+            throw runtime_error (out);
         }
 
         // open, close

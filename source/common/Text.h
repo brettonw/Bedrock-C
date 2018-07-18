@@ -279,4 +279,14 @@ ostream& operator << (ostream& ostr, const Text& text) {
     return ostr << (const char*) text;
 }
 
+inline
+Text hex (uint value) {
+    uint bitsNeeded = static_cast<uint> (ceil (log2 (value)));
+    uint bytesNeeded = max ((bitsNeeded >> 3) + ((bitsNeeded & 0x07) ? 1u : 0), 1u);
+    //cerr << "value: " << value << ", bits needed: " << bitsNeeded << ", bytes needed: " << bytesNeeded << endl;
+    ostringstream out;
+    out << "0x" << setfill ('0') << setw (bytesNeeded * 2) << hex << value;
+    return Text (out.str ().c_str ());
+}
+
 #define END_LINE    "\n";
