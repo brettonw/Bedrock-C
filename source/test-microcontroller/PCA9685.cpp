@@ -13,7 +13,7 @@ TEST_CASE(TestPCA9685) {
         ->expect (0x01, 0x04)
         ->expect (0x00, 0x01)
         ->expect (0x00, 0x00)
-        // setPulseFrequency
+        // which calls setPulseFrequency
         ->expect (0x0000, (byte) 0x10)
         ->expect (0x00fe, (byte) 0x05)
         ->expect (0x0000, (byte) 0x00)
