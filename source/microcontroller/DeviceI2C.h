@@ -26,7 +26,7 @@
 // https://www.nxp.com/docs/en/user-guide/UM10204.pdf
 // https://www.kernel.org/doc/Documentation/i2c/dev-interface
 // XXX TODO: is it possible to open the device file descriptor and keep it open?
-class DeviceI2C {
+MAKE_PTR_TO(DeviceI2C) {
     private:
         byte buffer[DEVICE_I2C_BUFFER_SIZE];
         int length;
@@ -40,36 +40,36 @@ class DeviceI2C {
             }
         }
 
-        void init (uint deviceAddress, Text busPath) {
+        void init (uint address, Text busPath) {
             length = 0;
 
             // open the device, configure it to use 7 bit addresses (per i2c-dev.h), and set the
             // slave address to our requested I2C address
-            if (((device = open (busPath, O_RDWR)) >= 0) && (ioctl(device, I2C_TENBIT, 0) >= 0) && (ioctl(device, I2C_SLAVE, deviceAddress) >= 0)) {
-                cerr << "Opened device " << busPath << " at address " << hex (deviceAddress) << " (" << hex (device) << ")" << endl;
+            if (((device = open (busPath, O_RDWR)) >= 0) && (ioctl(device, I2C_TENBIT, 0) >= 0) && (ioctl(device, I2C_SLAVE, address) >= 0)) {
+                cerr << "Opened device " << busPath << " at address " << hex (address) << " (" << hex (device) << ")" << endl;
             } else {
-                throw runtime_error (Text ("DeviceI2C: can't open device address (") << hex (deviceAddress) << ") at " << busPath);
+                throw runtime_error (Text ("DeviceI2C: can't open device address (") << hex (address) << ") at " << busPath);
             }
         }
 
     public:
-        DeviceI2C (uint deviceAddress, Text busPath) {
-            init (deviceAddress, busPath);
+        DeviceI2C (uint address, Text busPath) {
+            init (address, busPath);
         }
 
-        DeviceI2C (uint deviceAddress, uint deviceNumber = 0) {
+        DeviceI2C (uint address, uint busNumber = 0) {
             vector<Text> availableBusPaths = getAvailableBusPaths ();
-            if (deviceNumber < availableBusPaths.size ()) {
-                init (deviceAddress, availableBusPaths[deviceNumber]);
+            if (busNumber < availableBusPaths.size ()) {
+                init (address, availableBusPaths[busNumber]);
             } else {
-                throw runtime_error (Text ("DeviceI2C: no I2C bus at ") << hex (deviceNumber));
+                throw runtime_error (Text ("DeviceI2C: no I2C bus at ") << hex (busNumber));
             }
         }
 
         static vector<Text> getAvailableBusPaths () {
             vector<Text> availableBusPaths;
             for (uint i = 0; i < DEVICE_I2C_MAX_DEVICES; ++i) {
-                Text devicePath  = Text (DEVICE_I2C_FILE_PATH) << i;
+                auto devicePath  = Text (DEVICE_I2C_FILE_PATH) << i;
                 File deviceFile (devicePath);
                 if (deviceFile.getExists ()) {
                     availableBusPaths.push_back (devicePath);
@@ -89,10 +89,10 @@ class DeviceI2C {
             }
         }
 
-        DeviceI2C& write (byte address, byte value) {
+        DeviceI2C* write (byte address, byte value) {
             store (address);
             store (value);
-            return *this;
+            return this;
         }
 
         bool flush () {
