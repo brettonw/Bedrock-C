@@ -168,7 +168,7 @@ class PCA9685 : public ReferenceCountedObject {
 
             // compute the *actual* pulse frequency by inverting the equation
             pulseFrequency = clockFrequency / (CHANNEL_RESOLUTION * (preScale + 1));
-            cerr << ", " << "actual @" << pulseFrequency << "Hz (actual)" << endl;
+            cerr << ", " << "actual @" << pulseFrequency << "Hz" << endl;
 
             // PRE_SCALE can only be set when the SLEEP bit of the MODE1 register is set to logic 1.
             byte oldMode = device->read (MODE1);

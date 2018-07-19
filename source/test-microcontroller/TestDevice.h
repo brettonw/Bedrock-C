@@ -60,13 +60,14 @@ MAKE_PTR_TO(TestDevice) {
             return this;
         }
 
-        void report () {
+        bool report () {
             int count = expectations.size ();
             if (count > 0) {
                 Expectation& currentExpectation = expectations.front ();
                 cerr << "TestDevice: " << "UNMET (" << hex (currentExpectation.address) << ", " << hex (currentExpectation.b) << ")" << endl;
                 throw runtime_error (Text ("TestDevice: ") << "UNMET" << ((count > 1) ? "s" : "") << " (" << count << ")");
             }
+            return true;
         }
 };
 
