@@ -1,5 +1,6 @@
 #pragma once
 
+#include        "Log.h"
 #include        "Text.h"
 
 // values used for setting the pulse frequency, the default is 1ms per cycle
@@ -63,7 +64,7 @@ class PCA9685 : public ReferenceCountedObject {
             // the chip takes 500 microseconds to recover from turning off the SLEEP bit
             waitShort (500);
 
-            Log.info () << "PCA9685: " << "Ready to talk" << endl;
+            Log::info () << "PCA9685: " << "Ready to talk" << endl;
 
             // setup
             setPulseFrequency (requestedPulseFrequency);

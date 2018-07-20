@@ -23,7 +23,23 @@ class TestDeviceI2C : public DeviceI2C {
 
         bool expect (byte* source, uint sourceLength) {
             if (sourceLength == length) {
-                return memcmp (buffer, source, length);
+                return (memcmp (buffer, source, length) == 0);
+            } else {
+                {
+                    Log::info () << "Source (" << sourceLength;
+                    for (uint i = 0; i < sourceLength; ++i) {
+                        Log::debug () << ", " << hex(source[i]);
+                    }
+                    Log::info () << ")" << endl;
+                }
+
+                {
+                    Log::info () << "Buffer (" << length;
+                    for (uint i = 0; i < length; ++i) {
+                        Log::debug () << ", " << hex(buffer[i]);
+                    }
+                    Log::info () << ")" << endl;
+                }
             }
             return false;
         }
