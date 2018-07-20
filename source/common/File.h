@@ -29,9 +29,7 @@ class File {
                 //FILE*   directory = opendir
                 return result;
             }
-            Text out;
-            out << "File (" << path << ") is not a directory";
-            throw runtime_error (out);
+            throw runtime_error (Text ("File (") << path << ") is not a directory");
         }
 
         // open, close
