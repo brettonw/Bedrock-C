@@ -1,5 +1,6 @@
 #pragma once
 
+#include        "Log.h"
 #include        "Text.h"
 
 class Expectation {
@@ -33,14 +34,14 @@ MAKE_PTR_TO(TestDevice) {
             if (expectations.size () > 0) {
                 Expectation& currentExpectation = expectations.front ();
                 if (currentExpectation.satisfy (address, b)) {
-                    Log.debug () << "TestDevice: " << "RECEIVED (" << hex (address) << ", " << hex(b) << ") -> EXPECTED" << endl;
+                    Log::debug () << "TestDevice: " << "RECEIVED (" << hex (address) << ", " << hex(b) << ") -> EXPECTED" << endl;
                 } else {
-                    Log.error () << "TestDevice: " << "RECEIVED (" << hex (address) << ", " << hex(b) << ")" << endl;
+                    Log::error () << "TestDevice: " << "RECEIVED (" << hex (address) << ", " << hex(b) << ")" << endl;
                     throw runtime_error (Text ("TestDevice: ") << "UNSATISFIED (" << hex (currentExpectation.address) << ", " << hex(currentExpectation.b) << ")");
                 }
                 expectations.erase (expectations.begin());
             } else {
-                Log.error () << "TestDevice: " << "RECEIVED (" << hex (address) << ", " << hex(b) << ") -> UNEXPECTED" << endl;
+                Log::error () << "TestDevice: " << "RECEIVED (" << hex (address) << ", " << hex(b) << ") -> UNEXPECTED" << endl;
                 throw runtime_error (Text ("TestDevice: ") << "UNEXPECTED");
             }
 
