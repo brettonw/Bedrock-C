@@ -2,5 +2,5 @@
 #include        "Log.h"
 
 TEST_CASE (TestLog) {
-    LOG() << "Hello World" << endl;
+    Log::info() << "Hello World" << endl;
 }
