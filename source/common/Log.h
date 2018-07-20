@@ -3,7 +3,9 @@
 #include        "LogLevel.h"
 
 class Log {
-    friend Log& LOG ();
+    public:
+        class Level {
+        };
 
     private:
         ostream& stream;
@@ -12,6 +14,8 @@ class Log {
 
         Log (ostream& _stream, LogLevel _filterLevel = LogLevel::INFO, LogLevel _level = LogLevel::INFO) : stream (_stream), filterLevel (_filterLevel), level (_level) {
         }
+
+        static Log singleton ();
 
     public:
         template <typename InputType>
@@ -38,6 +42,8 @@ class Log {
             filterLevel = _filterLevel;
             return *this;
         }
+
+        static trace () { return
 };
 
 // the global static accessor
