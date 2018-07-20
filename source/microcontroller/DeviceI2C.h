@@ -11,7 +11,7 @@
 #ifndef __APPLE__
 #include <linux/i2c-dev.h>
 #else
-// shamelessly copied from a linux i2c-dev header
+// shamelessly copied from a linux i2c-dev header, prefer the linux source if it is available
 #define     I2C_SLAVE	0x0703	/* Use this slave address */
 #define     I2C_TENBIT	0x0704	/* set to 0 for 7 bit addrs, != 0 for 10 bit */
 #endif
@@ -19,18 +19,20 @@
 #define DEVICE_I2C_ERROR                    -1
 #define DEVICE_I2C_MAX_DEVICES              256
 #define DEVICE_I2C_BUFFER_SIZE              256
-#define DEVICE_I2C_FILE_PATH_BUFFER_SIZE    32
 #define DEVICE_I2C_FILE_PATH                "/dev/i2c-"
 
+// references
 // http://i2c.info/
 // http://i2c.info/i2c-bus-specification
 // https://www.nxp.com/docs/en/user-guide/UM10204.pdf
 // https://www.kernel.org/doc/Documentation/i2c/dev-interface
+// https://xanthium.in/serial-programming-tutorials
+// https://www.cmrr.umn.edu/~strupp/serial.html
 // XXX TODO: is it possible to open the device file descriptor and keep it open?
 MAKE_PTR_TO(DeviceI2C) {
-    private:
+    protected:
         byte buffer[DEVICE_I2C_BUFFER_SIZE];
-        int length;
+        uint length;
         int device;
 
         void store (byte b) {
@@ -52,6 +54,9 @@ MAKE_PTR_TO(DeviceI2C) {
                 throw runtime_error (Text ("DeviceI2C: can't open device address (") << hex (address) << ") at " << busPath);
             }
         }
+
+        // for testing purposes
+        DeviceI2C () { device = -1; length = 0; }
 
     public:
         DeviceI2C (uint address, Text busPath) {

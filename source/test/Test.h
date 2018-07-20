@@ -24,10 +24,11 @@ class UnitTest {
 #define     TEST_XYOP(x, y, op) { bool result_xyop = ((x) op (y)); cerr << (result_xyop ? "PASS" : "FAIL") << ": " #x " " #op " " #y " (" << (x) << " " #op " " << (y) << ")" << endl; TEST_ASSERTION(result_xyop); }
 #define     TEST_XYF(x, y, p) TEST_XYOP(fabs (x - y), p, <=)
 #define     TEST_XY(x, y) TEST_XYOP(x, y, ==)
+#define     TEST_X(x) TEST_XYOP(x, true, ==)
 #define		TEST_CASE(name)										                                    \
-			class name : public UnitTest {  				                                        \
+			class XXX##name : public UnitTest {  				                                    \
 				public:											                                    \
-					name () {			                                                            \
+					XXX##name () {			                                                        \
 						try {									                                    \
 						    cerr << "STARTING: (" __FILE__ << ") " << #name << endl;                \
 							test ();				                                                \
@@ -43,7 +44,7 @@ class UnitTest {
 						}										                                    \
 					}											                                    \
 					void test ();								                                    \
-        			static name test##name;			                                                \
+        			static XXX##name test##name;			                                        \
 			};													                                    \
-        	name name::test##name;			                                                        \
-			inline void name::test ()
+        	XXX##name XXX##name::test##name;			                                            \
+			inline void XXX##name::test ()
