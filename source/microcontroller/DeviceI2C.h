@@ -102,7 +102,7 @@ MAKE_PTR_TO(DeviceI2C) {
         }
 
         bool flush () {
-            if (::write (device, buffer, length) == length) {
+            if (::write (device, buffer, length) == int (length)) {
                 length = 0;
                 return true;
             }
