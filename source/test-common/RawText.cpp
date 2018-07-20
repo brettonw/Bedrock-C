@@ -2,6 +2,8 @@
 #include "RawText.h"
 
 TEST_CASE(TestRawText) {
+    //Log::Scope  scope (Log::DEBUG);
+
     const char* helloWorld = "Hello World";
     uint helloWorldLength = strlen (helloWorld);
     PtrToRawText rawText = RawText::make (helloWorld, helloWorldLength);

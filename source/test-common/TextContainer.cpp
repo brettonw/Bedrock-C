@@ -28,7 +28,7 @@ TEST_CASE(TestTextSet) {
     TEST_XY (ts.contains(Text ("Hello1")), false);
 
     TEST_XY (ts.toText (), "Hello, World");
-    cerr << ts << endl;
+    Log::debug () << ts << endl;
 }
 
 TEST_CASE(TestTextMap) {
@@ -54,5 +54,5 @@ TEST_CASE(TestTextMap) {
     TEST_XY (*(tm.get ("xxx")), "yyy");
 
     TEST_XY (tm.toText (), "Hello: Joe, xxx: yyy");
-    cerr << tm << endl;
+    Log::debug () << tm << endl;
 }

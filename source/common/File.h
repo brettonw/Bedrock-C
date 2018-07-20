@@ -2,9 +2,10 @@
 
 #include        <sys/types.h>
 #include        <sys/stat.h>
+#include        <dirent.h>
 #include        "Text.h"
 
-class File {
+MAKE_PTR_TO(File) {
     private:
         Text path;
         struct stat stats;
@@ -23,11 +24,18 @@ class File {
             return exists and S_ISDIR(stats.st_mode);
         }
 
-        vector<File> getFiles () {
+        vector<PtrToFile> getFiles () {
             if (isDirectory ()) {
-                vector<File> result;
-                //FILE*   directory = opendir
-                return result;
+                vector<PtrToFile> files;
+                DIR* directory = opendir (path);
+                if (directory) {
+                    struct dirent* ent;
+                    while ((ent = readdir (directory))) {
+                        files.push_back (new File (ent->d_name));
+                    }
+                    closedir (directory);
+                }
+                return files;
             }
             throw runtime_error (Text ("File (") << path << ") is not a directory");
         }

@@ -13,13 +13,34 @@ class Log {
         };
 
         class Level {
-            friend class Log;
             private:
                 uint level;
 
             public:
                 Level (uint _level) : level (_level) {}
-                uint get () { return level; }
+                uint get () const { return level; }
+        };
+
+        class Scope {
+            private:
+                uint filterLevel;
+                ostream* stream;
+
+            public:
+                Scope () : filterLevel (Log::base ().getFilterLevel ()), stream (Log::base ().getStream ()) { }
+
+                Scope (uint newFilterLevel) : filterLevel (Log::base ().getFilterLevel ()), stream (Log::base ().getStream ()) {
+                    Log::base ().setFilterLevel (newFilterLevel);
+                }
+
+                // XXX TODO: a Scope constructor that takes a named scope, and sets the new scope
+                //           from that, like from a settings file.
+
+                ~Scope () {
+                    Log::base ()
+                        .setFilterLevel (filterLevel)
+                        .setStream (*stream);
+                 }
         };
 
     private:
@@ -56,13 +77,21 @@ class Log {
         }
 
         Log& operator << (const Level& _level) {
-            level = _level.level;
+            level = _level.get ();
             return *this;
+        }
+
+        ostream* getStream () {
+            return stream;
         }
 
         Log& setStream (std::ostream& _stream) {
             stream = &_stream;
             return *this;
+        }
+
+        uint getFilterLevel () {
+            return filterLevel;
         }
 
         Log& setFilterLevel (uint _filterLevel) {

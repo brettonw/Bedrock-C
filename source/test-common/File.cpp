@@ -21,5 +21,8 @@ TEST_CASE(TestFileIsDirectory) {
 
     File    junk ("nonexistent-file.txt");
     TEST_XY(junk.isDirectory (), false);
+
+    vector<PtrToFile> files =  directory.getFiles ();
+    TEST_XYOP(files.size (), 0, >);
 }
 

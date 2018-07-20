@@ -88,7 +88,7 @@ TEST_CASE(TestBag1) {
     bagObject->put("xxx", bagArray);
     Text bag = bagObject->toJson ();
     TEST_XY(bag, "{\"xxx\":[5]}");
-    cerr << bag << endl;
+    Log::debug () << bag << endl;
 }
 
 TEST_CASE(TestBag2) {
@@ -96,5 +96,5 @@ TEST_CASE(TestBag2) {
     PtrToBagObject bagObject = (new BagObject ())->put("xxx", bagArray);
     Text bag = bagObject->toJson ();
     TEST_XY(bag, "{\"xxx\":[5,true,\"hello\",1.66500000,{\"yyy\":15}]}");
-    cerr << bag << endl;
+    Log::debug () << bag << endl;
 }

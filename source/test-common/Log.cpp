@@ -1,8 +1,8 @@
 #include        "Test.h"
-#include        "Log.h"
 #include        "Text.h"
 
 TEST_CASE (TestLogFilterTrace) {
+    Log::Scope scope;
     ostringstream out;
 
     Log::base().setStream (out).setFilterLevel (Log::TRACE);
@@ -17,6 +17,7 @@ TEST_CASE (TestLogFilterTrace) {
 }
 
 TEST_CASE (TestLogFilterDebug) {
+    Log::Scope scope;
     ostringstream out;
 
     Log::base().setStream (out).setFilterLevel (Log::DEBUG);
@@ -31,6 +32,7 @@ TEST_CASE (TestLogFilterDebug) {
 }
 
 TEST_CASE (TestLogFilterInfo) {
+    Log::Scope scope;
     ostringstream out;
 
     Log::base().setStream (out).setFilterLevel (Log::INFO);
@@ -45,6 +47,7 @@ TEST_CASE (TestLogFilterInfo) {
 }
 
 TEST_CASE (TestLogFilterWarn) {
+    Log::Scope scope;
     ostringstream out;
 
     Log::base().setStream (out).setFilterLevel (Log::WARN);
@@ -59,6 +62,7 @@ TEST_CASE (TestLogFilterWarn) {
 }
 
 TEST_CASE (TestLogFilterError) {
+    Log::Scope scope;
     ostringstream out;
 
     Log::base().setStream (out).setFilterLevel (Log::ERROR);
@@ -73,6 +77,7 @@ TEST_CASE (TestLogFilterError) {
 }
 
 TEST_CASE (TestLogMulti) {
+    Log::Scope scope;
     ostringstream out;
 
     Log::base().setStream (out).setFilterLevel (Log::INFO)
@@ -83,4 +88,42 @@ TEST_CASE (TestLogMulti) {
         << Log::Level (Log::ERROR) << "error";
 
     TEST_XY(Text (out.str ().c_str ()), Text("infowarnerror"));
+}
+
+TEST_CASE (TestLogScope) {
+    Log::Scope scope;
+
+    ostringstream out;
+    {
+        Log::Scope scope2;
+        Log::base().setStream (out).setFilterLevel (Log::INFO);
+        Log::trace() << "trace" << endl;
+        Log::debug() << "debug" << endl;
+        Log::info() << "info" << endl;
+        Log::warn() << "warn" << endl;
+        Log::error() << "error" << endl;
+    }
+    TEST_XY(Text (out.str ().c_str ()), Text("info\nwarn\nerror\n"));
+
+    {
+        Log::Scope scope2 (Log::DEBUG);
+        Log::base().setStream (out);
+        Log::trace() << "trace" << endl;
+        Log::debug() << "debug" << endl;
+        Log::info() << "info" << endl;
+        Log::warn() << "warn" << endl;
+        Log::error() << "error" << endl;
+    }
+    TEST_XY(Text (out.str ().c_str ()), Text("info\nwarn\nerror\ndebug\ninfo\nwarn\nerror\n"));
+
+    {
+        Log::Scope scope2;
+        Log::base().setStream (out);
+        Log::trace() << "trace" << endl;
+        Log::debug() << "debug" << endl;
+        Log::info() << "info" << endl;
+        Log::warn() << "warn" << endl;
+        Log::error() << "error" << endl;
+    }
+    TEST_XY(Text (out.str ().c_str ()), Text("info\nwarn\nerror\ndebug\ninfo\nwarn\nerror\ninfo\nwarn\nerror\n"));
 }

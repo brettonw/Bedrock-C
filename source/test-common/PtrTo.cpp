@@ -12,24 +12,24 @@ MAKE_PTR_TO(TestClass) {
         void* operator new (size_t size) {
             void* ptr = ::operator new (size);
             ptrs.insert(ptr);
-            cerr << "Allocate ptr " << ptr << endl;
+            Log::debug () << "Allocate ptr " << ptr << endl;
             return ptr;
         }
 
         void operator delete (void* ptr) {
             set<void*>::iterator it = ptrs.find (ptr);
             if (it != ptrs.end ()) {
-                cerr << "Deallocate known ptr " << ptr << endl;
+                Log::debug () << "Deallocate known ptr " << ptr << endl;
                 ptrs.erase(it);
             } else {
-                cerr << "Unknown ptr " << ptr << endl;
+                Log::debug () << "Unknown ptr " << ptr << endl;
             }
             ::operator delete (ptr);
         }
 
         static void checkPtrs (uint expect = 0) {
             for (set<void*>::iterator it = ptrs.begin (); it != ptrs.end (); ++it) {
-                cerr << "Known ptr " << *it << endl;
+                Log::warn () << "Known ptr " << *it << endl;
             }
             TEST_XY (ptrs.size(), expect);
         }
