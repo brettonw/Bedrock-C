@@ -1,6 +1,7 @@
 #pragma once
 
-#include    "Text.h"
+#include        "Log.h"
+#include        "Text.h"
 
 // this UTF-8 handling is modeled after the javascript at: https://github.com/mathiasbynens/utf8.js
 // for the UTF-8 specification, see: https://encoding.spec.whatwg.org/#utf-8
@@ -82,7 +83,7 @@ class Utf8Decoder {
             } catch (runtime_error& err) {
                 // set the error condition, and reset so that we will consistently hit that error
                 // condition if we keep trying to advance
-                cerr << err.what () << endl;
+                Log::error () << err.what () << endl;
                 codePoint = ERROR;
                 next = position;
             }

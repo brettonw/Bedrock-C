@@ -1,5 +1,6 @@
 #include        "Test.h"
 #include        "Log.h"
+#include        "Text.h"
 
 TEST_CASE (TestLogFilterTrace) {
     ostringstream out;

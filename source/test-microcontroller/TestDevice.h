@@ -30,17 +30,17 @@ MAKE_PTR_TO(TestDevice) {
         }
 
         TestDevice* write (byte address, byte b) {
-            cerr << "TestDevice: " << "RECEIVED (" << hex (address) << ", " << hex(b) << ")";
             if (expectations.size () > 0) {
                 Expectation& currentExpectation = expectations.front ();
                 if (currentExpectation.satisfy (address, b)) {
-                    //log.debug ("EXPECTED! (" + String.format ("0x%04x", address) + ", " + String.format ("0x%02x", b) + ")");
-                    cerr << " -> EXPECTED" << endl;
+                    Log.debug () << "TestDevice: " << "RECEIVED (" << hex (address) << ", " << hex(b) << ") -> EXPECTED" << endl;
                 } else {
+                    Log.error () << "TestDevice: " << "RECEIVED (" << hex (address) << ", " << hex(b) << ")" << endl;
                     throw runtime_error (Text ("TestDevice: ") << "UNSATISFIED (" << hex (currentExpectation.address) << ", " << hex(currentExpectation.b) << ")");
                 }
                 expectations.erase (expectations.begin());
             } else {
+                Log.error () << "TestDevice: " << "RECEIVED (" << hex (address) << ", " << hex(b) << ") -> UNEXPECTED" << endl;
                 throw runtime_error (Text ("TestDevice: ") << "UNEXPECTED");
             }
 
@@ -64,7 +64,7 @@ MAKE_PTR_TO(TestDevice) {
             int count = expectations.size ();
             if (count > 0) {
                 Expectation& currentExpectation = expectations.front ();
-                cerr << "TestDevice: " << "UNMET (" << hex (currentExpectation.address) << ", " << hex (currentExpectation.b) << ")" << endl;
+                Log::error () << "TestDevice: " << "UNMET (" << hex (currentExpectation.address) << ", " << hex (currentExpectation.b) << ")" << endl;
                 throw runtime_error (Text ("TestDevice: ") << "UNMET" << ((count > 1) ? "s" : "") << " (" << count << ")");
             }
             return true;

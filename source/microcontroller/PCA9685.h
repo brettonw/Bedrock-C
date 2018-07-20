@@ -63,7 +63,7 @@ class PCA9685 : public ReferenceCountedObject {
             // the chip takes 500 microseconds to recover from turning off the SLEEP bit
             waitShort (500);
 
-            cerr << "PCA9685: " << "Ready to talk" << endl;
+            Log.info () << "PCA9685: " << "Ready to talk" << endl;
 
             // setup
             setPulseFrequency (requestedPulseFrequency);
@@ -89,7 +89,7 @@ class PCA9685 : public ReferenceCountedObject {
         */
         void setChannelPulse (byte channel, ushort on, ushort off) {
             // (https://cdn-shop.adafruit.com/datasheets/PCA9685.pdf - Section 7.3.3)
-            cerr << "PCA9685: " << "setChannelPulse - ON(" << hex (on) << ") OFF(" << hex (off) << ")" << endl;
+            Log::debug () << "PCA9685: " << "setChannelPulse - ON(" << hex (on) << ") OFF(" << hex (off) << ")" << endl;
             auto channelOffset = channel * CHANNEL_OFFSET_MULTIPLIER;
             writeShort (CHANNEL_BASE_ON + channelOffset, on);
             writeShort (CHANNEL_BASE_OFF + channelOffset, off);
@@ -161,14 +161,14 @@ class PCA9685 : public ReferenceCountedObject {
             // (https://cdn-shop.adafruit.com/datasheets/PCA9685.pdf - Section 7.3.5)
             const double CHANNEL_RESOLUTION = 4096.0;   // 12-bit precision
             byte preScale = byte (round (clockFrequency / (CHANNEL_RESOLUTION * requestedPulseFrequency))) - 1;
-            cerr << "PCA9685: " << "pre-scale (" << hex (preScale) << ")" << endl;
+            Log::debug () << "PCA9685: " << "pre-scale (" << hex (preScale) << ")" << endl;
             const byte MIN_PRE_SCALE = 0x03, MAX_PRE_SCALE = 0xFF;
             preScale = min (max (MIN_PRE_SCALE, preScale), MAX_PRE_SCALE);
-            cerr << "PCA9685: " << "requested @" << requestedPulseFrequency << " Hz";
+            Log::info () << "PCA9685: " << "requested @" << requestedPulseFrequency << " Hz";
 
             // compute the *actual* pulse frequency by inverting the equation
             pulseFrequency = clockFrequency / (CHANNEL_RESOLUTION * (preScale + 1));
-            cerr << ", " << "actual @" << pulseFrequency << "Hz" << endl;
+            Log::info () << ", " << "actual @" << pulseFrequency << "Hz" << endl;
 
             // PRE_SCALE can only be set when the SLEEP bit of the MODE1 register is set to logic 1.
             byte oldMode = device->read (MODE1);

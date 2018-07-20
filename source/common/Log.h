@@ -1,6 +1,6 @@
 #pragma once
 
-#include        "Text.h"
+#include        "Types.h"
 
 class Log {
     public:

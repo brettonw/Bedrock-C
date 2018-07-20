@@ -49,7 +49,7 @@ MAKE_PTR_TO(DeviceI2C) {
             // open the device, configure it to use 7 bit addresses (per i2c-dev.h), and set the
             // slave address to our requested I2C address
             if (((device = open (busPath, O_RDWR)) >= 0) && (ioctl(device, I2C_TENBIT, 0) >= 0) && (ioctl(device, I2C_SLAVE, address) >= 0)) {
-                cerr << "Opened device " << busPath << " at address " << hex (address) << " (" << hex (device) << ")" << endl;
+                Log.info () << "Opened device " << busPath << " at address " << hex (address) << " (" << hex (device) << ")" << endl;
             } else {
                 throw runtime_error (Text ("DeviceI2C: can't open device address (") << hex (address) << ") at " << busPath);
             }
@@ -91,7 +91,7 @@ MAKE_PTR_TO(DeviceI2C) {
         ~DeviceI2C () {
             if (device >= 0) {
                 close (device);
-                cerr << "Closed device (" << hex (device) << ")" << endl;
+                Log.info () << "Closed device (" << hex (device) << ")" << endl;
             }
         }
 
