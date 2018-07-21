@@ -1,6 +1,7 @@
 #pragma once
 
 #include        "PCA9685.h"
+#include        "ServoId.h"
 
 /**
 * Servo Driver Board
@@ -13,32 +14,15 @@
 *
 */
 
-enum ServoId {
-    SERVO_01, SERVO_02, SERVO_03, SERVO_04,
-    SERVO_05, SERVO_06, SERVO_07, SERVO_08,
-    SERVO_09, SERVO_10, SERVO_11, SERVO_12,
-    SERVO_13, SERVO_14, SERVO_15, SERVO_16
-};
+const int ADAFRUIT_SERVER_DRIVER_DEFAULT_ADDRESS = 0x40;
+const int ADAFRUIT_SERVER_DRIVER_DEFAULT_PULSE_FREQUENCY = 50;
 
 template<typename DeviceType>
-public class AdafruitServoDriver : public PCA9685<DeviceType> {
-    private:
-        // default pulse frequency of the Adafruit server hat
-        enum {
-            DEFAULT_PULSE_FREQUENCY = 50
-        }
-
-
+class AdafruitServoDriver : public PCA9685<DeviceType> {
     public:
-        // default i2c address of the Adafruit server hat
-        enum {
-            DEFAULT_ADDRESS = 0x40,
-            DEFAULT_PULSE_FREQUENCY = 50
-        }
+        AdafruitServoDriver (uint address = ADAFRUIT_SERVER_DRIVER_DEFAULT_ADDRESS, uint requestedPulseFrequency = ADAFRUIT_SERVER_DRIVER_DEFAULT_PULSE_FREQUENCY, uint busNumber = 0) : PCA9685<DeviceType> (address, requestedPulseFrequency, busNumber) {}
 
-        AdafruitServoDriver (uint address = DEFAULT_ADDRESS, uint requestedPulseFrequency = DEFAULT_PULSE_FREQUENCY, uint busNumber = 0) : PCA9685 (address, requestedPulseFrequency, busNumber) {}
-
-        AdafruitServoDriver (PtrTo<DeviceType> _device, uint requestedPulseFrequency = DEFAULT_PULSE_FREQUENCY) : PCA9685 (_device, requestedPulseFrequency) {}
+        AdafruitServoDriver (PtrTo<DeviceType> _device, uint requestedPulseFrequency = ADAFRUIT_SERVER_DRIVER_DEFAULT_PULSE_FREQUENCY) : PCA9685<DeviceType> (_device, requestedPulseFrequency) {}
 
         /**
         * set the pulse width to control a servo. the exact meaning of this is up to the servo itself.
@@ -47,8 +31,6 @@ public class AdafruitServoDriver : public PCA9685<DeviceType> {
         * @return this, for chaining
         */
         void setPulseDuration (ServoId servoId, double milliseconds) {
-            setChannelPulseMs (servoId, milliseconds);
+            PCA9685<DeviceType>::setChannelPulseMs (servoId, milliseconds);
         }
-}
-
-typedef PtrTo<AdafruitServoDriver<DeviceI2C> > PtrToAdafruitServoDriver;
+};
