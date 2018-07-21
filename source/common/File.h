@@ -31,13 +31,40 @@ MAKE_PTR_TO(File) {
                 if (directory) {
                     struct dirent* ent;
                     while ((ent = readdir (directory))) {
-                        files.push_back (new File (ent->d_name));
+                        Text name (ent->d_name);
+                        if (name.find (".") != 0) {
+                            files.push_back (new File (ent->d_name));
+                        }
                     }
                     closedir (directory);
                 }
                 return files;
             }
             throw runtime_error (Text ("File (") << path << ") is not a directory");
+        }
+
+        Text getPath () {
+            return path;
+        }
+
+        Text getBasename () {
+            vector<Text> components = path.split ("/");
+            Text basename = components.back ();
+            vector<Text> nameComponents = basename.split (".");
+            if (nameComponents.size () > 1) {
+                uint remove = nameComponents.back ().length () + 1;
+                basename = basename.substring (0, basename.length () - remove);
+            }
+            return basename;
+        }
+
+        Text getExtension () {
+            Text extension;
+            vector<Text> components = path.split (getBasename () + ".");
+            if (components.size () > 1) {
+                extension = components.back ();
+            }
+            return extension;
         }
 
         // open, close

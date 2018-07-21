@@ -12,7 +12,29 @@ TEST_CASE(TestFileExists) {
     TEST_XY(junk.getExists (), false);
 }
 
+TEST_CASE(TestFileBasename) {
+    File    file ("./Utf8Test.txt");
+    TEST_XY(file.getPath (), "./Utf8Test.txt");
+    TEST_XY(file.getBasename (), "Utf8Test");
+    TEST_XY(file.getExtension (), "txt");
+
+    File file2 ("./dir/dir2");
+    TEST_XY(file2.getExists (), true);
+    TEST_XY(file2.isDirectory (), true);
+    TEST_XY(file2.getPath (), "./dir/dir2");
+    TEST_XY(file2.getBasename (), "dir2");
+    TEST_XY(file2.getExtension (), "");
+
+    File file3 ("./dir/dir2/test.long.txt");
+    TEST_XY(file3.getExists (), true);
+    TEST_XY(file3.getPath (), "./dir/dir2/test.long.txt");
+    TEST_XY(file3.getBasename (), "test.long");
+    TEST_XY(file3.getExtension (), "txt");
+}
+
 TEST_CASE(TestFileIsDirectory) {
+    Log::Scope scope (Log::DEBUG);
+
     File    file ("Utf8Test.txt");
     TEST_XY(file.isDirectory (), false);
 
@@ -24,5 +46,8 @@ TEST_CASE(TestFileIsDirectory) {
 
     vector<PtrToFile> files =  directory.getFiles ();
     TEST_XYOP(files.size (), 0, >);
+    TEST_X((files[0]->getBasename () == "debug") || (files[0]->getBasename () == "release"));
+
+    Log::debug () << files.size () << " files in directory (" << directory.getPath () << ")" << endl;
 }
 
