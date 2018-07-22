@@ -6,3 +6,5 @@ enum ServoId {
     SERVO_08, SERVO_09, SERVO_10, SERVO_11,
     SERVO_12, SERVO_13, SERVO_14, SERVO_15
 };
+
+const int SERVO_COUNT = ServoId::SERVO_15 + 1;

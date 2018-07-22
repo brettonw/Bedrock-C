@@ -4,29 +4,6 @@
 #include        "DeviceI2C.h"
 #include        "Motor.h"
 
-template<typename DeviceType>
-class TestMotorDriver : public ReferenceCountedObject {
-    private:
-        PtrTo<AdafruitMotorDriver<DeviceType> > adafruitMotorDriver;
-        double speeds[MotorId::MOTOR_3 + 1];
-
-    public:
-        TestMotorDriver (PtrTo<AdafruitMotorDriver<DeviceType> > _adafruitMotorDriver) : adafruitMotorDriver (_adafruitMotorDriver) {
-            for (int i = MotorId::MOTOR_0; i <= MotorId::MOTOR_3; ++i) {
-                speeds[static_cast<MotorId>(i)] = 0;
-            }
-        }
-
-        void runMotor (MotorId motorId, double speed) {
-            speeds[motorId] = speed;
-            adafruitMotorDriver->runMotor (motorId, speed);
-        }
-
-        double getSpeed (MotorId motorId) {
-            return speeds[motorId];
-        }
-};
-
 TEST_CASE(TestAdafruitMotorDriver) {
     Log::Scope scope (Log::TRACE);
 
@@ -99,9 +76,8 @@ TEST_CASE(TestAdafruitMotorDriver) {
         ->expect (0x25, (byte) 0x10);
 
     PtrTo<AdafruitMotorDriver<TestDevice> > driver = new AdafruitMotorDriver<TestDevice> (device);
-    PtrTo<TestMotorDriver<TestDevice> > testDriver = new TestMotorDriver<TestDevice> (driver);
-    for (int i = MotorId::MOTOR_0; i <= MotorId::MOTOR_3; ++i) {
-        TEST_XY(testDriver->getSpeed (static_cast<MotorId>(i)), 0);
+    for (int i = 0; i < MOTOR_COUNT; ++i) {
+        TEST_XY(driver->getMotorSpeed (static_cast<MotorId>(i)), 0);
     }
 
     // stop motor 0
@@ -119,8 +95,8 @@ TEST_CASE(TestAdafruitMotorDriver) {
         ->expect (0x28, (byte) 0x00)
         ->expect (0x29, (byte) 0x10);
 
-    PtrTo<Motor<TestMotorDriver<TestDevice> > > motor = new Motor<TestMotorDriver<TestDevice> > (testDriver, MotorId::MOTOR_0);
-    TEST_XY(testDriver->getSpeed (MotorId::MOTOR_0), 0);
+    PtrTo<Motor<AdafruitMotorDriver<TestDevice> > > motor = new Motor<AdafruitMotorDriver<TestDevice> > (driver, MotorId::MOTOR_0);
+    TEST_XY(driver->getMotorSpeed (MotorId::MOTOR_0), 0);
 
     // (runMotor) - motorId: MOTOR_1, speed: 1.0
     device
@@ -137,7 +113,7 @@ TEST_CASE(TestAdafruitMotorDriver) {
        ->expect (0x28, (byte) 0x00)
        ->expect (0x29, (byte) 0x00);
      motor->run (1.0);
-    TEST_XY(testDriver->getSpeed (MotorId::MOTOR_0), 1.0);
+    TEST_XY(driver->getMotorSpeed (MotorId::MOTOR_0), 1.0);
 
     // (runMotor) - motorId: MOTOR_1, speed: 1.5
     device
@@ -154,7 +130,7 @@ TEST_CASE(TestAdafruitMotorDriver) {
        ->expect (0x28, (byte) 0x00)
        ->expect (0x29, (byte) 0x00);
      motor->run (1.5);
-    TEST_XY(testDriver->getSpeed (MotorId::MOTOR_0), 1.0);
+    TEST_XY(driver->getMotorSpeed (MotorId::MOTOR_0), 1.0);
 
     TEST_ASSERTION(device->report ());
 }

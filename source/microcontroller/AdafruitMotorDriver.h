@@ -15,35 +15,34 @@
 *
 */
 
-struct MotorSpec {
-    uint modulator;
-    uint frontPin;
-    uint backPin;
-
-    MotorSpec () {}
-    void operator () (uint _modulator, uint _frontPin, uint _backPin) {
-        modulator = _modulator;
-        frontPin = _frontPin;
-        backPin = _backPin;
-    }
-};
-
-inline
-ostream& operator << (ostream& ostr, const MotorSpec& motorSpec) {
-    return ostr << "modulator [" << hex (motorSpec.modulator) << "], frontPin [" << hex (motorSpec.frontPin) << "], backPin [" << hex(motorSpec.backPin) << "]";
-}
-
-
 const int ADAFRUIT_MOTOR_DRIVER_DEFAULT_ADDRESS = 0x60;
 
 template<typename DeviceType>
 class AdafruitMotorDriver : public PCA9685<DeviceType> {
     protected:
+        // a helper class to capture the three pin values that we have to set through the PCA9685
+        // for any given motor id
+        struct MotorSpec {
+            uint modulator;
+            uint frontPin;
+            uint backPin;
+
+            MotorSpec () {}
+            void operator () (uint _modulator, uint _frontPin, uint _backPin) {
+                modulator = _modulator;
+                frontPin = _frontPin;
+                backPin = _backPin;
+            }
+        };
+
+        double speeds[MOTOR_COUNT];
+
         void stopAllMotors () {
-            for (int i = MotorId::MOTOR_0; i <= MotorId::MOTOR_3; ++i) {
+            for (int i = 0; i < MOTOR_COUNT; ++i) {
                 runMotor (static_cast<MotorId>(i), 0.0);
             }
         }
+
 
     public:
         AdafruitMotorDriver (uint address = ADAFRUIT_MOTOR_DRIVER_DEFAULT_ADDRESS, uint requestedPulseFrequency = PCA9685_DEFAULT_PULSE_FREQUENCY, uint busNumber = 0) : PCA9685<DeviceType> (address, requestedPulseFrequency, busNumber) {
@@ -66,9 +65,12 @@ class AdafruitMotorDriver : public PCA9685<DeviceType> {
                 case MotorId::MOTOR_1: motorSpec (13, 12, 11); break;
                 case MotorId::MOTOR_2: motorSpec ( 2, 3, 4); break;
                 case MotorId::MOTOR_3: motorSpec ( 7, 6, 5); break;
-                default:break;
             }
-            Log::trace () << "AdafruitMotorDriver: " << "run MOTOR_" << motorId << " (" <<motorSpec << ") @ " << speed << endl;
+            Log::trace () << "AdafruitMotorDriver: " << "run MOTOR_" << motorId << " ("
+                          << "modulator [" << hex (motorSpec.modulator) << "], "
+                          << "frontPin [" << hex (motorSpec.frontPin) << "], "
+                          << "backPin [" << hex(motorSpec.backPin) << "]" << ") @ "
+                          << speed << endl;
             if (speed < 0.0) {
                 PCA9685<DeviceType>::setChannelOff (motorSpec.frontPin);
                 PCA9685<DeviceType>::setChannelOn (motorSpec.backPin);
@@ -82,5 +84,12 @@ class AdafruitMotorDriver : public PCA9685<DeviceType> {
                 PCA9685<DeviceType>::setChannelOff (motorSpec.backPin);
                 PCA9685<DeviceType>::setChannelOff (motorSpec.modulator);
             }
+
+            // if we successfully got here, then capture the speed request
+            speeds[motorId] = speed;
+        }
+
+        double getMotorSpeed (MotorId motorId) {
+            return speeds[motorId];
         }
 };
