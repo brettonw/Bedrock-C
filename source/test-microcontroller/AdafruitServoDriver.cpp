@@ -31,7 +31,7 @@ TEST_CASE(TestAdafruitServoDriver) {
         ->expect (0x08, (byte) 0x33)
         ->expect (0x09, (byte) 0x01);
 
-    PtrTo<Servo<AdafruitServoDriver<TestDevice> > > servo1 = new Servo<AdafruitServoDriver<TestDevice> > (driver, ServoId::SERVO_01);
+    PtrTo<Servo<AdafruitServoDriver<TestDevice> > > servo0 = new Servo<AdafruitServoDriver<TestDevice> > (driver, ServoId::SERVO_00);
 
     // followed by a call to set channel pulse to set the stop position
     device
@@ -40,7 +40,7 @@ TEST_CASE(TestAdafruitServoDriver) {
         ->expect (0x0c, (byte) 0xcd)
         ->expect (0x0d, (byte) 0x00);
 
-    PtrTo<Servo<AdafruitServoDriver<TestDevice> > > servo2 = new Servo<AdafruitServoDriver<TestDevice> > (driver, ServoId::SERVO_02, 0.5, 1.5);
+    PtrTo<Servo<AdafruitServoDriver<TestDevice> > > servo1 = new Servo<AdafruitServoDriver<TestDevice> > (driver, ServoId::SERVO_01, 0.5, 1.5);
 
     // the PCA9685 class otherwise exposes no useful public interface to test
     TEST_ASSERTION(device->report ());
