@@ -40,10 +40,9 @@ template<typename DeviceType>
 class AdafruitMotorDriver : public PCA9685<DeviceType> {
     protected:
         void stopAllMotors () {
-            runMotor (MotorId::MOTOR_0, 0.0);
-            runMotor (MotorId::MOTOR_1, 0.0);
-            runMotor (MotorId::MOTOR_2, 0.0);
-            runMotor (MotorId::MOTOR_3, 0.0);
+            for (int i = MotorId::MOTOR_0; i <= MotorId::MOTOR_3; ++i) {
+                runMotor (static_cast<MotorId>(i), 0.0);
+            }
         }
 
     public:
@@ -63,11 +62,11 @@ class AdafruitMotorDriver : public PCA9685<DeviceType> {
         void runMotor (MotorId motorId, double speed) {
             MotorSpec motorSpec;
             switch (motorId) {
-                default:
                 case MotorId::MOTOR_0: motorSpec ( 8, 9, 10); break;
                 case MotorId::MOTOR_1: motorSpec (13, 12, 11); break;
                 case MotorId::MOTOR_2: motorSpec ( 2, 3, 4); break;
                 case MotorId::MOTOR_3: motorSpec ( 7, 6, 5); break;
+                default:break;
             }
             Log::trace () << "AdafruitMotorDriver: " << "run MOTOR_" << motorId << " (" <<motorSpec << ") @ " << speed << endl;
             if (speed < 0.0) {
