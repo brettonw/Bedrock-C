@@ -49,21 +49,3 @@ TEST_CASE(TestAdafruitServoDriver) {
 
     TEST_ASSERTION(device->report ());
 }
-
-TEST_CASE(LiveTestAdafruitServoDriver) {
-    //Log::Scope scope (Log::TRACE);
-    try {
-        PtrTo<AdafruitServoDriver<DeviceI2C> > driver = new AdafruitServoDriver<DeviceI2C> ();
-        PtrTo<Servo<AdafruitServoDriver<DeviceI2C> > > servo = new Servo<AdafruitServoDriver<DeviceI2C> > (driver, ServoId::SERVO_00);
-        Pause::milli (1000);
-        servo->setPosition (-0.5);
-        Pause::milli (1000);
-        servo->setPosition (0.5);
-        Pause::milli (1000);
-        servo->setPosition (-0.5);
-        Pause::milli (1000);
-        servo->setPosition (0.5);
-    } catch (...) {
-    }
-    TEST_X(true);
-}

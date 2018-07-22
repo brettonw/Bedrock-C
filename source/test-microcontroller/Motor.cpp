@@ -7,7 +7,7 @@
 TEST_CASE(TestAMotor) {
     //Log::Scope scope (Log::TRACE);
 
-    PtrToNullDevice device = new NullDevice (ADAFRUIT_MOTOR_DRIVER_DEFAULT_ADDRESS);
+    PtrToNullDevice device = new NullDevice ();
     PtrTo<AdafruitMotorDriver<NullDevice> > driver = new AdafruitMotorDriver<NullDevice> (device);
     for (int i = 0; i < MOTOR_COUNT; ++i) {
         TEST_XY(driver->getMotorSpeed (static_cast<MotorId>(i)), 0);
