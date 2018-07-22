@@ -29,8 +29,8 @@ class Servo : public ReferenceCountedObject {
     * @param position - in the range -1..1
     * @return
     */
-    Servo& setPosition (double newPosition) {
-        position = min (max (newPosition, -1.0), 1.0);
+    Servo& setPosition (double _position) {
+        position = min (max (_position, -1.0), 1.0);
         double pulseDurationMilliseconds = minPositionMs + ((maxPositionMs - minPositionMs) * (position + 1) * 0.5);
         Log::trace () << "Servo: " << servoId << "@" << pulseDurationMilliseconds << "ms" << endl;
         driver->setPulseDuration (servoId, pulseDurationMilliseconds);

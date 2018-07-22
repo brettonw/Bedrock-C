@@ -42,7 +42,6 @@ TEST_CASE(TestAdafruitServoDriver) {
 
     PtrTo<Servo<AdafruitServoDriver<TestDevice> > > servo1 = new Servo<AdafruitServoDriver<TestDevice> > (driver, ServoId::SERVO_01, 0.5, 1.5);
 
-    // the PCA9685 class otherwise exposes no useful public interface to test
     TEST_ASSERTION(device->report ());
 }
 

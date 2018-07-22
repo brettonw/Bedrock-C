@@ -156,7 +156,6 @@ TEST_CASE(TestAdafruitMotorDriver) {
      motor->run (1.5);
     TEST_XY(testDriver->getSpeed (MotorId::MOTOR_0), 1.0);
 
-    // the PCA9685 class otherwise exposes no useful public interface to test
     TEST_ASSERTION(device->report ());
 }
 
