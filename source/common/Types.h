@@ -28,12 +28,12 @@ typedef unsigned long ulong;
 // helpers
 //------------------------------------------------------------------------------
 
-// signum
-template <typename T> int sgn(T value) {
+template <typename T>
+int signum(T value) {
     return (T(0) < value) - (value < T(0));
 }
 
 inline
 double saturate (double value) {
-    return (fabs (value) > 0.5) ? sgn (value) : 0;
+    return (abs (value) > 0.5) ? double (signum (value)) : 0;
 }

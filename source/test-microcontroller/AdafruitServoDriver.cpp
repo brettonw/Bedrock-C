@@ -45,12 +45,13 @@ TEST_CASE(TestAdafruitServoDriver) {
         ->expect (0x0d, (byte) 0x00);
 
     PtrTo<Servo<AdafruitServoDriver<TestDevice> > > servo1 = new Servo<AdafruitServoDriver<TestDevice> > (driver, ServoId::SERVO_01, 0.5, 1.5);
+    TEST_XY(driver->getPulseDuration (ServoId::SERVO_01), 1.0);
 
     TEST_ASSERTION(device->report ());
 }
 
 TEST_CASE(LiveTestAdafruitServoDriver) {
-    Log::Scope scope (Log::TRACE);
+    //Log::Scope scope (Log::TRACE);
     try {
         PtrTo<AdafruitServoDriver<DeviceI2C> > driver = new AdafruitServoDriver<DeviceI2C> ();
         PtrTo<Servo<AdafruitServoDriver<DeviceI2C> > > servo = new Servo<AdafruitServoDriver<DeviceI2C> > (driver, ServoId::SERVO_00);

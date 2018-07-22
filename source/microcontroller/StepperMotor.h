@@ -16,36 +16,70 @@
 * these detents in degrees (typical: 1.8 degrees)
 */
 template<typename DriverType>
-class StepperMotor {
+class StepperMotor : public ReferenceCountedObject {
     private:
         // internal class for the values in a cycle
         struct CycleValue {
-            double motor1;
-            double motor2;
+            double motorA;
+            double motorB;
 
-            CycleValue (double motor1, double motor2, bool saturate) {
-                motor1 = saturate ? saturate (motor1) : motor1;
-                motor2 = saturate ? saturate (motor2) : motor2;
+            /* are these needed?
+            CycleValue () {}
+
+            CycleValue (const CycleValue& cycleValue) {
+                motorA = cycleValue.motorA;
+                motorB = cycleValue.motorB;
+            }
+            */
+
+            CycleValue (double _motorA, double _motorB, bool _saturate) {
+                motorA = _saturate ? saturate (_motorA) : _motorA;
+                motorB = _saturate ? saturate (_motorB) : _motorB;
             }
         };
 
-        enum {
-            MINIMUM_CYCLE_DELAY = 10
-        };
+        enum { MINIMUM_CYCLE_DELAY = 10 };
 
-        String stepperType;
-        double stepAngle;
-        int stepsPerRevolution;
-
-        PtrTo<DriverType> motorController;
-
+        PtrTo<DriverType> driver;
+        Text stepperType;
         MotorId motorIdA;
         MotorId motorIdB;
+        double stepAngle;
+        int stepsPerRevolution;
+        int current;
         vector<CycleValue> cycle;
 
-        int current;
-        int minimumCycleDelay;
+        StepperMotor (PtrTo<DriverType> _driver, Text _stepperType, MotorId _motorIdA, MotorId _motorIdB, double _stepAngle, int cycleLength, double startAngle, bool _saturate) :
+            driver (_driver), stepperType (_stepperType), motorIdA(_motorIdA), motorIdB(_motorIdB),
+            stepAngle (_stepAngle), stepsPerRevolution (int (round (360.0 / stepAngle))), current (0) {
 
+            // build the cycle table - basically it is a representation of a list of 2d coordinates
+            // taken to be positions on the unit circle, and traversed in angle order
+            double cycleAngle = (M_PI * 2.0) / cycleLength;
+            for (int i = 0; i < cycleLength; ++i) {
+                double angle = startAngle + (cycleAngle * i);
+                cycle.emplace_back (cos (angle), sin (angle), _saturate);
+            }
+    
+            Log::info () << "StepperMotor:  " << getDescription () << ", with " << stepsPerRevolution << " steps per revolution" << endl;
+    
+            // and now... energize the coils at the start of the cycle
+            step (0);
+        }
+    
+        void step (int direction) {
+            // add the direction for the step, and ensure the new index is in the valid region
+            current += direction;
+            int cycleSize = cycle.size ();
+            do { current = (current + cycleSize) % cycleSize; } while (current < 0);
+            Log::trace () << "StepperMotor: " << "current: " << current << ", A (" << cycle[current].motorA << "), B (" << cycle[current].motorB << ")" << endl;
+            driver
+                ->runMotor (motorIdA, cycle[current].motorA)
+                ->runMotor (motorIdB, cycle[current].motorB);
+        }
+    
+
+    public:
     /**
     * the most basic stepper traverses the unit circle, starting at 0 degrees and proceeds at 90
     * degree intervals in 4 cycle. i find this method to be unreliable, often missing steps, so I
@@ -53,116 +87,80 @@ class StepperMotor {
     * steps, but starts at a 45 degree offset and saturates the control values. this way, both
     * coils are always fully activated, making the cycle robust.
     * @param stepAngle - the degrees per step from the motor specification
-    * @param motorController  - the motor motorController, two motors are used to drive the stepper
+    * @param driver  - the motor driver, two motors are used to drive the stepper
     * @param motorIdA - the first of the two motors, or "coils"
     * @param motorIdB - the second of the two motors, or "coils"
     * @return
     */
-    static StepperMotor getFullStepper (MotorController motorController, MotorId motorIdA, MotorId motorIdB, double stepAngle) {
-        return new StepperMotor ("full", motorController, motorIdA, motorIdB, stepAngle, 4, Math.PI / 4.0, true);
+    static PtrTo<StepperMotor<DriverType> > getFullStepper (PtrTo<DriverType> driver, MotorId motorIdA, MotorId motorIdB, double stepAngle) {
+        return new StepperMotor (driver, "full", motorIdA, motorIdB, stepAngle, 4, M_PI / 4.0, true);
     }
 
     /**
-     * a half-stepper starts at 0 degrees, proceeds at 45 degree intervals, and saturates the
-     * control values. the result is more precise than a full step motorController, but the torque varies
-     * because the motor alternates between a single coil and both coils being activated.
-     * @param stepAngle - the degrees per step from the motor specification
-     * @param motorController  - the motor motorController, two motors are used to drive the stepper
-     * @param motorIdA - the first of the two motors, or "coils"
-     * @param motorIdB - the second of the two motors, or "coils"
-     * @return
-     */
-    public static StepperMotor getHalfStepper (MotorController motorController, MotorId motorIdA, MotorId motorIdB, double stepAngle) {
-        return new StepperMotor ("half", motorController, motorIdA, motorIdB, stepAngle, 8, 0, true);
+    * a half-stepper starts at 0 degrees, proceeds at 45 degree intervals, and saturates the
+    * control values. the result is more precise than a full step driver, but the torque varies
+    * because the motor alternates between a single coil and both coils being activated.
+    * @param stepAngle - the degrees per step from the motor specification
+    * @param driver  - the motor driver, two motors are used to drive the stepper
+    * @param motorIdA - the first of the two motors, or "coils"
+    * @param motorIdB - the second of the two motors, or "coils"
+    * @return
+    */
+    static PtrTo<StepperMotor<DriverType> > getHalfStepper (PtrTo<DriverType> driver, MotorId motorIdA, MotorId motorIdB, double stepAngle) {
+        return new StepperMotor (driver, "half", motorIdA, motorIdB, stepAngle, 8, 0, true);
     }
 
     /**
-     * a micro-stepper starts at 0 degrees and proceeds around the unit circle at sample points
-     * according to the stepCount.
-     *
-     * @param stepAngle   - the degrees per step from the motor specification
-     * @param motorController  - the motor motorController, two motors are used to drive the stepper
-     * @param motorIdA    - the first of the two motors, or "coils"
-     * @param motorIdB    - the second of the two motors, or "coils"
-     * @param cycleLength - the number of internal steps per cycle. at higher counts, this can drive
-     *                    the motor very precisely and smoothly, but the tradeoff is speed. useful
-     *                    numbers start at 5 and go up.
-     * @return
-     */
-    public static StepperMotor getMicroStepper (MotorController motorController, MotorId motorIdA, MotorId motorIdB, double stepAngle, int cycleLength) {
-        return new StepperMotor ("micro", motorController, motorIdA, motorIdB, stepAngle, cycleLength, 0, false);
+    * a micro-stepper starts at 0 degrees and proceeds around the unit circle at sample points
+    * according to the stepCount.
+    *
+    * @param stepAngle   - the degrees per step from the motor specification
+    * @param driver  - the motor driver, two motors are used to drive the stepper
+    * @param motorIdA    - the first of the two motors, or "coils"
+    * @param motorIdB    - the second of the two motors, or "coils"
+    * @param cycleLength - the number of internal steps per cycle. at higher counts, this can drive
+    *                    the motor very precisely and smoothly, but the tradeoff is speed. useful
+    *                    numbers start at 5 and go up.
+    * @return
+    */
+    static PtrTo<StepperMotor<DriverType> > getMicroStepper (PtrTo<DriverType> driver, MotorId motorIdA, MotorId motorIdB, double stepAngle, int cycleLength) {
+        return new StepperMotor (driver, "micro", motorIdA, motorIdB, stepAngle, cycleLength, 0, false);
     }
 
     /**
-     * a micro-stepper starts at 0 degrees and proceeds around the unit circle at sample points
-     * according to the desired angular resolution.
-     *
-     * @param stepAngle   - the degrees per step from the motor specification
-     * @param motorController  - the motor motorController, two motors are used to drive the stepper
-     * @param motorIdA    - the first of the two motors, or "coils"
-     * @param motorIdB    - the second of the two motors, or "coils"
-     * @param resolution - the desired accuracy of the motor.
-     * @return
-     */
-    public static StepperMotor getMicroStepper (MotorController motorController, MotorId motorIdA, MotorId motorIdB, double resolution, double stepAngle) {
+    * a micro-stepper starts at 0 degrees and proceeds around the unit circle at sample points
+    * according to the desired angular resolution.
+    *
+    * @param stepAngle   - the degrees per step from the motor specification
+    * @param driver  - the motor driver, two motors are used to drive the stepper
+    * @param motorIdA    - the first of the two motors, or "coils"
+    * @param motorIdB    - the second of the two motors, or "coils"
+    * @param resolution - the desired accuracy of the motor.
+    * @return
+    */
+    static PtrTo<StepperMotor<DriverType> > getMicroStepper (PtrTo<DriverType> driver, MotorId motorIdA, MotorId motorIdB, double resolution, double stepAngle) {
         // compute the closest approximation to the desired resolution
-        int cycleLength = (int) Math.round ((stepAngle * 4.0) / resolution);
-        return new StepperMotor ("micro", motorController, motorIdA, motorIdB, stepAngle, cycleLength, 0, false);
-    }
-
-    private StepperMotor (String stepperType, MotorController motorController, MotorId motorIdA, MotorId motorIdB, double stepAngle, int cycleLength, double startAngle, boolean saturate) {
-        this.stepperType = stepperType;
-        stepsPerRevolution = (int) Math.round (360.0 / stepAngle);
-        this.motorController = motorController;
-        this.motorIdA = motorIdA;
-        this.motorIdB = motorIdB;
-        this.stepAngle = stepAngle;
-        current = 0;
-        minimumCycleDelay = MINIMUM_CYCLE_DELAY;
-
-        // build the cycle table - basically it is a representation of a list of 2d coordinates
-        // taken to be positions on the unit circle, and traversed in angle order
-        cycle = new CycleValue[cycleLength];
-        double cycleAngle = (Math.PI * 2.0) / cycleLength;
-        for (int i = 0; i < cycleLength; ++i) {
-            double angle = startAngle + (cycleAngle * i);
-            cycle[i] = new CycleValue (Math.cos (angle), Math.sin (angle), saturate);
-        }
-
-        log.info (getDescription () + ", with " + stepsPerRevolution + " steps per revolution");
-
-        // and now... energize the coils at the start of the cycle
-        step (0);
-    }
-
-    private void step (int direction) {
-        // add the direction for the step, and ensure the new index is in the valid region
-        current += direction;
-        do { current = (current + cycle.length) % cycle.length; } while (current < 0);
-        log.trace ("current: " + current);
-
-        log.trace ("A (" + String.format ("%.04f", cycle[current].motor1) + "), B (" + String.format ("%.04f", cycle[current].motor2) + ")");
-        motorController.runMotor (motorIdA, cycle[current].motor1);
-        motorController.runMotor (motorIdB, cycle[current].motor2);
+        int cycleLength = int (round ((stepAngle * 4.0) / resolution));
+        return new StepperMotor (driver, "micro", motorIdA, motorIdB, stepAngle, cycleLength, 0, false);
     }
 
     /**
-     *
-     * @param revolutions
-     * @return
-     */
-    public StepperMotor turn (double revolutions) {
+    *
+    * @param revolutions
+    * @return
+    */
+    StepperMotor* turn (double revolutions) {
         // do it as fast as possible
         return turn (revolutions, 0);
     }
 
     /**
-     *
-     * @param revolutions
-     * @param time
-     * @return
-     */
-    public StepperMotor turn (double revolutions, double time) {
+    *
+    * @param revolutions
+    * @param time
+    * @return
+    */
+    StepperMotor* turn (double revolutions, double time) {
         // XXX TODO this should be (optionally) threaded in the future
 
         // stepsPerRevolution is an artifical number based on the number of discrete positions of
@@ -170,8 +168,8 @@ class StepperMotor {
         // different cycle length. the number of full cycles through the stepsPerRevolution is given
         // by: stepsPerRevolution / 4. one is led to believe that all steppers have a
         // stepsPerRevolution that is evenly divisible by 4.
-        int stepCount = (int) Math.round (Math.abs (revolutions) * (((cycle.length * stepsPerRevolution) / 4) + 1));
-        int direction = (int) Math.signum (revolutions);
+        int stepCount = int (round (abs (revolutions) * (((cycle.size () * stepsPerRevolution) / 4.0) + 1.0)));
+        int direction = int (signum (revolutions));
         double halfway = stepCount / 2.0;
 
         // account for the delay time of going through this loop - assume 3us per iteration for
@@ -191,59 +189,49 @@ class StepperMotor {
 
         // time is in seconds, scale it up to micro-seconds, scale by the rangeTimeScale, then
         // subtract the expected overhead. finally, divide by the number of steps we will take to
-        // get the delay per step, rounded to the nearest integrl microsecond.
-        double microsecondsDelay = (rangeTimeScale * 1_000_000.0 * time) - overheadTime;
-        int microsecondsDelayPerStep = Math.max ((int) Math.round (microsecondsDelay / stepCount), 0);
-        log.debug (stepCount + " steps (direction: " + direction + ", delay: " + microsecondsDelayPerStep + ")");
+        // get the delay per step, rounded to the nearest integral microsecond.
+        double microsecondsDelay = (rangeTimeScale * 1000000.0 * time) - overheadTime;
+        int microsecondsDelayPerStep = max (int (round (microsecondsDelay / stepCount)), 0);
+        Log::debug () << "StepperMotor: " << stepCount << " steps (direction: " << direction << ", delay: " << microsecondsDelayPerStep << ")" << endl;
 
         // loop over all the steps...
-        long timeSum = 0;
+        //long timeSum = 0;
         for (int i = 0; i < stepCount; ++i) {
-            long startTime = System.nanoTime ();
+            //long startTime = System.nanoTime ();
             step (direction);
-            double proportion = (1.0 - speedVaryingRange) + (speedVaryingRange * Math.abs ((halfway - i) / halfway));
-            int delay = (int) Math.round (microsecondsDelayPerStep * proportion);
+            double proportion = (1.0 - speedVaryingRange) + (speedVaryingRange * abs ((halfway - i) / halfway));
+            int delay = int (round (microsecondsDelayPerStep * proportion));
             //log.debug ("delay: " + delay + "us");
-            timeSum += System.nanoTime () - startTime;
-            Utility.waitShort (delay);
+            //timeSum += System.nanoTime () - startTime;
+            Pause::micro (delay);
         }
-        log.debug ("Average overhead: " + (timeSum / stepCount) + "ns");
+        //Log::debug() << "StepperMotor: " << "Average overhead: " << (timeSum / stepCount) << "ns" << endl;
         return this;
     }
 
     /**
-     *
-     * @return
-     */
-    public StepperMotor stop () {
-        motorController.runMotor (motorIdA, 0);
-        motorController.runMotor (motorIdB, 0);
+    *
+    * @return
+    */
+    StepperMotor* stop () {
+        driver->runMotor (motorIdA, 0);
+        driver->runMotor (motorIdB, 0);
         return this;
     }
 
     /**
-     *
-     * @param minimumCycleDelay
-     * @return
-     */
-    public StepperMotor setMinimumCycleDelay (int minimumCycleDelay) {
-        this.minimumCycleDelay = minimumCycleDelay;
-        return this;
+    *
+    * @return
+    */
+    double getResolution () {
+        return (stepAngle * 4.0) / cycle.size ();
     }
 
     /**
-     *
-     * @return
-     */
-    public double getResolution () {
-        return (stepAngle * 4.0) / cycle.length;
+    *
+    * @return
+    */
+    Text getDescription () {
+        return stepperType << "-step, cycle-length (per 4 steps): " << cycle.size () << ", resolution: " << getResolution () << " degrees/step";
     }
-
-    /**
-     *
-     * @return
-     */
-    public String getDescription () {
-        return stepperType + "-step, cycle-length (per 4 steps): " + cycle.length + ", resolution: " + String.format ("%.03f", getResolution ()) + " degrees/step";
-    }
-}
+};

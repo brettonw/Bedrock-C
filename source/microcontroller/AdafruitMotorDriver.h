@@ -12,7 +12,6 @@
 * this "hat" is a combination 9685 16 Channel Pulse Width Modulation Controller (PWM) for LEDs, and
 * 2 6612 H-bridge motor controllers driven off the modulated outputs. the "hat" supports four
 * motors (a stepper motor is driven as if it were two motors)
-*
 */
 
 const int ADAFRUIT_MOTOR_DRIVER_DEFAULT_ADDRESS = 0x60;
@@ -58,7 +57,7 @@ class AdafruitMotorDriver : public PCA9685<DeviceType> {
         * @param motorId - which motor to run
         * @param speed - the speed to run it at in the range 0..1, 0 is stopped.
         */
-        void runMotor (MotorId motorId, double speed) {
+        AdafruitMotorDriver<DeviceType>* runMotor (MotorId motorId, double speed) {
             MotorSpec motorSpec;
             switch (motorId) {
                 case MotorId::MOTOR_0: motorSpec ( 8, 9, 10); break;
@@ -87,6 +86,8 @@ class AdafruitMotorDriver : public PCA9685<DeviceType> {
 
             // if we successfully got here, then capture the speed request
             speeds[motorId] = speed;
+
+            return this;
         }
 
         double getMotorSpeed (MotorId motorId) {

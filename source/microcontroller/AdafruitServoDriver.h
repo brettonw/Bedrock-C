@@ -11,7 +11,6 @@
 * this breakout board is a straightforward implementation of a 9685 16-Channel Pulse Width
 * Modulation (PWM) Controller for LEDs with 12-bits of resolution. We use it to provide a bunch of
 * PWM outputs for servos.
-*
 */
 
 const int ADAFRUIT_SERVO_DRIVER_DEFAULT_ADDRESS = 0x40;
@@ -43,9 +42,13 @@ class AdafruitServoDriver : public PCA9685<DeviceType> {
         * @param milliseconds - the width of the puls in milliseconds
         * @return this, for chaining
         */
-        void setPulseDuration (ServoId servoId, double milliseconds) {
+        AdafruitServoDriver<DeviceType>*  setPulseDuration (ServoId servoId, double milliseconds) {
             PCA9685<DeviceType>::setChannelPulseMs (servoId, milliseconds);
+
+            // if we successfully got here, then capture the pulse duration request
             pulseDurations[servoId] = milliseconds;
+
+            return this;
         }
 
         double getPulseDuration (ServoId servoId) {
