@@ -14,15 +14,15 @@
 *
 */
 
-const int ADAFRUIT_SERVER_DRIVER_DEFAULT_ADDRESS = 0x40;
-const int ADAFRUIT_SERVER_DRIVER_DEFAULT_PULSE_FREQUENCY = 50;
+const int ADAFRUIT_SERVO_DRIVER_DEFAULT_ADDRESS = 0x40;
+const int ADAFRUIT_SERVO_DRIVER_DEFAULT_PULSE_FREQUENCY = 50;
 
 template<typename DeviceType>
 class AdafruitServoDriver : public PCA9685<DeviceType> {
     public:
-        AdafruitServoDriver (uint address = ADAFRUIT_SERVER_DRIVER_DEFAULT_ADDRESS, uint requestedPulseFrequency = ADAFRUIT_SERVER_DRIVER_DEFAULT_PULSE_FREQUENCY, uint busNumber = 0) : PCA9685<DeviceType> (address, requestedPulseFrequency, busNumber) {}
+        AdafruitServoDriver (uint address = ADAFRUIT_SERVO_DRIVER_DEFAULT_ADDRESS, uint requestedPulseFrequency = ADAFRUIT_SERVO_DRIVER_DEFAULT_PULSE_FREQUENCY, uint busNumber = 0) : PCA9685<DeviceType> (address, requestedPulseFrequency, busNumber) {}
 
-        AdafruitServoDriver (PtrTo<DeviceType> _device, uint requestedPulseFrequency = ADAFRUIT_SERVER_DRIVER_DEFAULT_PULSE_FREQUENCY) : PCA9685<DeviceType> (_device, requestedPulseFrequency) {}
+        AdafruitServoDriver (PtrTo<DeviceType> _device, uint requestedPulseFrequency = ADAFRUIT_SERVO_DRIVER_DEFAULT_PULSE_FREQUENCY) : PCA9685<DeviceType> (_device, requestedPulseFrequency) {}
 
         /**
         * set the pulse width to control a servo. the exact meaning of this is up to the servo itself.

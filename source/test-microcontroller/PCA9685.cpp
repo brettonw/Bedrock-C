@@ -14,10 +14,10 @@ TEST_CASE(TestPCA9685) {
         ->expect (0x00, 0x01)
         ->expect (0x00, 0x00)
         // which calls setPulseFrequency
-        ->expect (0x0000, (byte) 0x10)
-        ->expect (0x00fe, (byte) 0x05)
-        ->expect (0x0000, (byte) 0x00)
-        ->expect (0x0000, (byte) 0x80);
+        ->expect (0x00, (byte) 0x10)
+        ->expect (0xfe, (byte) 0x05)
+        ->expect (0x00, (byte) 0x00)
+        ->expect (0x00, (byte) 0x80);
 
     PtrTo<PCA9685<TestDevice> > pca9685 = new PCA9685<TestDevice> (device);
 

@@ -26,9 +26,9 @@ class UnitTest {
 #define     TEST_XY(x, y) TEST_XYOP(x, y, ==)
 #define     TEST_X(x) TEST_XYOP(x, true, ==)
 #define		TEST_CASE(name)										                                            \
-			class XXX##name : public UnitTest {  				                                            \
+			class TEST_CASE_##name : public UnitTest {  				                                    \
 				public:											                                            \
-					XXX##name () {			                                                                \
+					TEST_CASE_##name () {			                                                        \
 						try {									                                            \
 						    Log::info () << "TESTING: (" __FILE__ << ") " << #name << endl;                 \
 							test ();				                                                        \
@@ -44,7 +44,7 @@ class UnitTest {
 						}										                                            \
 					}											                                            \
 					void test ();								                                            \
-        			static XXX##name test##name;			                                                \
+        			static TEST_CASE_##name test##name;			                                            \
 			};													                                            \
-        	XXX##name XXX##name::test##name;			                                                    \
-			inline void XXX##name::test ()
+        	TEST_CASE_##name TEST_CASE_##name::test##name;			                                        \
+			inline void TEST_CASE_##name::test ()

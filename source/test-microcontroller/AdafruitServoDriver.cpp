@@ -6,7 +6,7 @@
 
 TEST_CASE(TestAdafruitServoDriver) {
     //Log::Scope scope (Log::TRACE);
-    PtrToTestDevice device = new TestDevice (ADAFRUIT_SERVER_DRIVER_DEFAULT_ADDRESS);
+    PtrToTestDevice device = new TestDevice (ADAFRUIT_SERVO_DRIVER_DEFAULT_ADDRESS);
     device
         // PCA9685 constructor
         ->expect (0xfa, 0x00)
