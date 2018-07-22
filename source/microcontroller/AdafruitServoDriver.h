@@ -9,7 +9,7 @@
 * https://learn.adafruit.com/16-channel-pwm-servo-driver/overview
 *
 * this breakout board is a straightforward implementation of a 9685 16-Channel Pulse Width
-* Modulation Controller (PWM) for LEDs with 12-bits of resolution. We use it to provide a bunch of
+* Modulation (PWM) Controller for LEDs with 12-bits of resolution. We use it to provide a bunch of
 * PWM outputs for servos.
 *
 */
@@ -19,10 +19,23 @@ const int ADAFRUIT_SERVO_DRIVER_DEFAULT_PULSE_FREQUENCY = 50;
 
 template<typename DeviceType>
 class AdafruitServoDriver : public PCA9685<DeviceType> {
-    public:
-        AdafruitServoDriver (uint address = ADAFRUIT_SERVO_DRIVER_DEFAULT_ADDRESS, uint requestedPulseFrequency = ADAFRUIT_SERVO_DRIVER_DEFAULT_PULSE_FREQUENCY, uint busNumber = 0) : PCA9685<DeviceType> (address, requestedPulseFrequency, busNumber) {}
+    private:
+        double pulseDurations[SERVO_COUNT];
 
-        AdafruitServoDriver (PtrTo<DeviceType> _device, uint requestedPulseFrequency = ADAFRUIT_SERVO_DRIVER_DEFAULT_PULSE_FREQUENCY) : PCA9685<DeviceType> (_device, requestedPulseFrequency) {}
+        void init () {
+            for (int i = 0; i < SERVO_COUNT; ++i) {
+                pulseDurations[i] = 0;
+            }
+        }
+
+    public:
+        AdafruitServoDriver (uint address = ADAFRUIT_SERVO_DRIVER_DEFAULT_ADDRESS, uint requestedPulseFrequency = ADAFRUIT_SERVO_DRIVER_DEFAULT_PULSE_FREQUENCY, uint busNumber = 0) : PCA9685<DeviceType> (address, requestedPulseFrequency, busNumber) {
+            init ();
+        }
+
+        AdafruitServoDriver (PtrTo<DeviceType> _device, uint requestedPulseFrequency = ADAFRUIT_SERVO_DRIVER_DEFAULT_PULSE_FREQUENCY) : PCA9685<DeviceType> (_device, requestedPulseFrequency) {
+            init ();
+        }
 
         /**
         * set the pulse width to control a servo. the exact meaning of this is up to the servo itself.
@@ -32,5 +45,10 @@ class AdafruitServoDriver : public PCA9685<DeviceType> {
         */
         void setPulseDuration (ServoId servoId, double milliseconds) {
             PCA9685<DeviceType>::setChannelPulseMs (servoId, milliseconds);
+            pulseDurations[servoId] = milliseconds;
+        }
+
+        double getPulseDuration (ServoId servoId) {
+            return pulseDurations[servoId];
         }
 };

@@ -47,18 +47,18 @@ class StepperMotor {
         int minimumCycleDelay;
 
     /**
-     * the most basic stepper traverses the unit circle, starting at 0 degrees and proceeds at 90
-     * degree intervals in 4 cycle. i find this method to be unreliable, often missing steps, so I
-     * don't suggest using it. the next most basic case also proceeds at 90 degrees intervals in 4
-     * steps, but starts at a 45 degree offset and saturates the control values. this way, both
-     * coils are always fully activated, making the cycle robust.
-     * @param stepAngle - the degrees per step from the motor specification
-     * @param motorController  - the motor motorController, two motors are used to drive the stepper
-     * @param motorIdA - the first of the two motors, or "coils"
-     * @param motorIdB - the second of the two motors, or "coils"
-     * @return
-     */
-    public static StepperMotor getFullStepper (MotorController motorController, MotorId motorIdA, MotorId motorIdB, double stepAngle) {
+    * the most basic stepper traverses the unit circle, starting at 0 degrees and proceeds at 90
+    * degree intervals in 4 cycle. i find this method to be unreliable, often missing steps, so I
+    * don't suggest using it. the next most basic case also proceeds at 90 degrees intervals in 4
+    * steps, but starts at a 45 degree offset and saturates the control values. this way, both
+    * coils are always fully activated, making the cycle robust.
+    * @param stepAngle - the degrees per step from the motor specification
+    * @param motorController  - the motor motorController, two motors are used to drive the stepper
+    * @param motorIdA - the first of the two motors, or "coils"
+    * @param motorIdB - the second of the two motors, or "coils"
+    * @return
+    */
+    static StepperMotor getFullStepper (MotorController motorController, MotorId motorIdA, MotorId motorIdB, double stepAngle) {
         return new StepperMotor ("full", motorController, motorIdA, motorIdB, stepAngle, 4, Math.PI / 4.0, true);
     }
 

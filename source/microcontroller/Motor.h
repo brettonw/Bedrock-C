@@ -5,8 +5,8 @@
 
 /**
 * Motor
-* brushed motors have relatively simple controllers that use two wires, and switch the power on and
-* off really fast using a modulated width pulse.
+* brushed motors have relatively simple controllers that use two wires, and control the speed by
+* switching the power on and off really fast using a modulated width pulse, a.k.a. PWM.
 */
 template<typename DriverType>
 class Motor : public ReferenceCountedObject {
