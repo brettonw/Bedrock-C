@@ -96,6 +96,7 @@ MAKE_PTR_TO(DeviceI2C) {
         }
 
         DeviceI2C* write (byte address, byte value) {
+            Log::trace () << "DeviceI2C: " << "write (@" << hex (address) << ", " << hex (value) << ")" << endl;
             store (address);
             store (value);
             return this;
@@ -103,9 +104,11 @@ MAKE_PTR_TO(DeviceI2C) {
 
         bool flush () {
             if (::write (device, buffer, length) == int (length)) {
+                Log::trace () << "DeviceI2C: flushed " << length << " bytes" << endl;
                 length = 0;
                 return true;
             }
+            Log::debug () << "DeviceI2C: flush (FAILED)" << endl;
             return false;
         }
 
@@ -114,6 +117,7 @@ MAKE_PTR_TO(DeviceI2C) {
             // have the nice side effect of finishing any pending writes.
             store (address);
             if ((flush ()) && (::read (device, &buffer[0], 1) == 1)) {
+                Log::trace () << "DeviceI2C: " << "read (@" << hex (address) << ", got -> " << hex (buffer[0]) << ")" << endl;
                 return buffer[0];
             }
             throw runtime_error ("DeviceI2C: read failed");
