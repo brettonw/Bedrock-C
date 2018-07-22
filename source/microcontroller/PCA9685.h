@@ -1,6 +1,7 @@
 #pragma once
 
 #include        "Log.h"
+#include        "Pause.h"
 #include        "Text.h"
 
 // values used for setting the pulse frequency, the default is 1ms per cycle
@@ -56,13 +57,13 @@ class PCA9685 : public ReferenceCountedObject {
             device->write (MODE2, OUTDRV)->write (MODE1, ALLCALL)->flush ();
 
             // the chip takes 500 microseconds to recover from changes to the control registers
-            waitShort (500);
+            Pause::micro (500);
 
             // wake up
             device->write (MODE1, device->read (MODE1) & ~SLEEP)->flush ();
 
             // the chip takes 500 microseconds to recover from turning off the SLEEP bit
-            waitShort (500);
+            Pause::micro (500);
 
             Log::info () << "PCA9685: " << "Ready to talk" << endl;
 
@@ -132,14 +133,6 @@ class PCA9685 : public ReferenceCountedObject {
             setChannelPulse (channel, width);
         }
 
-        void waitShort (uint microseconds) {
-            // a busy-wait... thread yield resolution is probably measured in milliseconds (3 orders
-            // of magnitude lower resolution than we want), so sleeping for short times isn't going
-            // to be expedient
-            auto startTime = chrono::high_resolution_clock::now();
-            while (chrono::duration_cast<chrono::microseconds>(chrono::high_resolution_clock::now() - startTime).count() < microseconds) {}
-        }
-
     public:
 
         PCA9685 (uint address, uint requestedPulseFrequency = PCA9685_DEFAULT_PULSE_FREQUENCY, uint busNumber = 0) : device (new DeviceType (address, busNumber)){
@@ -177,7 +170,7 @@ class PCA9685 : public ReferenceCountedObject {
             device->write (MODE1, newMode)->write (PRE_SCALE, preScale)->write (MODE1, oldMode)->flush ();
 
             // SLEEP bit must be 0 for at least 500us before 1 is written into the RESTART bit.
-            waitShort (500);
+            Pause::micro (500);
 
             // restart
             device->write (MODE1, oldMode | RESTART)->flush ();

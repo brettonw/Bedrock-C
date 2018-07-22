@@ -50,7 +50,14 @@ TEST_CASE(LiveTestAdafruitServoDriver) {
     try {
         PtrTo<AdafruitServoDriver<DeviceI2C> > driver = new AdafruitServoDriver<DeviceI2C> ();
         PtrTo<Servo<AdafruitServoDriver<DeviceI2C> > > servo8 = new Servo<AdafruitServoDriver<DeviceI2C> > (driver, ServoId::SERVO_08);
+        Pause::milli (1000);
         servo8->setPosition (-0.5);
+        Pause::milli (1000);
+        servo8->setPosition (0.5);
+        Pause::milli (1000);
+        servo8->setPosition (-0.5);
+        Pause::milli (1000);
+        servo8->setPosition (0.5);
     } catch (...) {
     }
     TEST_X(true);
