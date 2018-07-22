@@ -1,7 +1,7 @@
 #pragma once
 
 #include        "Log.h"
-#include        "ServoId.h"
+#include        "MotorId.h"
 
 /**
 * Motor
@@ -45,7 +45,7 @@ class Motor : public ReferenceCountedObject {
      */
     Motor* stop () {
         speed = 0;
-        Log::trace () << "Motor: " << "MOTOR_" << motorId << " @ STOP" << endl;
+        //Log::trace () << "Motor: " << "MOTOR_" << motorId << " @ STOP" << endl;
         driver->runMotor (motorId, speed);
         return this;
     }

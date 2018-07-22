@@ -161,6 +161,18 @@ TEST_CASE(TestAdafruitMotorDriver) {
 
 TEST_CASE(LiveTestAdafruitMotorDriver) {
     try {
+        PtrTo<AdafruitMotorDriver<DeviceI2C> > driver = new AdafruitMotorDriver<DeviceI2C> ();
+        PtrTo<Motor<AdafruitMotorDriver<DeviceI2C> > > motor = new Motor<AdafruitMotorDriver<DeviceI2C> > (driver, MotorId::MOTOR_0);
+        Pause::milli (1000);
+        motor->run (-0.5);
+        Pause::milli (1000);
+        motor->run (0.5);
+        Pause::milli (1000);
+        motor->run (-0.5);
+        Pause::milli (1000);
+        motor->run (0.5);
+        Pause::milli (1000);
+        motor->stop ();
     } catch (...) {
     }
     TEST_X(true);

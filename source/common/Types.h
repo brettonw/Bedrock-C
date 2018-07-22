@@ -32,3 +32,8 @@ typedef unsigned long ulong;
 template <typename T> int sgn(T value) {
     return (T(0) < value) - (value < T(0));
 }
+
+inline
+double saturate (double value) {
+    return (fabs (value) > 0.5) ? sgn (value) : 0;
+}
