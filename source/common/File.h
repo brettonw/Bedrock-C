@@ -3,7 +3,7 @@
 #include        <sys/types.h>
 #include        <sys/stat.h>
 #include        <dirent.h>
-#include        "Text.h"
+#include        "RuntimeError.h"
 
 MAKE_PTR_TO(File) {
     private:
@@ -40,7 +40,7 @@ MAKE_PTR_TO(File) {
                 }
                 return files;
             }
-            throw runtime_error (Text ("File (") << path << ") is not a directory");
+            throw RuntimeError (Text ("File (") << path << ") is not a directory");
         }
 
         Text getPath () {

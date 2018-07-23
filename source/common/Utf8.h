@@ -1,7 +1,7 @@
 #pragma once
 
 #include        "Log.h"
-#include        "Text.h"
+#include        "RuntimeError.h"
 
 // this UTF-8 handling is modeled after the javascript at: https://github.com/mathiasbynens/utf8.js
 // for the UTF-8 specification, see: https://encoding.spec.whatwg.org/#utf-8
@@ -27,7 +27,7 @@ class Utf8Decoder {
             }
 
             // error case - hit the end of the buffer in the middle of reading a code point
-            throw runtime_error("UTF-8: unexpected END_OF_BUFFER");
+            throw RuntimeError("UTF-8: unexpected END_OF_BUFFER");
         }
 
     public:
@@ -53,7 +53,7 @@ class Utf8Decoder {
                         uint byte2 = readContinuationByte();
                         codePoint = ((byte1 & 0x1f) << 6) | byte2;
                         if (codePoint < 0x80) {
-                            throw runtime_error("UTF-8: invalid continuation");
+                            throw RuntimeError("UTF-8: invalid continuation");
                         }
                     } else if ((byte1 & 0xf0) == 0xe0) {
                         // 3-byte sequence (0xe0 - 0xef)
@@ -62,10 +62,10 @@ class Utf8Decoder {
                         codePoint = ((byte1 & 0x0f) << 12) | (byte2 << 6) | byte3;
                         if (codePoint >= 0x0800) {
                             if (codePoint >= 0xd800 and codePoint <= 0xdfff) {
-                                throw runtime_error(Text () << "UTF-8: lone surrogate U+" << hex (codePoint) << " is not a scalar value");
+                                throw RuntimeError(Text () << "UTF-8: lone surrogate U+" << hex (codePoint) << " is not a scalar value");
                             }
                         } else {
-                            throw runtime_error("UTF-8: invalid continuation");
+                            throw RuntimeError("UTF-8: invalid continuation");
                         }
                     } else if ((byte1 & 0xf8) == 0xf0) {
                         // 4-byte sequence (0xf0 - 0xf4)
@@ -74,16 +74,16 @@ class Utf8Decoder {
                         uint byte4 = readContinuationByte();
                         codePoint = ((byte1 & 0x07) << 18) | (byte2 << 12) | (byte3 << 6) | byte4;
                         if ((codePoint < 0x010000) or (codePoint > 0x10ffff)) {
-                            throw runtime_error("UTF8: invalid continuation");
+                            throw RuntimeError("UTF8: invalid continuation");
                         }
                     } else {
-                        throw runtime_error("UTF-8: invalid read");
+                        throw RuntimeError("UTF-8: invalid read");
                     }
                 }
-            } catch (runtime_error& err) {
+            } catch (RuntimeError& runtimeError) {
                 // set the error condition, and reset so that we will consistently hit that error
                 // condition if we keep trying to advance
-                Log::error () << err.what () << endl;
+                Log::error () << runtimeError.getMessage () << endl;
                 codePoint = ERROR;
                 next = position;
             }

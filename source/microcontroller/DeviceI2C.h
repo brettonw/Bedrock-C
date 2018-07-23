@@ -39,7 +39,7 @@ MAKE_PTR_TO(DeviceI2C) {
             if ((length + 1) <= DEVICE_I2C_BUFFER_SIZE) {
                 buffer[length++] = b;
             } else {
-                throw runtime_error ("DeviceI2C: out of buffer for writes");
+                throw RuntimeError ("DeviceI2C: out of buffer for writes");
             }
         }
 
@@ -51,7 +51,7 @@ MAKE_PTR_TO(DeviceI2C) {
             if (((device = open (busPath, O_RDWR)) >= 0) && (ioctl(device, I2C_TENBIT, 0) >= 0) && (ioctl(device, I2C_SLAVE, address) >= 0)) {
                 Log::info () << "Opened device " << busPath << " at address " << hex (address) << " (" << hex (device) << ")" << endl;
             } else {
-                throw runtime_error (Text ("DeviceI2C: can't open device address (") << hex (address) << ") at " << busPath);
+                throw RuntimeError (Text ("DeviceI2C: can't open device address (") << hex (address) << ") at " << busPath);
             }
         }
 
@@ -68,7 +68,7 @@ MAKE_PTR_TO(DeviceI2C) {
             if (busNumber < availableBusPaths.size ()) {
                 init (address, availableBusPaths[busNumber]);
             } else {
-                throw runtime_error (Text ("DeviceI2C: no I2C bus at ") << hex (busNumber));
+                throw RuntimeError (Text ("DeviceI2C: no I2C bus at ") << hex (busNumber));
             }
         }
 
@@ -120,7 +120,7 @@ MAKE_PTR_TO(DeviceI2C) {
                 Log::trace () << "DeviceI2C: " << "read (@" << hex (address) << ", got -> " << hex (buffer[0]) << ")" << endl;
                 return buffer[0];
             }
-            throw runtime_error ("DeviceI2C: read failed");
+            throw RuntimeError ("DeviceI2C: read failed");
         }
 
 };

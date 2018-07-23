@@ -6,8 +6,8 @@ TEST_CASE(TestDeviceI2C) {
         DeviceI2C   device (0x40);
         TEST_ASSERTION(true);
     }
-    catch (runtime_error& exception) {
-        cerr << exception.what () << endl;
+    catch (RuntimeError& runtimeError) {
+        cerr << runtimeError.getMessage () << endl;
         TEST_X(true);
     }
 }

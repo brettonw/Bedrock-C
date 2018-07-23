@@ -1,6 +1,6 @@
 #include    "Types.h"
 
 int main (int argc, char** argv) {
-	cerr << "Main" << endl;
+	cerr << "Words" << endl;
 	return EXIT_SUCCESS;
 }

@@ -1,7 +1,7 @@
 #pragma once
 
 #include        "Log.h"
-#include        "Text.h"
+#include        "RuntimeError.h"
 
 class Expectation {
     public:
@@ -37,12 +37,12 @@ MAKE_PTR_TO(TestDevice) {
                     Log::debug () << "TestDevice: " << "RECEIVED (" << hex (address) << ", " << hex(b) << ") -> EXPECTED" << endl;
                 } else {
                     Log::error () << "TestDevice: " << "RECEIVED (" << hex (address) << ", " << hex(b) << ")" << endl;
-                    throw runtime_error (Text ("TestDevice: ") << "UNSATISFIED (" << hex (currentExpectation.address) << ", " << hex(currentExpectation.b) << ")");
+                    throw RuntimeError (Text ("TestDevice: ") << "UNSATISFIED (" << hex (currentExpectation.address) << ", " << hex(currentExpectation.b) << ")");
                 }
                 expectations.erase (expectations.begin());
             } else {
                 Log::error () << "TestDevice: " << "RECEIVED (" << hex (address) << ", " << hex(b) << ") -> UNEXPECTED" << endl;
-                throw runtime_error (Text ("TestDevice: ") << "UNEXPECTED");
+                throw RuntimeError (Text ("TestDevice: ") << "UNEXPECTED");
             }
 
             return this;
@@ -66,7 +66,7 @@ MAKE_PTR_TO(TestDevice) {
             if (count > 0) {
                 Expectation& currentExpectation = expectations.front ();
                 Log::error () << "TestDevice: " << "UNMET (" << hex (currentExpectation.address) << ", " << hex (currentExpectation.b) << ")" << endl;
-                throw runtime_error (Text ("TestDevice: ") << "UNMET" << ((count > 1) ? "s" : "") << " (" << count << ")");
+                throw RuntimeError (Text ("TestDevice: ") << "UNMET" << ((count > 1) ? "s" : "") << " (" << count << ")");
             }
             return true;
         }
