@@ -14,10 +14,6 @@ MAKE_PTR_TO(NullDevice) {
             return this;
         }
 
-        bool flush () {
-            return true;
-        }
-
         byte read (byte address) {
             return address;
         }
