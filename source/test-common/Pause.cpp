@@ -13,6 +13,7 @@ void testMicro (int microseconds) {
 
 TEST_CASE(TestMicroPause) {
     Log::Scope  scope (Log::DEBUG);
+    testMicro (10);
     testMicro (20);
     testMicro (50);
     testMicro (100);
