@@ -48,10 +48,6 @@ MAKE_PTR_TO(TestDevice) {
             return this;
         }
 
-        bool flush () {
-            return true;
-        }
-
         byte read (byte address) {
             return address;
         }

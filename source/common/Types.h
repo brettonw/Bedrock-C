@@ -24,6 +24,18 @@ typedef unsigned short ushort;
 typedef unsigned int uint;
 typedef unsigned long ulong;
 
+// my echos of the posix types
+typedef char            s08;
+typedef short           s16;
+typedef int             s32;
+typedef long            s64;
+typedef unsigned char   u08;
+typedef unsigned short  u16;
+typedef unsigned int    u32;
+typedef unsigned long   u64;
+typedef float           f32;
+typedef double          f64;
+
 //------------------------------------------------------------------------------
 // helpers
 //------------------------------------------------------------------------------
