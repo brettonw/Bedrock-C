@@ -14,7 +14,7 @@ void testMicro (int microseconds) {
     average /= sampleCount;
     Log::debug () << "testMicro: " << "requested " << microseconds << " us pause, waited for " << average << " us on average over " << sampleCount << " pauses" << endl;
     // ensure it is within 5% error
-    TEST_XYF(average, microseconds, max (microseconds / 20, 1));
+    TEST_XYF(average, microseconds, 4);
 }
 
 TEST_CASE(TestMicroPause) {
@@ -41,7 +41,7 @@ void testMilli (int milliseconds) {
     average /= sampleCount;
     Log::debug () << "testMicro: " << "requested " << milliseconds << " ms pause, waited for " << average << " ms on average over " << sampleCount << " pauses" << endl;
     // ensure it is within 3ms or 5%, whichever is greater
-    TEST_XYF(average, milliseconds, max (milliseconds / 20, 3));
+    TEST_XYF(average, milliseconds, 4);
 }
 
 TEST_CASE(TestMilliPause) {
