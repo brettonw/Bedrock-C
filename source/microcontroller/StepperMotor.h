@@ -149,7 +149,7 @@ class StepperMotor : public ReferenceCountedObject {
     * @param revolutions
     * @return
     */
-    StepperMotor* turn (double revolutions) {
+    StepperMotor<DriverType>* turn (double revolutions) {
         // do it as fast as possible
         return turn (revolutions, 0);
     }
@@ -160,7 +160,7 @@ class StepperMotor : public ReferenceCountedObject {
     * @param time
     * @return
     */
-    StepperMotor* turn (double revolutions, double time) {
+    StepperMotor<DriverType>* turn (double revolutions, double time) {
         // XXX TODO this should be (optionally) threaded in the future
 
         // stepsPerRevolution is an artifical number based on the number of discrete positions of
@@ -213,7 +213,7 @@ class StepperMotor : public ReferenceCountedObject {
     *
     * @return
     */
-    StepperMotor* stop () {
+    StepperMotor<DriverType>* stop () {
         driver->runMotor (motorIdA, 0);
         driver->runMotor (motorIdB, 0);
         return this;
