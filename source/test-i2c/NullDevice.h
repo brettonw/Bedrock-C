@@ -10,12 +10,32 @@ MAKE_PTR_TO(NullDevice) {
 
         ~NullDevice () {}
 
-        NullDevice* write (byte address, byte b) {
+        NullDevice*  begin () {
             return this;
         }
 
-        byte read (byte address) {
-            return address;
+        // reads are always immediate, after a flush
+        byte read (byte at) {
+            return at;
         }
+
+        NullDevice* read (byte at, byte* out) {
+            *out = read (at);
+            return this;
+        }
+
+        // writes are buffered
+        NullDevice* write (byte at, byte value) {
+            return this;
+        }
+
+        // finish any writes
+        NullDevice* flush () {
+            return this;
+        }
+
+        void end () {
+        }
+
 };
 

@@ -4,7 +4,7 @@
 #include        "DeviceI2C.h"
 #include        "StepperMotor.h"
 
-TEST_CASE(TestStepperrMotor) {
+TEST_CASE(TestStepperMotor) {
     //Log::Scope scope (Log::TRACE);
 
     PtrToNullDevice device = new NullDevice ();

@@ -51,13 +51,20 @@ class PCA9685 : public ReferenceCountedObject {
         void init (uint requestedPulseFrequency) {
             // init, everything off
             setChannelPulse (CHANNEL_ALL, 0, 0);
-            device->write (MODE2, OUTDRV)->write (MODE1, ALLCALL);
+            device
+                ->begin ()
+                ->write (MODE2, OUTDRV)
+                ->write (MODE1, ALLCALL)
+                ->end ();
 
             // the chip takes 500 microseconds to recover from changes to the control registers
             Pause::micro (500);
 
             // wake up
-            device->write (MODE1, device->read (MODE1) & ~SLEEP);
+            device
+                ->begin ()
+                ->write (MODE1, device->read (MODE1) & ~SLEEP)
+                ->end ();
 
             // the chip takes 500 microseconds to recover from turning off the SLEEP bit
             Pause::micro (500);
@@ -66,12 +73,7 @@ class PCA9685 : public ReferenceCountedObject {
 
             // setup
             setPulseFrequency (requestedPulseFrequency);
-        }
 
-        void writeShort (byte startAddress, ushort value) {
-            device
-                ->write (startAddress, value & 0x00FF)
-                ->write (startAddress + 1, (value >> 8) & 0x00FF);
         }
 
         // set a channel's pulse parameters - this applies per tick of the clock (set by the
@@ -86,8 +88,13 @@ class PCA9685 : public ReferenceCountedObject {
             // (https://cdn-shop.adafruit.com/datasheets/PCA9685.pdf - Section 7.3.3)
             Log::debug () << "PCA9685: " << "setChannelPulse - CHANNEL(" << hex(channel) << ") ON(" << hex (on) << ") OFF(" << hex (off) << ")" << endl;
             auto channelOffset = channel * CHANNEL_OFFSET_MULTIPLIER;
-            writeShort (CHANNEL_BASE_ON + channelOffset, on);
-            writeShort (CHANNEL_BASE_OFF + channelOffset, off);
+            device
+                ->begin ()
+                ->write (CHANNEL_BASE_ON + channelOffset, on & 0x00ff)
+                ->write (CHANNEL_BASE_ON + channelOffset + 1, (on >> 8) & 0x00ff)
+                ->write (CHANNEL_BASE_OFF + channelOffset, off & 0x00ff)
+                ->write (CHANNEL_BASE_OFF + channelOffset + 1, (off >> 8) & 0x00ff)
+                ->end ();
         }
 
         // set a channel's pulse parameters - this applies per tick of the clock (set by the
@@ -150,15 +157,22 @@ class PCA9685 : public ReferenceCountedObject {
             Log::info () << ", " << "actual @" << pulseFrequency << "Hz" << endl;
 
             // PRE_SCALE can only be set when the SLEEP bit of the MODE1 register is set to logic 1.
-            byte oldMode = device->read (MODE1);
-            byte newMode = (oldMode & 0x7F) | SLEEP;
-            device->write (MODE1, newMode)->write (PRE_SCALE, preScale)->write (MODE1, oldMode);
+            byte oldMode;
+            device
+                ->begin ()
+                ->read (MODE1, &oldMode)
+                ->write (MODE1, (oldMode & 0x7F) | SLEEP)
+                ->write (PRE_SCALE, preScale)
+                ->write (MODE1, oldMode)
+                ->flush ();
 
             // SLEEP bit must be 0 for at least 500us before 1 is written into the RESTART bit.
             Pause::micro (500);
 
             // restart
-            device->write (MODE1, oldMode | RESTART);
+            device
+                ->write (MODE1, oldMode | RESTART)
+                ->end ();
         }
 };
 

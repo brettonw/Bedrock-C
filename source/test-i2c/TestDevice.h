@@ -30,26 +30,43 @@ MAKE_PTR_TO(TestDevice) {
         ~TestDevice () {
         }
 
-        TestDevice* write (byte address, byte b) {
+        TestDevice*  begin () {
+            return this;
+        }
+
+        byte read (byte at) {
+            return at;
+        }
+
+        TestDevice* read (byte at, byte* out) {
+            *out = read (at);
+            return this;
+        }
+
+        TestDevice* write (byte at, byte b) {
             if (expectations.size () > 0) {
                 Expectation& currentExpectation = expectations.front ();
-                if (currentExpectation.satisfy (address, b)) {
-                    Log::debug () << "TestDevice: " << "RECEIVED (" << hex (address) << ", " << hex(b) << ") -> EXPECTED" << endl;
+                if (currentExpectation.satisfy (at, b)) {
+                    Log::debug () << "TestDevice: " << "RECEIVED (" << hex (at) << ", " << hex(b) << ") -> EXPECTED" << endl;
                 } else {
-                    Log::error () << "TestDevice: " << "RECEIVED (" << hex (address) << ", " << hex(b) << ")" << endl;
+                    Log::error () << "TestDevice: " << "RECEIVED (" << hex (at) << ", " << hex(b) << ")" << endl;
                     throw RuntimeError (Text ("TestDevice: ") << "UNSATISFIED (" << hex (currentExpectation.address) << ", " << hex(currentExpectation.b) << ")");
                 }
                 expectations.erase (expectations.begin());
             } else {
-                Log::error () << "TestDevice: " << "RECEIVED (" << hex (address) << ", " << hex(b) << ") -> UNEXPECTED" << endl;
+                Log::error () << "TestDevice: " << "RECEIVED (" << hex (at) << ", " << hex(b) << ") -> UNEXPECTED" << endl;
                 throw RuntimeError (Text ("TestDevice: ") << "UNEXPECTED");
             }
 
             return this;
         }
 
-        byte read (byte address) {
-            return address;
+        // finish any writes
+        TestDevice* flush () {
+            return this;
+        }
+
+        void end () {
         }
 
         TestDevice* expect (byte address, byte b) {
@@ -66,5 +83,6 @@ MAKE_PTR_TO(TestDevice) {
             }
             return true;
         }
+
 };
 

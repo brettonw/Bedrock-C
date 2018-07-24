@@ -15,14 +15,15 @@
 #include    <algorithm>
 #include    <chrono>
 #include    <thread>
+#include    <pthread.h>
 
 using namespace std;
 
 // a few basic types
-typedef unsigned char byte;
-typedef unsigned short ushort;
-typedef unsigned int uint;
-typedef unsigned long ulong;
+typedef unsigned char   byte;
+typedef unsigned short  ushort;
+typedef unsigned int    uint;
+typedef unsigned long   ulong;
 
 // my echos of the posix types
 typedef char            s08;
