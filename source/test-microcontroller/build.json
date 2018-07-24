@@ -1,5 +1,0 @@
-{ 
-    "values": {
-        "dependencies": ["test", "microcontroller"]
-    }
-}

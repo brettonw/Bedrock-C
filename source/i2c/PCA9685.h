@@ -8,13 +8,10 @@
 const double PCA9685_CLOCK_FREQUENCY = 25000000.0; // PCA9685 has a 25 MHz internal oscillator
 const uint PCA9685_DEFAULT_PULSE_FREQUENCY = 1000;
 
-/**
-* This is a software interface for the PCA9685. It is a 16-channel Pulse Width Modulator (PWM)
-* Controller (designed to drive LEDs) with 12 bits of resolution, and controlled over the I2C bus.
-* The 9685 is used in the Adafruit motor hat and the servo driver board
-* <p>
-* https://cdn-shop.adafruit.com/datasheets/PCA9685.pdf
-*/
+// This is a software interface for the PCA9685. It is a 16-channel Pulse Width Modulator (PWM)
+// Controller (designed to drive LEDs) with 12 bits of resolution, and controlled over the I2C bus.
+// The 9685 is used in the Adafruit motor hat and the servo driver board
+// https://cdn-shop.adafruit.com/datasheets/PCA9685.pdf
 template<typename DeviceType>
 class PCA9685 : public ReferenceCountedObject {
     protected:
@@ -77,34 +74,26 @@ class PCA9685 : public ReferenceCountedObject {
                 ->write (startAddress + 1, (value >> 8) & 0x00FF);
         }
 
-        /**
-        * set a channel's pulse parameters - this applies per tick of the clock (set by the
-        * pulse frequency).
-        *
-        * @param channel - which channel of the PCM will be updated
-        * @param on      - when to turn the pulse on within the tick, out of 4096, control
-        *                bit 4 (value 4096) will force the output on for the whole cycle
-        * @param off     - when to turn the pulse off within the tick, out of 4096, off
-        *                should be greater than on, but control bit 4 (value 4096) will force
-        *                the output off for the whole
-        * @throws IOException
-        */
+        // set a channel's pulse parameters - this applies per tick of the clock (set by the
+        // pulse frequency).
+        // @param channel - which channel of the PCM will be updated
+        // @param on      - when to turn the pulse on within the tick, out of 4096, control
+        //                  bit 4 (value 4096) will force the output on for the whole cycle
+        // @param off     - when to turn the pulse off within the tick, out of 4096, off
+        //                  should be greater than on, but control bit 4 (value 4096) will force
+        //                  the output off for the whole
         void setChannelPulse (byte channel, ushort on, ushort off) {
             // (https://cdn-shop.adafruit.com/datasheets/PCA9685.pdf - Section 7.3.3)
-            Log::debug () << "PCA9685: " << "setChannelPulse - ON(" << hex (on) << ") OFF(" << hex (off) << ")" << endl;
+            Log::debug () << "PCA9685: " << "setChannelPulse - CHANNEL(" << hex(channel) << ") ON(" << hex (on) << ") OFF(" << hex (off) << ")" << endl;
             auto channelOffset = channel * CHANNEL_OFFSET_MULTIPLIER;
             writeShort (CHANNEL_BASE_ON + channelOffset, on);
             writeShort (CHANNEL_BASE_OFF + channelOffset, off);
         }
 
-        /**
-        * set a channel's pulse parameters - this applies per tick of the clock (set by the
-        * pulse frequency).
-        *
-        * @param channel - which channel of the PCM will be updated
-        * @param width   - proportion of the pulse to be on, 0..4_095 (for 0..1)
-        * @throws IOException
-        */
+        // set a channel's pulse parameters - this applies per tick of the clock (set by the
+        // pulse frequency).
+        // @param channel - which channel of the PCM will be updated
+        // @param width   - proportion of the pulse to be on, 0..4_095 (for 0..1)
         void setChannelPulse (byte channel, uint width) {
             switch (width) {
                 case 0:
@@ -142,14 +131,11 @@ class PCA9685 : public ReferenceCountedObject {
             init (requestedPulseFrequency);
         }
 
-        /**
-         * Set the frequency of pulses across the whole controller - each channel has 12-bits
-         * of resolution (4,096 division) for setting the pulse duration within the cycle
-         *
-         * @param requestedPulseFrequency requested number of pulses per second for the whole board,
-         *                                value in Hertz (Hz). The code tries to accommodate the request
-         *                                as best as it can, to be *at least* as frequent as requested.
-         */
+         // Set the frequency of pulses across the whole controller - each channel has 12-bits
+         // of resolution (4,096 division) for setting the pulse duration within the cycle
+         // @param requestedPulseFrequency requested number of pulses per second for the whole board,
+         //                                value in Hertz (Hz). The code tries to accommodate the request
+         //                                as best as it can, to be *at least* as frequent as requested.
         void setPulseFrequency (uint requestedPulseFrequency, double clockFrequency = PCA9685_CLOCK_FREQUENCY) {
             // (https://cdn-shop.adafruit.com/datasheets/PCA9685.pdf - Section 7.3.5)
             const double CHANNEL_RESOLUTION = 4096.0;   // 12-bit precision
