@@ -73,7 +73,7 @@ MAKE_PTR_TO(DeviceI2C) {
 
         byte read (byte address) {
             int result = SMBus::readRegister(smbus, address);
-            if (result > 0) {
+            if (result >= 0) {
                 Log::trace () << "DeviceI2C: " << "read (@" << hex (address) << ", got -> " << hex (result) << ")" << endl;
                 return byte (0x00ff & result);
             } else {
