@@ -67,7 +67,9 @@ MAKE_PTR_TO(DeviceI2C) {
 
         DeviceI2C* write (byte address, byte value) {
             Log::trace () << "DeviceI2C: " << "write (@" << hex (address) << ", " << hex (value) << ")" << endl;
-            SMBus::writeRegister(smbus, address, value);
+            if (SMBus::writeRegister(smbus, address, value) != 0) {
+                throw RuntimeError ("DeviceI2C: write failed");
+            };
             return this;
         }
 
