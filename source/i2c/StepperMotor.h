@@ -2,19 +2,17 @@
 
 #include        "Motor.h"
 
-/**
-* Stepper Motor
-*
-* stepper motors work by driving multiple coils in a sequence. this class drives bi-polar stepper
-* motors, or motors that have two coils. The coils are activated using a pair of waveforms that are
-* out of phase with each other. another way to think about the coil activations is to think of the
-* power levels as the points on a unit circle, and the steps are progressing in cycles around the
-* unit circle.
-*
-* this type of stepper is made using teeth internally that cause some number of detent positions
-* for the motor. most motors will specify the "step angle", which is the angle associated with
-* these detents in degrees (typical: 1.8 degrees)
-*/
+// Stepper Motor
+//
+// stepper motors work by driving multiple coils in a sequence. this class drives bi-polar stepper
+// motors, or motors that have two coils. The coils are activated using a pair of waveforms that are
+// out of phase with each other. another way to think about the coil activations is to think of the
+// power levels as the points on a unit circle, and the steps are progressing in cycles around the
+// unit circle.
+//
+// this type of stepper is made using teeth internally that cause some number of detent positions
+// for the motor. most motors will specify the "step angle", which is the angle associated with
+// these detents in degrees (typical: 1.8 degrees)
 template<typename DriverType>
 class StepperMotor : public ReferenceCountedObject {
     private:
@@ -22,15 +20,6 @@ class StepperMotor : public ReferenceCountedObject {
         struct CycleValue {
             double motorA;
             double motorB;
-
-            /* are these needed?
-            CycleValue () {}
-
-            CycleValue (const CycleValue& cycleValue) {
-                motorA = cycleValue.motorA;
-                motorB = cycleValue.motorB;
-            }
-            */
 
             CycleValue (double _motorA, double _motorB, bool _saturate) {
                 motorA = _saturate ? saturate (_motorA) : _motorA;
@@ -80,86 +69,62 @@ class StepperMotor : public ReferenceCountedObject {
     
 
     public:
-    /**
-    * the most basic stepper traverses the unit circle, starting at 0 degrees and proceeds at 90
-    * degree intervals in 4 cycle. i find this method to be unreliable, often missing steps, so I
-    * don't suggest using it. the next most basic case also proceeds at 90 degrees intervals in 4
-    * steps, but starts at a 45 degree offset and saturates the control values. this way, both
-    * coils are always fully activated, making the cycle robust.
-    * @param stepAngle - the degrees per step from the motor specification
-    * @param driver  - the motor driver, two motors are used to drive the stepper
-    * @param motorIdA - the first of the two motors, or "coils"
-    * @param motorIdB - the second of the two motors, or "coils"
-    * @return
-    */
+    // the most basic stepper traverses the unit circle, starting at 0 degrees and proceeds at 90
+    // degree intervals in 4 cycle. i find this method to be unreliable, often missing steps, so I
+    // don't suggest using it. the next most basic case also proceeds at 90 degrees intervals in 4
+    // steps, but starts at a 45 degree offset and saturates the control values. this way, both
+    // coils are always fully activated, making the cycle robust.
+    // @param stepAngle - the degrees per step from the motor specification
+    // @param driver    - the motor driver, two motors are used to drive the stepper
+    // @param motorIdA  - the first of the two motors, or "coils"
+    // @param motorIdB  - the second of the two motors, or "coils"
     static PtrTo<StepperMotor<DriverType> > getFullStepper (PtrTo<DriverType> driver, MotorId motorIdA, MotorId motorIdB, double stepAngle) {
         return new StepperMotor (driver, "full", motorIdA, motorIdB, stepAngle, 4, M_PI / 4.0, true);
     }
 
-    /**
-    * a half-stepper starts at 0 degrees, proceeds at 45 degree intervals, and saturates the
-    * control values. the result is more precise than a full step driver, but the torque varies
-    * because the motor alternates between a single coil and both coils being activated.
-    * @param stepAngle - the degrees per step from the motor specification
-    * @param driver  - the motor driver, two motors are used to drive the stepper
-    * @param motorIdA - the first of the two motors, or "coils"
-    * @param motorIdB - the second of the two motors, or "coils"
-    * @return
-    */
+    // a half-stepper starts at 0 degrees, proceeds at 45 degree intervals, and saturates the
+    // control values. the result is more precise than a full step driver, but the torque varies
+    // because the motor alternates between a single coil and both coils being activated.
+    // @param stepAngle - the degrees per step from the motor specification
+    // @param driver    - the motor driver, two motors are used to drive the stepper
+    // @param motorIdA  - the first of the two motors, or "coils"
+    // @param motorIdB  - the second of the two motors, or "coils"
     static PtrTo<StepperMotor<DriverType> > getHalfStepper (PtrTo<DriverType> driver, MotorId motorIdA, MotorId motorIdB, double stepAngle) {
         return new StepperMotor (driver, "half", motorIdA, motorIdB, stepAngle, 8, 0, true);
     }
 
-    /**
-    * a micro-stepper starts at 0 degrees and proceeds around the unit circle at sample points
-    * according to the stepCount.
-    *
-    * @param stepAngle   - the degrees per step from the motor specification
-    * @param driver  - the motor driver, two motors are used to drive the stepper
-    * @param motorIdA    - the first of the two motors, or "coils"
-    * @param motorIdB    - the second of the two motors, or "coils"
-    * @param cycleLength - the number of internal steps per cycle. at higher counts, this can drive
-    *                    the motor very precisely and smoothly, but the tradeoff is speed. useful
-    *                    numbers start at 5 and go up.
-    * @return
-    */
+    // a micro-stepper starts at 0 degrees and proceeds around the unit circle at sample points
+    // according to the stepCount.
+    //
+    // @param stepAngle   - the degrees per step from the motor specification
+    // @param driver      - the motor driver, two motors are used to drive the stepper
+    // @param motorIdA    - the first of the two motors, or "coils"
+    // @param motorIdB    - the second of the two motors, or "coils"
+    // @param cycleLength - the number of internal steps per cycle. at higher counts, this can drive
+    //                      the motor very precisely and smoothly, but the tradeoff is speed. useful
+    //                      numbers start at 5 and go up.
     static PtrTo<StepperMotor<DriverType> > getMicroStepper (PtrTo<DriverType> driver, MotorId motorIdA, MotorId motorIdB, double stepAngle, int cycleLength) {
         return new StepperMotor (driver, "micro", motorIdA, motorIdB, stepAngle, cycleLength, 0, false);
     }
 
-    /**
-    * a micro-stepper starts at 0 degrees and proceeds around the unit circle at sample points
-    * according to the desired angular resolution.
-    *
-    * @param stepAngle   - the degrees per step from the motor specification
-    * @param driver  - the motor driver, two motors are used to drive the stepper
-    * @param motorIdA    - the first of the two motors, or "coils"
-    * @param motorIdB    - the second of the two motors, or "coils"
-    * @param resolution - the desired accuracy of the motor.
-    * @return
-    */
+    // a micro-stepper starts at 0 degrees and proceeds around the unit circle at sample points
+    // according to the desired angular resolution.
+    // @param stepAngle   - the degrees per step from the motor specification
+    // @param driver      - the motor driver, two motors are used to drive the stepper
+    // @param motorIdA    - the first of the two motors, or "coils"
+    // @param motorIdB    - the second of the two motors, or "coils"
+    // @param resolution  - the desired accuracy of the motor.
     static PtrTo<StepperMotor<DriverType> > getMicroStepper (PtrTo<DriverType> driver, MotorId motorIdA, MotorId motorIdB, double resolution, double stepAngle) {
         // compute the closest approximation to the desired resolution
         int cycleLength = int (round ((stepAngle * 4.0) / resolution));
         return new StepperMotor (driver, "micro", motorIdA, motorIdB, stepAngle, cycleLength, 0, false);
     }
 
-    /**
-    *
-    * @param revolutions
-    * @return
-    */
     StepperMotor<DriverType>* turn (double revolutions) {
         // do it as fast as possible
         return turn (revolutions, 0);
     }
 
-    /**
-    *
-    * @param revolutions
-    * @param time
-    * @return
-    */
     StepperMotor<DriverType>* turn (double revolutions, double time) {
         // XXX TODO this should be (optionally) threaded in the future
 
@@ -209,28 +174,16 @@ class StepperMotor : public ReferenceCountedObject {
         return this;
     }
 
-    /**
-    *
-    * @return
-    */
     StepperMotor<DriverType>* stop () {
         driver->runMotor (motorIdA, 0);
         driver->runMotor (motorIdB, 0);
         return this;
     }
 
-    /**
-    *
-    * @return
-    */
     double getResolution () {
         return (stepAngle * 4.0) / cycle.size ();
     }
 
-    /**
-    *
-    * @return
-    */
     Text getDescription () {
         return stepperType << "-step, cycle-length (per 4 steps): " << cycle.size () << ", resolution: " << getResolution () << " degrees/step";
     }

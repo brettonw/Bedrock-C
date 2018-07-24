@@ -28,7 +28,7 @@ TEST_CASE(TestAMotor) {
 TEST_CASE(LiveTestMotor) {
     try {
         PtrTo<AdafruitMotorDriver<DeviceI2C> > driver = new AdafruitMotorDriver<DeviceI2C> ();
-        PtrTo<Motor<AdafruitMotorDriver<DeviceI2C> > > motor = new Motor<AdafruitMotorDriver<DeviceI2C> > (driver, MotorId::MOTOR_0);
+        PtrTo<Motor<AdafruitMotorDriver<DeviceI2C> > > motor = new Motor<AdafruitMotorDriver<DeviceI2C> > (driver, MotorId::MOTOR_2);
         Pause::milli (1000);
         motor->run (-0.5);
         Pause::milli (1000);

@@ -3,16 +3,14 @@
 #include        "PCA9685.h"
 #include        "MotorId.h"
 
-/**
-* DC and Stepper Motor "Hat" Driver
-*
-* https://learn.adafruit.com/adafruit-dc-and-stepper-motor-hat-for-raspberry-pi/overview
-* https://cdn-shop.adafruit.com/datasheets/TB6612FNG_datasheet_en_20121101.pdf
-*
-* this "hat" is a combination 9685 16 Channel Pulse Width Modulation Controller (PWM) for LEDs, and
-* 2 6612 H-bridge motor controllers driven off the modulated outputs. the "hat" supports four
-* motors (a stepper motor is driven as if it were two motors)
-*/
+// DC and Stepper Motor "Hat" Driver
+//
+// https://learn.adafruit.com/adafruit-dc-and-stepper-motor-hat-for-raspberry-pi/overview
+// https://cdn-shop.adafruit.com/datasheets/TB6612FNG_datasheet_en_20121101.pdf
+//
+// this "hat" is a combination 9685 16 Channel Pulse Width Modulation Controller (PWM) for LEDs, and
+// 2 6612 H-bridge motor controllers driven off the modulated outputs. the "hat" supports four
+// motors (a stepper motor is driven as if it were two motors)
 
 const int ADAFRUIT_MOTOR_DRIVER_DEFAULT_ADDRESS = 0x60;
 
