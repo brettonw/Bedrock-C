@@ -18,6 +18,8 @@ TEST_CASE(TestDeviceI2C) {
         device.write (0x43, 0x20);
         x = device.read (0x43);
         TEST_XY(x, 0x20);
+
+        Pause::milli (1000);
     }
     catch (RuntimeError& runtimeError) {
         cerr << runtimeError.getMessage () << endl;
