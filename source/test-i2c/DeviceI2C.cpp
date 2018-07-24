@@ -1,10 +1,22 @@
 #include "Test.h"
 #include "DeviceI2C.h"
+#include "AdafruitMotorDriver.h"
 
 TEST_CASE(TestDeviceI2C) {
     try {
-        DeviceI2C   device (0x40);
-        TEST_ASSERTION(true);
+        DeviceI2C   device (ADAFRUIT_MOTOR_DRIVER_DEFAULT_ADDRESS);
+
+        device.write (0x43, 0x10);
+        byte x = device.read (0x43);
+        TEST_XY(x, 0x10);
+
+        device.write (0x43, 0x11);
+        x = device.read (0x43);
+        TEST_XY(x, 0x11);
+
+        device.write (0x43, 0x20);
+        x = device.read (0x43);
+        TEST_XY(x, 0x20);
     }
     catch (RuntimeError& runtimeError) {
         cerr << runtimeError.getMessage () << endl;
