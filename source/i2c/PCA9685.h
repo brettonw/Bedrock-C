@@ -19,7 +19,7 @@ class PCA9685 : public ReferenceCountedObject {
             // registers (https://cdn-shop.adafruit.com/datasheets/PCA9685.pdf - table 4)
             MODE1 = 0x00,
             MODE2 = 0x01,
-            PRE_SCALE = 0xFE,
+            PRE_SCALE = 0xfe,
 
             // these registers are used as the base address of the full set of supported channels,
             // technically they are LED0_ON_L, LED0_ON_H, LED0_OFF_L, and LED0_OFF_H
@@ -28,10 +28,10 @@ class PCA9685 : public ReferenceCountedObject {
 
             // values used for offsetting the registers by channel, "ALL" is a special channel
             CHANNEL_OFFSET_MULTIPLIER = 4,
-            CHANNEL_ALL = 0x3D,
+            CHANNEL_ALL = 0x3d,
 
             // the pulse width modulators (PWM) have 12-bit resolution
-            CHANNEL_HIGH = 0x0FFF, // 4095
+            CHANNEL_HIGH = 0x0fff, // 4095
             CHANNEL_FORCE = 0x1000, // 4096
 
             // bits (https://cdn-shop.adafruit.com/datasheets/PCA9685.pdf - mode 1, table 5)
@@ -157,11 +157,11 @@ class PCA9685 : public ReferenceCountedObject {
             Log::info () << ", " << "actual @" << pulseFrequency << "Hz" << endl;
 
             // PRE_SCALE can only be set when the SLEEP bit of the MODE1 register is set to logic 1.
-            byte oldMode;
+            byte oldMode = 0x00;
             device
                 ->begin ()
                 ->read (MODE1, &oldMode)
-                ->write (MODE1, (oldMode & 0x7F) | SLEEP)
+                ->write (MODE1, (oldMode & 0x7f) | SLEEP)
                 ->write (PRE_SCALE, preScale)
                 ->write (MODE1, oldMode)
                 ->flush ();

@@ -5,14 +5,14 @@
 
 class Expectation {
     public:
-        byte address;
+        byte at;
         byte b;
 
-        Expectation (byte _address, byte _b) : address (_address), b (_b) {
+        Expectation (byte _at, byte _b) : at (_at), b (_b) {
         }
 
-        bool satisfy (int _address, byte _b) {
-            return (_address == address) && (_b == b);
+        bool satisfy (int _at, byte _b) {
+            return (_at == at) && (_b == b);
         }
 };
 
@@ -50,7 +50,7 @@ MAKE_PTR_TO(TestDevice) {
                     Log::debug () << "TestDevice: " << "RECEIVED (" << hex (at) << ", " << hex(b) << ") -> EXPECTED" << endl;
                 } else {
                     Log::error () << "TestDevice: " << "RECEIVED (" << hex (at) << ", " << hex(b) << ")" << endl;
-                    throw RuntimeError (Text ("TestDevice: ") << "UNSATISFIED (" << hex (currentExpectation.address) << ", " << hex(currentExpectation.b) << ")");
+                    throw RuntimeError (Text ("TestDevice: ") << "UNSATISFIED (" << hex (currentExpectation.at) << ", " << hex(currentExpectation.b) << ")");
                 }
                 expectations.erase (expectations.begin());
             } else {
@@ -78,7 +78,7 @@ MAKE_PTR_TO(TestDevice) {
             int count = expectations.size ();
             if (count > 0) {
                 Expectation& currentExpectation = expectations.front ();
-                Log::error () << "TestDevice: " << "UNMET (" << hex (currentExpectation.address) << ", " << hex (currentExpectation.b) << ")" << endl;
+                Log::error () << "TestDevice: " << "UNMET (" << hex (currentExpectation.at) << ", " << hex (currentExpectation.b) << ")" << endl;
                 throw RuntimeError (Text ("TestDevice: ") << "UNMET" << ((count > 1) ? "s" : "") << " (" << count << ")");
             }
             return true;

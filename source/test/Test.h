@@ -39,10 +39,13 @@ class UnitTest {
                                 Log::error () << "EMPTY: " #name " (made no assertions)" << endl << endl;   \
                                 exit (EXIT_FAILURE);                                                        \
 							}                                                                               \
-						} catch (exception& exception) {		                                            \
-							cerr << "    " << exception.what () << endl;                                    \
-							exit (EXIT_FAILURE);                                                            \
-						}										                                            \
+                        } catch (RuntimeError& exception) {                                                 \
+                            cerr << "    " << exception.getMessage () << endl;                              \
+                            exit (EXIT_FAILURE);                                                            \
+                        } catch (exception& exception) {                                                    \
+                            cerr << "    " << exception.what () << endl;                                    \
+                            exit (EXIT_FAILURE);                                                            \
+                        }                                                                                   \
 					}											                                            \
 					void test ();								                                            \
         			static TEST_CASE_##name test##name;			                                            \
