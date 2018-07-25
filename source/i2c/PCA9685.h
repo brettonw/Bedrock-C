@@ -130,7 +130,7 @@ class PCA9685 : public ReferenceCountedObject {
 
     public:
 
-        PCA9685 (uint address, uint requestedPulseFrequency = PCA9685_DEFAULT_PULSE_FREQUENCY, uint busNumber = 0) : device (new DeviceType (address, busNumber)){
+        PCA9685 (uint address, uint requestedPulseFrequency = PCA9685_DEFAULT_PULSE_FREQUENCY, int bus = -1) : device (new DeviceType (address, bus)){
             init (requestedPulseFrequency);
         }
 

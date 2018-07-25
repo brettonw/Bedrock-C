@@ -28,7 +28,7 @@ class AdafruitServoDriver : public PCA9685<DeviceType> {
         }
 
     public:
-        AdafruitServoDriver (uint address = ADAFRUIT_SERVO_DRIVER_DEFAULT_ADDRESS, uint requestedPulseFrequency = ADAFRUIT_SERVO_DRIVER_DEFAULT_PULSE_FREQUENCY, uint busNumber = 0) : PCA9685<DeviceType> (address, requestedPulseFrequency, busNumber) {
+        AdafruitServoDriver (uint address = ADAFRUIT_SERVO_DRIVER_DEFAULT_ADDRESS, uint requestedPulseFrequency = ADAFRUIT_SERVO_DRIVER_DEFAULT_PULSE_FREQUENCY, int bus = -1) : PCA9685<DeviceType> (address, requestedPulseFrequency, bus) {
             init ();
         }
 

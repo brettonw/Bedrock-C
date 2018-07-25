@@ -118,7 +118,7 @@ MAKE_PTR_TO(Bus) {
         }
 
         // get bus by their file id (0..BUS_MAX_COUNT)
-        static PtrToBus getBusById (int id) {
+        static PtrToBus getBusById (uint id) {
             identifyBuses ();
             return buses.at (id);
         }
@@ -133,7 +133,7 @@ MAKE_PTR_TO(Bus) {
                 }
                 return iter->second;
             } else {
-                throw RuntimeError (Text("Bus: ") << "bus index out of range");
+                throw RuntimeError (Text("Bus: ") << "index out of range (" << index << ")");
             }
         }
 

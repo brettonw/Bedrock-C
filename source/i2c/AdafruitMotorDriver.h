@@ -42,7 +42,7 @@ class AdafruitMotorDriver : public PCA9685<DeviceType> {
 
 
     public:
-        AdafruitMotorDriver (uint address = ADAFRUIT_MOTOR_DRIVER_DEFAULT_ADDRESS, uint requestedPulseFrequency = PCA9685_DEFAULT_PULSE_FREQUENCY, uint busNumber = 0) : PCA9685<DeviceType> (address, requestedPulseFrequency, busNumber) {
+        AdafruitMotorDriver (uint address = ADAFRUIT_MOTOR_DRIVER_DEFAULT_ADDRESS, uint requestedPulseFrequency = PCA9685_DEFAULT_PULSE_FREQUENCY, int bus = -1) : PCA9685<DeviceType> (address, requestedPulseFrequency, bus) {
             stopAllMotors ();
         }
 
