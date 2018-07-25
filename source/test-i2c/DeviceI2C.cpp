@@ -12,6 +12,7 @@ TEST_CASE(TestDeviceI2C) {
         // motor driver - so it can be set to a range of values. if you try to set the ON register,
         // it will fail (silently) if the value is greater than the corresponding off register.
         // XXX TODO: find a general way to do this check across all devices
+        device.begin ();
         device.write (0x44, 0x10);
         Pause::milli (10);
         int x = device.read (0x44);

@@ -6,7 +6,7 @@
 #include        "StepperMotor.h"
 
 TEST_CASE(TestAdafruitMotorDriverMotor) {
-    Log::Scope scope (Log::TRACE);
+    //Log::Scope scope (Log::TRACE);
 
     PtrToTestDevice device = new TestDevice (ADAFRUIT_MOTOR_DRIVER_DEFAULT_ADDRESS);
     device
