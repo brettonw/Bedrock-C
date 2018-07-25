@@ -39,6 +39,8 @@ TEST_CASE(LiveTestMotor) {
         motor->run (0.5);
         Pause::milli (1000);
         motor->stop ();
+    } catch (RuntimeError& runtimeError) {
+        Log::error () << runtimeError.getMessage () << endl;
     } catch (...) {
     }
     TEST_X(true);
