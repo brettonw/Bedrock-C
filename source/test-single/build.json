@@ -1,13 +1,5 @@
-{ 
+{
     "values": {
         "dependencies": ["test", "i2c"]
-    },
-    "configurations": {
-        "debug": {
-            "linkerOptions": "-lpthread"
-        },
-        "release": {
-            "linkerOptions": "-lpthread"
-        }
     }
 }
