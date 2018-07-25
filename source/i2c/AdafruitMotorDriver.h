@@ -68,6 +68,16 @@ class AdafruitMotorDriver : public PCA9685<DeviceType> {
                           << "frontPin [" << hex (motorSpec.frontPin) << "], "
                           << "backPin [" << hex(motorSpec.backPin) << "]" << ") @ "
                           << speed << endl;
+
+// older gcc (like 6) doesn't recognize that MotorId was exhaustively enumerated above, and issues a
+// warning that motorSpec may not be initialized - I could ignore that, but in my zeal to turn it
+// off, I found that gcc complains about unknown pragmas, and newer gcc doesn't support this pragma
+// because it properly checks for a fully enumerated value. so... we gotta turn off the unknown
+// pragma warning too...
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpragmas"
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialize"
+
             if (speed < 0.0) {
                 PCA9685<DeviceType>::setChannelOff (motorSpec.frontPin);
                 PCA9685<DeviceType>::setChannelOn (motorSpec.backPin);
@@ -81,6 +91,8 @@ class AdafruitMotorDriver : public PCA9685<DeviceType> {
                 PCA9685<DeviceType>::setChannelOff (motorSpec.backPin);
                 PCA9685<DeviceType>::setChannelOff (motorSpec.modulator);
             }
+
+#pragma GCC diagnostic pop
 
             // if we successfully got here, then capture the speed request
             speeds[motorId] = speed;
