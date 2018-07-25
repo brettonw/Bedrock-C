@@ -29,6 +29,7 @@ TEST_CASE(TestDeviceI2C) {
         Pause::milli (10);
         x = device.read (0x44);
         TEST_XY(x, 0x20);
+        device.end ();
 
         Pause::milli (1000);
     }
