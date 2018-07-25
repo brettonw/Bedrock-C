@@ -51,7 +51,6 @@ MAKE_PTR_TO(Bus) {
         int handle;
 
         // a mutex used to atomicize access to the bus
-        int                 mutexCount;
         pthread_mutex_t     mutex;
         pthread_mutexattr_t mutexAttribute;
 
@@ -81,18 +80,18 @@ MAKE_PTR_TO(Bus) {
             }
         }
 
-        Bus (uint _id, const Text& _filePath) : id (_id), filePath (_filePath), handle(BUS_INVALID), mutexCount (0) {
+        Bus (uint _id, const Text& _filePath) : id (_id), filePath (_filePath), handle(BUS_INVALID) {
             // NOTE: constructing a bus doesn't "open" it - that is done lazily to avoid allocating
             // resources unnecessarily, but once it's opened it stays open until the program
             // terminates
-            if (pthread_mutexattr_settype(&mutexAttribute, PTHREAD_MUTEX_ERRORCHECK_NP) == 0) {
+            if (pthread_mutexattr_settype(&mutexAttribute, PTHREAD_MUTEX_RECURSIVE) == 0) {
                 if (pthread_mutex_init (&mutex, &mutexAttribute) != 0) {
                     throw RuntimeError (Text ("Bus: ") << "can't create mutex");
                 } else {
                     pthread_mutexattr_destroy(&mutexAttribute);
                 }
             } else {
-                throw RuntimeError (Text ("Bus: ") << "can't create mutex attribute");
+                throw RuntimeError (Text ("Bus: ") << "can't create mutex attribute [PTHREAD_MUTEX_RECURSIVE]");
             }
 
         }
@@ -150,8 +149,9 @@ MAKE_PTR_TO(Bus) {
         // start the read/write cycle on a bus
         Bus* begin (uint address) {
             // lock the mutex and increment the lock count
-            pthread_mutex_lock(&mutex);
-            ++mutexCount;
+            if (pthread_mutex_lock(&mutex) != 0) {
+                throw RuntimeError (Text("Bus: ") << "can't lock mutex");
+            }
 
             // if the bus is not already open, open it
             if (handle == BUS_INVALID) {
@@ -181,9 +181,8 @@ MAKE_PTR_TO(Bus) {
 
         // finish working with the device
         void end () {
-            // decrement the lock count - if this was the last one, unlock the door on your way out
-            if (--mutexCount == 0) {
-                pthread_mutex_unlock(&mutex);
+            if (pthread_mutex_unlock (&mutex) != 0) {
+                throw RuntimeError (Text("Bus: ") << "can't unlock mutex");
             }
         }
 
