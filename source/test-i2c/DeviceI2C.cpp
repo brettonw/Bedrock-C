@@ -4,7 +4,7 @@
 
 TEST_CASE(TestDeviceI2C) {
     try {
-        Log::Scope scope (Log::TRACE);
+        //Log::Scope scope (Log::TRACE);
         DeviceI2C   device (ADAFRUIT_MOTOR_DRIVER_DEFAULT_ADDRESS);
 
         // this test checks whether the device is active and responding by writing a register and
