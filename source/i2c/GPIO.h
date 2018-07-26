@@ -20,29 +20,70 @@
 
 // https://github.com/halherta/RaspberryPi-GPIOClass-v2
 
+
+// See BCM2835 *or* BCM2837 (UNOFFICIAL), Chapter 6 for GPIO explanations
+// From Raspberry Pi Foundation: rpi_DATA_CM_2p0.pdf, Chapter 9
+
+
+/*
+There are 54 general-purpose I/O (GPIO) lines split into two banks.
+
+The GPIO has 41 registers. All accesses are assumed to be 32-bit.
+
+GPIO Pin Output Set Registers (GPSETn)
+The output set registers are used to set a GPIO pin. The SET{n} field defines the
+respective GPIO pin to set, writing a “0” to the field has no effect. If the GPIO pin is
+being used as in input (by default) then the value in the SET{n} field is ignored.
+However, if the pin is subsequently defined as an output then the bit will be set
+according to the last set/clear operation. Separating the set and clear functions
+removes the need for read-modify-write operations.
+
+GPIO Pin Output Clear Registers (GPCLRn)
+The output clear registers are used to clear a GPIO pin. The CLR{n} field defines
+the respective GPIO pin to clear, writing a “0” to the field has no effect. If the GPIO
+pin is being used as in input (by default) then the value in the CLR{n} field is
+ignored. However, if the pin is subsequently defined as an output then the bit will
+be set according to the last set/clear operation. Separating the set and clear
+functions removes the need for read-modify-write operations.
+
+GPIO Pin Level Registers (GPLEVn)
+The pin level registers return the actual value of the pin. The LEV{n} field gives the
+value of the respective GPIO pin.
+
+Address Field Name Description Size
+Read/
+Write
+0000 GPFSEL0 Function Select 0 32 R/W
+0004 GPFSEL1 Function Select 1 32 R/W
+0008 GPFSEL2 Function Select 2 32 R/W
+000C GPFSEL3 Function Select 3 32 R/W
+0010 GPFSEL4 Function Select 4 32 R/W
+0014 GPFSEL5 Function Select 5 32 R/W
+0018 - Reserved - -
+001C GPSET0 Pin Output Set 0 32 W
+0020 GPSET1 Pin Output Set 1 32 W
+0024 - Reserved - -
+0028 GPCLR0 Pin Output Clear 0 32 W
+002C GPCLR1 Pin Output Clear 1 32 W
+0030 - Reserved - -
+0034 GPLEV0 Pin Level 0 32 R
+0038 GPLEV1 Pin Level 1 32 R
+
+*/
+
 // this is a memory mapped version of working with GPIO pins
 
-#define BLOCK_SIZE  0xb4
+const int GPIO_BLOCK_SIZE = 0xb4;
 
 class GPIO {
     private:
-static volatile uint* gpio;
-
-        struct BCM2835 {
-            ulong addr_p;
-            int mem_fd;
-            void* map;
-            volatile uint* addr;
-        };
-
-
-       uint* gpioReg;
-
+        volatile uint* gpioReg;
     public:
         GPIO () {
+            // memory map the gpio registers
             int fd = open("/dev/gpiomem", O_RDWR | O_SYNC) ;
             if (fd >= 0) {
-                gpioReg = static_cast<(uint*> (mmap (0, BLOCK_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0));
+                gpioReg = static_cast<(uint*> (mmap (0, GPIO_BLOCK_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0));
                 close(fd);
 
                 if (gpioReg == MAP_FAILED) {
@@ -54,38 +95,27 @@ static volatile uint* gpio;
         }
 
         ~GPIO () {
-            munmap(gpioReg, BLOCK_SIZE);
+            munmap(gpioReg, GPIO_BLOCK_SIZE);
         }
-
-        GpioPin (int _pinNumber) : pinNumber (_pinNumber) {
-            Text rootPath = Text (GPIO_ROOT_PATH) << "gpio" << pinNumber;
-            directionPath = rootPath + "/direction";
-            valuePath = rootPath + "/value";
-        }
-
-        ~GpioPin () {
-        }
-
 
         enum Direction {
             IN, OUT
         };
 
-        int setDirection (Direction direction) {
+        int setDirection (int pin, Direction direction) {
+        }
+
+        int getDirection (int pin) {
         }
 
         enum Value {
             OFF, ON
         };
 
-        int setValue (Value value) {
+        int setValue (int pin, Value value) {
         }
 
-        int getValue (string& val) {
-        }
-
-        int getPinNumber () {
-            return pinNumber;
+        int getValue (int pin) {
         }
 };
 
