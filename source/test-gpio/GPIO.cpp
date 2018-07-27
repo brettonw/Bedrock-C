@@ -16,7 +16,7 @@ TEST_CASE(TestGPIO) {
         names.push_back ("ALTERNATE_2");
         names.push_back ("ALTERNATE_3");
 
-        for (uint pin = 0; pin < GPIO::PIN_COUNT; ++pin) {
+        for (uint pin = 0; pin < GPIO_PIN_COUNT; ++pin) {
             GPIO::Function function = gpio.getFunction (static_cast<Pin> (pin));
             Log::debug () << "TestGPIO: " << "pin " << pin << " is " << names[function] << endl;
         }
@@ -26,5 +26,4 @@ TEST_CASE(TestGPIO) {
     } catch (...) {
     }
     TEST_X(true);
-
 }

@@ -9,7 +9,6 @@
 #include        <errno.h>
 #include        <sys/mman.h>
 
-
 /*
 This documentation is abstracted from the BCM2835 and BCM2837 datasheets, see chapter 6 for GPIO
 explanations, and the addenda from the Raspberry Pi Foundation: rpi_DATA_CM_2p0.pdf, Chapter 9.
@@ -79,21 +78,9 @@ The pin level registers return the actual value of the pin. The LEV{n} field giv
 value of the respective GPIO pin.
 */
 
-enum Pin {
-    GPIO_01, GPIO_02, GPIO_03, GPIO_04, GPIO_05, GPIO_06, GPIO_07, GPIO_08, GPIO_09, GPIO_10,
-    GPIO_11, GPIO_12, GPIO_13, GPIO_14, GPIO_15, GPIO_16, GPIO_17, GPIO_18, GPIO_19, GPIO_20,
-    GPIO_21, GPIO_22, GPIO_23, GPIO_24, GPIO_25, GPIO_26, GPIO_27, GPIO_28, GPIO_29, GPIO_30,
-    GPIO_31, GPIO_32, GPIO_33, GPIO_34, GPIO_35, GPIO_36, GPIO_37, GPIO_38, GPIO_39, GPIO_40,
-    GPIO_41, GPIO_42, GPIO_43, GPIO_44, GPIO_45, GPIO_46, GPIO_47, GPIO_48, GPIO_49, GPIO_50,
-    GPIO_51, GPIO_52, GPIO_53, GPIO_54
-};
+#include        "Pin.h"
 
 MAKE_PTR_TO(GPIO) {
-    public:
-        enum {
-            PIN_COUNT = GPIO_54 + 1
-        };
-
     private:
         volatile uint* registers;
 
