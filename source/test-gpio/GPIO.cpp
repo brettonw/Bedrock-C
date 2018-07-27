@@ -12,21 +12,21 @@ TEST_CASE(TestGPIO) {
         };
 
         GPIO::Function function;
-        Log& log = Log::debug () << "TestGPIO: pinout" << endl << endl;
+        Log& log = Log::debug () << "TestGPIO: " << "pinout" << endl << endl;
         for (uint piPin = 0; piPin < RASPBERRY_PI_PIN_COUNT;) {
             log << ((piPin < 10) ? " " : "");
             try {
                 function = gpio.getFunction (static_cast<Pin> (getPin (static_cast<PiPin> (piPin))));
                 log << (piPin + 1) << " -> " << functions[function] << " | ";
             } catch (RuntimeError& runtimeError) {
-                log << (piPin + 1) << " -> " << " * " << " | ";
+                log << (piPin + 1) << " -> " << "*" << " | ";
             }
             ++piPin;
             try {
                 function = gpio.getFunction (static_cast<Pin> (getPin (static_cast<PiPin> (piPin))));
                 log << functions[function] << " <- " << (piPin + 1) << endl;
             } catch (RuntimeError& runtimeError) {
-                log << " * " << " <- " << (piPin + 1) << endl;
+                log << "*" << " <- " << (piPin + 1) << endl;
             }
             ++piPin;
         }
@@ -45,8 +45,10 @@ TEST_CASE(TestBlinkPin6) {
         GPIO    gpio;
         gpio.setFunction (GPIO_06, GPIO::Function::OUTPUT);
         for (int i = 0; i < 10; ++i) {
+            Log::debug () << "TestBlinkPin6: ON" << endl;
             gpio.set (GPIO_06);
             Pause::milli (500);
+            Log::debug () << "TestBlinkPin6: OFF" << endl;
             gpio.clear (GPIO_06);
             Pause::milli (500);
         }
