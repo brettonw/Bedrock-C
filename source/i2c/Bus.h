@@ -19,7 +19,7 @@
 
 #define         I2C_SLAVE               0x0703  // use this slave address
 #define         I2C_TENBIT              0x0704  // set to 0 for 7 bit addrs (pretty much everything we care about)
-#define         I2C_SMBUS               0x0720  // perform a SMBus transfer
+#define         I2C_SMBUS               0x0720  // perform a SMBus operation
 
 // SMBus read or write markers
 #define         I2C_SMBUS_READ          1
@@ -32,10 +32,10 @@
 #endif
 
 // this is an abstraction on a System Management Bus (SMB) which we use for Inter-Integrated
-// Circuit Bus (I2C). Both are 2-wire bus protocols that are compatible with each other, but I2C
-// can run at higher speeds and has simpler electric connection requirements. You can see in the
-// linux constant naming that the same code is used for either bus protocol, though there is a
-// slight lack of consistency.
+// Circuit Bus (I2C) operations. Both are 2-wire bus protocols that are compatible with each other,
+// but I2C can run at higher speeds and has simpler electric connection requirements. You can see in
+// the linux constant naming that the same code is used for either bus protocol, though there is a
+// slight lack of consistency in the naming protocols.
 
 // we assume stuff works, so the general error handling strategy is to throw an exception if
 // something fails.
@@ -123,7 +123,9 @@ MAKE_PTR_TO(Bus) {
             return buses.at (id);
         }
 
-        // get bus by their index in the buses map
+        // get bus by their index in the buses map, this might be the common case if you don't know
+        // what bus to try to open - it will be consistent from run to run on a single platform, so
+        // long as the file mappings of the buses don't change.
         static PtrToBus getBusByIndex (uint index) {
             identifyBuses ();
             if (index < buses.size()) {
