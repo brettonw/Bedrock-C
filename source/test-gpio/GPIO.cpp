@@ -19,10 +19,10 @@ TEST_CASE(TestGPIO) {
         for (uint pin = 0; pin < GPIO_PIN_COUNT;) {
             GPIO::Function function = gpio.getFunction (static_cast<Pin> (pin));
             //Log::debug () << "TestGPIO: " << "pin " << pin << " is " << names[function] << endl;
-            Log& log = Log::debug () << "TestGPIO: " << pin << " -> " << function << " | ";
+            Log& log = Log::debug () << "TestGPIO: " << pin << " -> " << names[function] << " | ";
             ++pin;
             function = gpio.getFunction (static_cast<Pin> (pin + 1));
-            log << function << " <- " << pin << endl;
+            log << names[function] << " <- " << pin << endl;
             ++pin;
         }
 
