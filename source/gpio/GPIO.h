@@ -153,7 +153,7 @@ MAKE_PTR_TO(GPIO) {
             Log::info () << "GPIO: " << "released map" << endl;
         }
 
-
+        // data types and methods for setting and getting pin functions
         enum Function {
             INPUT = 0x00, OUTPUT = 0x01,
             ALTERNATE_0 = 0x04, ALTERNATE_1 = 0x05, ALTERNATE_2 = 0x06,
@@ -186,6 +186,7 @@ MAKE_PTR_TO(GPIO) {
             return this;
         }
 
+        // methods for setting and clearing pins that are functioning as outputs
         GPIO* set (Pin pin) {
             return op (GPSET, pin);
         }
@@ -198,6 +199,8 @@ MAKE_PTR_TO(GPIO) {
             return high ? set (pin) : clear (pin);
         }
 
+        // method for getting the current level of a pin - this should work regardless of the pin
+        // function - but I need to confirm that...
         bool get (Pin pin) {
             // there are two banks (0 or 1) of pins (0-31 and 32-53), so we divide by 32 to
             // determine which register to fetch, and mask out all but the lower 5 bits (which is
@@ -212,7 +215,9 @@ MAKE_PTR_TO(GPIO) {
             return this;
         }
 
+        // and the typical combination of get/set
         GPIO* toggle (Pin pin) {
-            return get (pin) ?  clear (pin) : set (pin);
+            //return get (pin) ?  clear (pin) : set (pin);
+            return write (pin, not get (pin));
         }
 };
