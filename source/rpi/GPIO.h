@@ -1,7 +1,7 @@
 #pragma once
 
 #include        "Log.h"
-#include        "Text.h"
+#include        "RuntimeError.h"
 
 #include        <fcntl.h>
 #include        <unistd.h>
@@ -108,7 +108,7 @@ class GPIO {
 
             // total register address space, 180 bytes
             GPIO_BLOCK_SIZE = 0xb4
-        }
+        };
 
     public:
         GPIO (const char* fileToMap = "/dev/gpiomem", uint baseAddress = 0) {
@@ -121,7 +121,7 @@ class GPIO {
             // depending on what model you are running.
             int fd = open(fileToMap, O_RDWR | O_SYNC) ;
             if (fd >= 0) {
-                registers = static_cast<(uint*> (mmap (0, GPIO_BLOCK_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, baseAddress));
+                registers = static_cast<uint*> (mmap (0, GPIO_BLOCK_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, baseAddress));
                 close(fd);
 
                 if (registers == MAP_FAILED) {
@@ -133,7 +133,7 @@ class GPIO {
         }
 
         ~GPIO () {
-            munmap (registers, GPIO_BLOCK_SIZE);
+            munmap ((void*) registers, GPIO_BLOCK_SIZE);
         }
 
         enum Function {
@@ -200,6 +200,6 @@ class GPIO {
         }
 
         GPIO* togglePin (uint pin) {
-            return getPin (pin) ?  clearPin (pin) : setPint (pin);
+            return getPin (pin) ?  clearPin (pin) : setPin (pin);
         }
 };
