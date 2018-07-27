@@ -21,16 +21,16 @@ TEST_CASE(TestGPIO) {
             Log& log = Log::debug () << "TestGPIO: ";
             try {
                 function = gpio.getFunction (static_cast<Pin> (getPin (static_cast<PiPin> (piPin))));
-                log << piPin << " -> " << names[function] << " | ";
+                log << (piPin + 1) << " -> " << names[function] << " | ";
             } catch (RuntimeError& runtimeError) {
-                log << piPin << " -> " << "XXXXXX" << " | ";
+                log << piPin << " -> " << "  XX  " << " | ";
             }
             ++piPin;
             try {
                 function = gpio.getFunction (static_cast<Pin> (getPin (static_cast<PiPin> (piPin))));
                 log << names[function] << " <- " << piPin << endl;
             } catch (RuntimeError& runtimeError) {
-                log << "XXXXXX" << " <- " << piPin << endl;
+                log << "  XX  " << " <- " << (piPin + 1) << endl;
             }
             ++piPin;
         }
