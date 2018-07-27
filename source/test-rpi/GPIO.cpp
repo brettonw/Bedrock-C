@@ -2,7 +2,7 @@
 #include        "GPIO.h"
 
 TEST_CASE(TestGPIO) {
-    //Log::Scope scope (Log::TRACE);
+    Log::Scope scope (Log::TRACE);
     try {
         GPIO    gpio;
 
