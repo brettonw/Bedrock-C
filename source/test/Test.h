@@ -32,7 +32,10 @@ class UnitTest {
 					TEST_CASE_##name () {			                                                        \
 						try {									                                            \
 						    Log::info () << "TESTING: (" __FILE__ << ") " << #name << endl;                 \
-							test ();				                                                        \
+						    {                                                                               \
+						        Log::Scope scope (Log::WARN);                                               \
+							    test ();				                                                    \
+							}                                                                               \
 							if (assertionsCount > 0) {                                                      \
 							    Log::debug () << "PASSED: " #name << endl << endl;	                        \
 							} else {                                                                        \

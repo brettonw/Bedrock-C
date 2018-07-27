@@ -101,9 +101,9 @@ class Log {
 
         // global static accessors
         static Log& base () { return singleton (); }
-        static Log& trace () { return singleton () << Level (TRACE); }
-        static Log& debug () { return singleton () << Level (DEBUG); }
-        static Log& info () { return singleton () << Level (INFO); }
-        static Log& warn () { return singleton () << Level (WARN); }
-        static Log& error () { return singleton () << Level (ERROR); }
+        static Log& trace () { return singleton () << Level (TRACE) << "[TRACE] "; }
+        static Log& debug () { return singleton () << Level (DEBUG) << "[DEBUG] "; }
+        static Log& info ()  { return singleton () << Level (INFO)  << "[ INFO] "; }
+        static Log& warn ()  { return singleton () << Level (WARN)  << "[ WARN] "; }
+        static Log& error () { return singleton () << Level (ERROR) << "[ERROR] "; }
 };

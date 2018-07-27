@@ -13,7 +13,8 @@ TEST_CASE (TestLogFilterTrace) {
     Log::warn() << "warn" << endl;
     Log::error() << "error" << endl;
 
-    TEST_XY(Text (out.str ().c_str ()), Text("trace\ndebug\ninfo\nwarn\nerror\n"));
+    //cerr << out.str () << endl;
+    TEST_XY(Text (out.str ().c_str ()), Text("[TRACE] trace\n[DEBUG] debug\n[ INFO] info\n[ WARN] warn\n[ERROR] error\n"));
 }
 
 TEST_CASE (TestLogFilterDebug) {
@@ -28,7 +29,7 @@ TEST_CASE (TestLogFilterDebug) {
     Log::warn() << "warn" << endl;
     Log::error() << "error" << endl;
 
-    TEST_XY(Text (out.str ().c_str ()), Text("debug\ninfo\nwarn\nerror\n"));
+    TEST_XY(Text (out.str ().c_str ()), Text("[DEBUG] debug\n[ INFO] info\n[ WARN] warn\n[ERROR] error\n"));
 }
 
 TEST_CASE (TestLogFilterInfo) {
@@ -43,7 +44,7 @@ TEST_CASE (TestLogFilterInfo) {
     Log::warn() << "warn" << endl;
     Log::error() << "error" << endl;
 
-    TEST_XY(Text (out.str ().c_str ()), Text("info\nwarn\nerror\n"));
+    TEST_XY(Text (out.str ().c_str ()), Text("[ INFO] info\n[ WARN] warn\n[ERROR] error\n"));
 }
 
 TEST_CASE (TestLogFilterWarn) {
@@ -58,7 +59,7 @@ TEST_CASE (TestLogFilterWarn) {
     Log::warn() << "warn" << endl;
     Log::error() << "error" << endl;
 
-    TEST_XY(Text (out.str ().c_str ()), Text("warn\nerror\n"));
+    TEST_XY(Text (out.str ().c_str ()), Text("[ WARN] warn\n[ERROR] error\n"));
 }
 
 TEST_CASE (TestLogFilterError) {
@@ -73,7 +74,7 @@ TEST_CASE (TestLogFilterError) {
     Log::warn() << "warn" << endl;
     Log::error() << "error" << endl;
 
-    TEST_XY(Text (out.str ().c_str ()), Text("error\n"));
+    TEST_XY(Text (out.str ().c_str ()), Text("[ERROR] error\n"));
 }
 
 TEST_CASE (TestLogMulti) {
@@ -91,7 +92,7 @@ TEST_CASE (TestLogMulti) {
 }
 
 TEST_CASE (TestLogScope) {
-    Log::Scope scope;
+    Log::Scope scope(Log::INFO);
 
     ostringstream out;
     {
@@ -103,7 +104,7 @@ TEST_CASE (TestLogScope) {
         Log::warn() << "warn" << endl;
         Log::error() << "error" << endl;
     }
-    TEST_XY(Text (out.str ().c_str ()), Text("info\nwarn\nerror\n"));
+    TEST_XY(Text (out.str ().c_str ()), Text("[ INFO] info\n[ WARN] warn\n[ERROR] error\n"));
 
     {
         Log::Scope scope2 (Log::DEBUG);
@@ -114,7 +115,7 @@ TEST_CASE (TestLogScope) {
         Log::warn() << "warn" << endl;
         Log::error() << "error" << endl;
     }
-    TEST_XY(Text (out.str ().c_str ()), Text("info\nwarn\nerror\ndebug\ninfo\nwarn\nerror\n"));
+    TEST_XY(Text (out.str ().c_str ()), Text("[ INFO] info\n[ WARN] warn\n[ERROR] error\n[DEBUG] debug\n[ INFO] info\n[ WARN] warn\n[ERROR] error\n"));
 
     {
         Log::Scope scope2;
@@ -125,5 +126,5 @@ TEST_CASE (TestLogScope) {
         Log::warn() << "warn" << endl;
         Log::error() << "error" << endl;
     }
-    TEST_XY(Text (out.str ().c_str ()), Text("info\nwarn\nerror\ndebug\ninfo\nwarn\nerror\ninfo\nwarn\nerror\n"));
+    TEST_XY(Text (out.str ().c_str ()), Text("[ INFO] info\n[ WARN] warn\n[ERROR] error\n[DEBUG] debug\n[ INFO] info\n[ WARN] warn\n[ERROR] error\n[ INFO] info\n[ WARN] warn\n[ERROR] error\n"));
 }

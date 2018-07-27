@@ -33,7 +33,7 @@ TEST_CASE(TestFileBasename) {
 }
 
 TEST_CASE(TestFileIsDirectory) {
-    Log::Scope scope (Log::DEBUG);
+    //Log::Scope scope (Log::DEBUG);
 
     File    file ("Utf8Test.txt");
     TEST_XY(file.isDirectory (), false);

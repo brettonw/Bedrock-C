@@ -60,6 +60,7 @@ TEST_CASE(TestEmptyBagObj) {
 }
 
 TEST_CASE(TestBagObj) {
+    //Log::Scope scope (Log::TRACE);
     PtrToBagObject bagObject = (new BagObject ())
         ->put ("A", "Hello World")
         ->put ("B", 5)

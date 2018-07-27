@@ -17,8 +17,8 @@ void testMicro (int microseconds) {
     TEST_XYF(sum, expectedSum, expectedSum / 5);
 }
 
-TEST_CASE(TestMicroPause) {
-    Log::Scope  scope (Log::DEBUG);
+TEST_CASE(TestPauseMicro) {
+    //Log::Scope  scope (Log::DEBUG);
     testMicro (10);
     testMicro (20);
     testMicro (50);
@@ -44,8 +44,8 @@ void testMilli (int milliseconds) {
     TEST_XYF(sum, expectedSum, expectedSum / 5);
 }
 
-TEST_CASE(TestMilliPause) {
-    Log::Scope  scope (Log::DEBUG);
+TEST_CASE(TestPauseMilli) {
+    //Log::Scope  scope (Log::DEBUG);
     testMilli (10);
     testMilli (20);
     testMilli (50);

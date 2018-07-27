@@ -3,6 +3,7 @@
 // XXX TODO - the output is not "pretty", formatted, or otherwise made especially
 // XXX TODO   human readable, though we could certainly do that.
 
+#include    "Log.h"
 #include    "TextContainer.h"
 
 MAKE_PTR_TO(BagThing) {
@@ -204,24 +205,24 @@ MAKE_PTR_TO_SUB(BagObject, BagContainer) {
         TextMap<PtrToBagThing> value;
 
         PtrToBagObject put (const Text& name, BagThing* bagThing) {
-            // statically allocate the name table if it hasn't been created already
-            if (nameTable == 0) {
-                nameTable = new TextMap<Text> ();
-            }
-
             // look up the requested name in our name table to check to see if we already have a
             // pointer to an identical string - this will mitigate repeated copying of the same
             // name, and reduce the memory footprint of BagObjects in aggregate.
-            const Text* nameTableName = nameTable->get(name);
-            Text useName;
-            if (nameTableName != 0) {
+            static TextMap<Text> nameTable;
+            const Text* foundName = nameTable.get(name);
+            Text useName = (foundName != 0) ? *foundName : (nameTable[name] = name);
+            Log::trace () << "BagObject: " << "nameTable contains " << nameTable.size () << " reference" << ((nameTable.size () != 1 ) ? "s" : "") << endl;
+            /*
+            if (foundName != 0) {
                 // we've already got a copy of this string - use that one
-                useName = *nameTableName;
+                useName = *foundName;
             } else {
-                // don't already have a copy, save this one
-                nameTable->set (name, name);
-                useName = name;
+                // we don't already have a copy, save this one
+                nameTable[name] = useName = name;
             }
+            */
+
+            // and now actually assign the thing...
             value[useName] = bagThing;
             return this;
         }
