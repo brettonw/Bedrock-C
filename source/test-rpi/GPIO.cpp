@@ -17,7 +17,7 @@ TEST_CASE(TestGPIO) {
         names.push_back ("ALTERNATE_3");
 
         for (uint pin = 0; pin < GPIO::PIN_COUNT; ++pin) {
-            GPIO::Function function = gpio.getFunction (static_cast<GPIO::Pin> (pin));
+            GPIO::Function function = gpio.getFunction (static_cast<Pin> (pin));
             Log::debug () << "TestGPIO: " << "pin " << pin << " is " << names[function] << endl;
         }
 
