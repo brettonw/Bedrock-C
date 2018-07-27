@@ -18,7 +18,7 @@ TEST_CASE(TestGPIO) {
         names.push_back ("ALT_3 ");
         */
         const char* functions[] = {
-            "INPUT", "OUTPUT", "ALT_5 ", "ALT_4 ", "ALT_0 ", "ALT_1 ", "ALT_2 ", "ALT_3 "
+            "INPUT ", "OUTPUT", "ALT_5 ", "ALT_4 ", "ALT_0 ", "ALT_1 ", "ALT_2 ", "ALT_3 "
         };
 
         GPIO::Function function;
