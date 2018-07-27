@@ -18,27 +18,29 @@ TEST_CASE(TestGPIO) {
         names.push_back ("ALT_3 ");
         */
         const char* functions[] = {
-            "INPUT ", "OUTPUT", "ALT_5 ", "ALT_4 ", "ALT_0 ", "ALT_1 ", "ALT_2 ", "ALT_3 "
+            " I ", " O ", "A_5", "A_4", "A_0", "A_1", "A_2", "A_3"
         };
 
         GPIO::Function function;
+        Log& log = Log::debug () << "TestGPIO: pinout" << endl << endl;
         for (uint piPin = 0; piPin < RASPBERRY_PI_PIN_COUNT;) {
-            Log& log = Log::debug () << "TestGPIO: " << ((piPin < 10) ? " " : "");
+            log << ((piPin < 10) ? " " : "");
             try {
                 function = gpio.getFunction (static_cast<Pin> (getPin (static_cast<PiPin> (piPin))));
                 log << (piPin + 1) << " -> " << functions[function] << " | ";
             } catch (RuntimeError& runtimeError) {
-                log << (piPin + 1) << " -> " << "     *" << " | ";
+                log << (piPin + 1) << " -> " << " * " << " | ";
             }
             ++piPin;
             try {
                 function = gpio.getFunction (static_cast<Pin> (getPin (static_cast<PiPin> (piPin))));
                 log << functions[function] << " <- " << (piPin + 1) << endl;
             } catch (RuntimeError& runtimeError) {
-                log << "*     " << " <- " << (piPin + 1) << endl;
+                log << " * " << " <- " << (piPin + 1) << endl;
             }
             ++piPin;
         }
+        log << endl;
 
     } catch (RuntimeError& runtimeError) {
         Log::exception (runtimeError);
