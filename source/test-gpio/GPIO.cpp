@@ -23,12 +23,12 @@ TEST_CASE(TestGPIO) {
                 function = gpio.getFunction (static_cast<Pin> (getPin (static_cast<PiPin> (piPin))));
                 log << (piPin + 1) << " -> " << names[function] << " | ";
             } catch (RuntimeError& runtimeError) {
-                log << piPin << " -> " << "  XX  " << " | ";
+                log << (piPin + 1) << " -> " << "  XX  " << " | ";
             }
             ++piPin;
             try {
                 function = gpio.getFunction (static_cast<Pin> (getPin (static_cast<PiPin> (piPin))));
-                log << names[function] << " <- " << piPin << endl;
+                log << names[function] << " <- " << (piPin + 1) << endl;
             } catch (RuntimeError& runtimeError) {
                 log << "  XX  " << " <- " << (piPin + 1) << endl;
             }
