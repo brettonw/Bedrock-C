@@ -18,7 +18,7 @@ TEST_CASE(TestGPIO) {
 
         GPIO::Function function;
         for (uint piPin = 0; piPin < RASPBERRY_PI_PIN_COUNT;) {
-            Log& log = Log::debug () << "TestGPIO: ";
+            Log& log = Log::debug () << "TestGPIO: " << ((piPin < 10) ? " " : "");
             try {
                 function = gpio.getFunction (static_cast<Pin> (getPin (static_cast<PiPin> (piPin))));
                 log << (piPin + 1) << " -> " << names[function] << " | ";
