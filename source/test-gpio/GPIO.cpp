@@ -18,11 +18,20 @@ TEST_CASE(TestGPIO) {
 
         GPIO::Function function;
         for (uint piPin = 0; piPin < RASPBERRY_PI_PIN_COUNT;) {
-            function = gpio.getFunction (static_cast<Pin> (getPin (static_cast<PiPin> (piPin))));
-            Log& log = Log::debug () << "TestGPIO: " << piPin << " -> " << names[function] << " | ";
+            Log& log = Log::debug () << "TestGPIO: ";
+            try {
+                function = gpio.getFunction (static_cast<Pin> (getPin (static_cast<PiPin> (piPin))));
+                log << piPin << " -> " << names[function] << " | ";
+            } catch (RuntimeError& runtimeError) {
+                log << piPin << " -> " << "XXXXXX" << " | ";
+            }
             ++piPin;
-            function = gpio.getFunction (static_cast<Pin> (getPin (static_cast<PiPin> (piPin))));
-            log << names[function] << " <- " << piPin << endl;
+            try {
+                function = gpio.getFunction (static_cast<Pin> (getPin (static_cast<PiPin> (piPin))));
+                log << names[function] << " <- " << piPin << endl;
+            } catch (RuntimeError& runtimeError) {
+                log << "XXXXXX" << " <- " << piPin << endl;
+            }
             ++piPin;
         }
 
