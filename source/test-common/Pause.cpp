@@ -12,8 +12,9 @@ void testMicro (int microseconds) {
         sum += delta;
     }
     Log::debug () << "testMicro: " << "requested " << microseconds << " us pause, waited for " << (sum / sampleCount) << " us on average over " << sampleCount << " pauses" << endl;
-    // ensure it is within some minimal degree of error (2 / sampleCount)
-    TEST_XYF(sum, (microseconds * sampleCount), (2 * microseconds));
+    // ensure it is within some degree of error (20%)
+    int expectedSum = microseconds * sampleCount;
+    TEST_XYF(sum, expectedSum, expectedSum / 5);
 }
 
 TEST_CASE(TestMicroPause) {
@@ -29,7 +30,7 @@ TEST_CASE(TestMicroPause) {
 
 void testMilli (int milliseconds) {
     int sum = 0;
-    int sampleCount = 20;
+    int sampleCount = 10;
     for (int i = 0; i < sampleCount; ++i) {
         auto startTime = chrono::high_resolution_clock::now();
         Pause::milli (milliseconds);
@@ -38,8 +39,9 @@ void testMilli (int milliseconds) {
         sum += delta;
     }
     Log::debug () << "testMilli: " << "requested " << milliseconds << " ms pause, waited for " << (sum / sampleCount) << " ms on average over " << sampleCount << " pauses" << endl;
-    // ensure it is within some minimal degree of error (3 / sampleCount)
-    TEST_XYF(sum, (milliseconds * sampleCount), (3 * milliseconds));
+    // ensure it is within some degree of error (20%)
+    int expectedSum = milliseconds * sampleCount;
+    TEST_XYF(sum, expectedSum, expectedSum / 5);
 }
 
 TEST_CASE(TestMilliPause) {
