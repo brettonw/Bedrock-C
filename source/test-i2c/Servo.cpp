@@ -38,7 +38,7 @@ TEST_CASE(LiveTestServo) {
         Pause::milli (1000);
         servo->setPosition (0.5);
     } catch (RuntimeError& runtimeError) {
-        Log::error () << runtimeError.getMessage () << endl;
+        Log::exception (runtimeError);
     } catch (...) {
     }
     TEST_X(true);

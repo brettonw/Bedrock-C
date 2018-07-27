@@ -22,7 +22,7 @@ TEST_CASE(TestGPIO) {
         }
 
     } catch (RuntimeError& runtimeError) {
-        Log::error () << runtimeError.getMessage () << endl;
+        Log::exception (runtimeError);
     } catch (...) {
     }
     TEST_X(true);

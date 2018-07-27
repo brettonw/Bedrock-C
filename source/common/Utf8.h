@@ -83,7 +83,7 @@ class Utf8Decoder {
             } catch (RuntimeError& runtimeError) {
                 // set the error condition, and reset so that we will consistently hit that error
                 // condition if we keep trying to advance
-                Log::error () << runtimeError.getMessage () << endl;
+                Log::exception (runtimeError);
                 codePoint = ERROR;
                 next = position;
             }

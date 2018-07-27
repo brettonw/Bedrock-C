@@ -34,7 +34,7 @@ TEST_CASE(TestDeviceI2C) {
         Pause::milli (1000);
     }
     catch (RuntimeError& runtimeError) {
-        cerr << runtimeError.getMessage () << endl;
+        Log::exception (runtimeError);
         TEST_X(true);
     }
 }
