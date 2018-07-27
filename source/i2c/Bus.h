@@ -99,7 +99,7 @@ MAKE_PTR_TO(Bus) {
         void close () {
             if (handle != BUS_INVALID) {
                 ::close (handle);
-                Log::info () << "Closed bus " << id << " (" << hex (handle) << ") on " << filePath << endl;
+                Log::info () << "closed bus " << id << " (" << hex (handle) << ") on " << filePath << endl;
                 handle = BUS_INVALID;
             }
         }

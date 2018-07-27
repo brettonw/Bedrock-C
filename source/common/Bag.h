@@ -197,11 +197,32 @@ MAKE_PTR_TO_SUB(BagArray, BagContainer) {
 };
 
 MAKE_PTR_TO_SUB(BagObject, BagContainer) {
+    private:
+        static TextMap<Text>* nameTable;
+
     protected:
         TextMap<PtrToBagThing> value;
 
         PtrToBagObject put (const Text& name, BagThing* bagThing) {
-            value[name] = bagThing;
+            // statically allocate the name table if it hasn't been created already
+            if (nameTable == 0) {
+                nameTable = new TextMap<Text> ();
+            }
+
+            // look up the requested name in our name table to check to see if we already have a
+            // pointer to an identical string - this will mitigate repeated copying of the same
+            // name, and reduce the memory footprint of BagObjects in aggregate.
+            const Text* nameTableName = nameTable->get(name);
+            Text useName;
+            if (nameTableName != 0) {
+                // we've already got a copy of this string - use that one
+                useName = *nameTableName;
+            } else {
+                // don't already have a copy, save this one
+                nameTable->set (name, name);
+                useName = name;
+            }
+            value[useName] = bagThing;
             return this;
         }
 
@@ -230,8 +251,7 @@ MAKE_PTR_TO_SUB(BagObject, BagContainer) {
 
         template<typename BagThingSubtype>
         PtrToBagObject put (const Text& name, PtrTo<BagThingSubtype> bagThing) {
-            value[name] = ptr_upcast<BagThing>(bagThing);
-            return this;
+            return put (name, bagThing.getPtr ());
         }
 
         PtrToBagObject put (const Text& name, const Text& thing) {

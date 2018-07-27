@@ -79,18 +79,19 @@ The pin level registers return the actual value of the pin. The LEV{n} field giv
 value of the respective GPIO pin.
 */
 
-class GPIO {
+enum Pin {
+    GPIO_01, GPIO_02, GPIO_03, GPIO_04, GPIO_05, GPIO_06, GPIO_07, GPIO_08, GPIO_09, GPIO_10,
+    GPIO_11, GPIO_12, GPIO_13, GPIO_14, GPIO_15, GPIO_16, GPIO_17, GPIO_18, GPIO_19, GPIO_20,
+    GPIO_21, GPIO_22, GPIO_23, GPIO_24, GPIO_25, GPIO_26, GPIO_27, GPIO_28, GPIO_29, GPIO_30,
+    GPIO_31, GPIO_32, GPIO_33, GPIO_34, GPIO_35, GPIO_36, GPIO_37, GPIO_38, GPIO_39, GPIO_40,
+    GPIO_41, GPIO_42, GPIO_43, GPIO_44, GPIO_45, GPIO_46, GPIO_47, GPIO_48, GPIO_49, GPIO_50,
+    GPIO_51, GPIO_52, GPIO_53, GPIO_54
+};
+
+MAKE_PTR_TO(GPIO) {
     public:
-        enum Pin {
-            GPIO_00, GPIO_01, GPIO_02, GPIO_03, GPIO_04, GPIO_05, GPIO_06, GPIO_07, GPIO_08, GPIO_09,
-            GPIO_10, GPIO_11, GPIO_12, GPIO_13, GPIO_14, GPIO_15, GPIO_16, GPIO_17, GPIO_18, GPIO_19,
-            GPIO_20, GPIO_21, GPIO_22, GPIO_23, GPIO_24, GPIO_25, GPIO_26, GPIO_27, GPIO_28, GPIO_29,
-            GPIO_30, GPIO_31, GPIO_32, GPIO_33, GPIO_34, GPIO_35, GPIO_36, GPIO_37, GPIO_38, GPIO_39,
-            GPIO_40, GPIO_41, GPIO_42, GPIO_43, GPIO_44, GPIO_45, GPIO_46, GPIO_47, GPIO_48, GPIO_49,
-            GPIO_50, GPIO_51, GPIO_52, GPIO_53
-        };
         enum {
-            PIN_COUNT = GPIO_53 + 1
+            PIN_COUNT = GPIO_54 + 1
         };
 
     private:
@@ -98,8 +99,8 @@ class GPIO {
 
         GPIO* op (uint registerBase, Pin pin) {
             // there are two banks (0 or 1) of pins (0-31 and 32-53), so we divide by 32 to
-            // determine which register to fetch, and mask out the lower 5 bits (which is equivalent
-            // to a modulo 32) to compute the offset within the register.
+            // determine which register to fetch, and mask out all but the lower 5 bits (which is
+            // equivalent to a modulo 32) to compute the offset within the register.
             uint which = registerBase + (pin >> 5);
             uint offset = pin & BANK_MASK;
             registers[which] = (0x01 << offset);
@@ -119,7 +120,7 @@ class GPIO {
             // 5 bit mask for working with register banks
             BANK_MASK = 0x1f,
 
-            // total register address space, 180 bytes
+            // total GPIO register address space, 180 bytes
             GPIO_BLOCK_SIZE = 0xb4
         };
 
@@ -134,6 +135,7 @@ class GPIO {
             // depending on what model you are running.
             int fd = open(fileToMap, O_RDWR | O_SYNC) ;
             if (fd >= 0) {
+                Log::debug () << "GPIO: " << "opened map file at " << fileToMap << endl;
                 registers = static_cast<uint*> (mmap (0, GPIO_BLOCK_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, baseAddress));
                 close(fd);
 
@@ -142,23 +144,20 @@ class GPIO {
                 }
                 Log::info () << "GPIO: " << "ready to talk" << endl;
             } else {
-                throw RuntimeError (Text("GPIO: ") << "can't open /dev/gpiomem");
+                throw RuntimeError (Text("GPIO: ") << "can't open map file at " << fileToMap);
             }
         }
 
         ~GPIO () {
             munmap ((void*) registers, GPIO_BLOCK_SIZE);
+            Log::info () << "GPIO: " << "released map" << endl;
         }
 
+
         enum Function {
-            INPUT = 0x00,
-            OUTPUT = 0x01,
-            ALTERNATE_0 = 0x04,
-            ALTERNATE_1 = 0x05,
-            ALTERNATE_2 = 0x06,
-            ALTERNATE_3 = 0x07,
-            ALTERNATE_4 = 0x03,
-            ALTERNATE_5 = 0x02
+            INPUT = 0x00, OUTPUT = 0x01,
+            ALTERNATE_0 = 0x04, ALTERNATE_1 = 0x05, ALTERNATE_2 = 0x06,
+            ALTERNATE_3 = 0x07, ALTERNATE_4 = 0x03, ALTERNATE_5 = 0x02
         };
 
         GPIO* setFunction (Pin pin, Function function) {
@@ -195,14 +194,14 @@ class GPIO {
             return op (GPCLR, pin);
         }
 
-        GPIO* write (Pin pin, bool should) {
-            return should ? set (pin) : clear (pin);
+        GPIO* write (Pin pin, bool high) {
+            return high ? set (pin) : clear (pin);
         }
 
         bool get (Pin pin) {
             // there are two banks (0 or 1) of pins (0-31 and 32-53), so we divide by 32 to
-            // determine which register to fetch, and mask out the lower 5 bits (which is equivalent
-            // to a modulo 32) to compute the offset within the register.
+            // determine which register to fetch, and mask out all but the lower 5 bits (which is
+            // equivalent to a modulo 32) to compute the offset within the register.
             uint which = GPLEV + (pin >> 5);
             uint offset = pin & BANK_MASK;
             return (registers[which] & (0x01 << offset)) ? true : false;

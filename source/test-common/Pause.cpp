@@ -2,19 +2,18 @@
 #include "Pause.h"
 
 void testMicro (int microseconds) {
-    int average = 0;
-    int sampleCount = 10;
+    int sum = 0;
+    int sampleCount = 100;
     for (int i = 0; i < sampleCount; ++i) {
         auto startTime = chrono::high_resolution_clock::now();
         Pause::micro (microseconds);
         auto stopTime = chrono::high_resolution_clock::now();
         int delta = static_cast<int> (chrono::duration_cast<chrono::microseconds>(stopTime - startTime).count ());
-        average += delta;
+        sum += delta;
     }
-    average /= sampleCount;
-    Log::debug () << "testMicro: " << "requested " << microseconds << " us pause, waited for " << average << " us on average over " << sampleCount << " pauses" << endl;
-    // ensure it is within some minimal degree of error
-    TEST_XYF(average, microseconds, 4);
+    Log::debug () << "testMicro: " << "requested " << microseconds << " us pause, waited for " << (sum / sampleCount) << " us on average over " << sampleCount << " pauses" << endl;
+    // ensure it is within some minimal degree of error (2 / sampleCount)
+    TEST_XYF(sum, (microseconds * sampleCount), (2 * microseconds));
 }
 
 TEST_CASE(TestMicroPause) {
@@ -29,19 +28,18 @@ TEST_CASE(TestMicroPause) {
 }
 
 void testMilli (int milliseconds) {
-    int average = 0;
-    int sampleCount = 10;
+    int sum = 0;
+    int sampleCount = 20;
     for (int i = 0; i < sampleCount; ++i) {
         auto startTime = chrono::high_resolution_clock::now();
         Pause::milli (milliseconds);
         auto stopTime = chrono::high_resolution_clock::now();
         int delta = static_cast<int> (chrono::duration_cast<chrono::milliseconds>(stopTime - startTime).count ());
-        average += delta;
+        sum += delta;
     }
-    average /= sampleCount;
-    Log::debug () << "testMicro: " << "requested " << milliseconds << " ms pause, waited for " << average << " ms on average over " << sampleCount << " pauses" << endl;
-    // ensure it is within some minimal degree of error
-    TEST_XYF(average, milliseconds, 4);
+    Log::debug () << "testMilli: " << "requested " << milliseconds << " ms pause, waited for " << (sum / sampleCount) << " ms on average over " << sampleCount << " pauses" << endl;
+    // ensure it is within some minimal degree of error (3 / sampleCount)
+    TEST_XYF(sum, (milliseconds * sampleCount), (3 * milliseconds));
 }
 
 TEST_CASE(TestMilliPause) {
