@@ -43,6 +43,7 @@ TEST_CASE(TestBlinkPin6) {
     Log::Scope scope (Log::DEBUG);
     try {
         GPIO    gpio;
+        gpio.setFunction (GPIO_06, GPIO::Function::OUTPUT);
         for (int i = 0; i < 10; ++i) {
             gpio.set (GPIO_06);
             Pause::milli (500);
