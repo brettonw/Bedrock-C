@@ -80,10 +80,23 @@ value of the respective GPIO pin.
 */
 
 class GPIO {
+    public:
+        enum Pin {
+            GPIO_00, GPIO_01, GPIO_02, GPIO_03, GPIO_04, GPIO_05, GPIO_06, GPIO_07, GPIO_08, GPIO_09,
+            GPIO_10, GPIO_11, GPIO_12, GPIO_13, GPIO_14, GPIO_15, GPIO_16, GPIO_17, GPIO_18, GPIO_19,
+            GPIO_20, GPIO_21, GPIO_22, GPIO_23, GPIO_24, GPIO_25, GPIO_26, GPIO_27, GPIO_28, GPIO_29,
+            GPIO_30, GPIO_31, GPIO_32, GPIO_33, GPIO_34, GPIO_35, GPIO_36, GPIO_37, GPIO_38, GPIO_39,
+            GPIO_40, GPIO_41, GPIO_42, GPIO_43, GPIO_44, GPIO_45, GPIO_46, GPIO_47, GPIO_48, GPIO_49,
+            GPIO_50, GPIO_51, GPIO_52, GPIO_53
+        };
+        enum {
+            PIN_COUNT = GPIO_53 + 1
+        };
+
     private:
         volatile uint* registers;
 
-        GPIO* op (uint registerBase, uint pin) {
+        GPIO* op (uint registerBase, Pin pin) {
             // there are two banks (0 or 1) of pins (0-31 and 32-53), so we divide by 32 to
             // determine which register to fetch, and mask out the lower 5 bits (which is equivalent
             // to a modulo 32) to compute the offset within the register.
@@ -127,6 +140,7 @@ class GPIO {
                 if (registers == MAP_FAILED) {
                     throw RuntimeError (Text("GPIO: ") << "can't map GPIO registers");
                 }
+                Log::info () << "GPIO: " << "ready to talk" << endl;
             } else {
                 throw RuntimeError (Text("GPIO: ") << "can't open /dev/gpiomem");
             }
@@ -147,7 +161,7 @@ class GPIO {
             ALTERNATE_5 = 0x02
         };
 
-        GPIO* setPinFunction (uint pin, Function function) {
+        GPIO* setFunction (Pin pin, Function function) {
             // there are 6 function select registers, each controls 10 GPIO pins, with 3 bits for
             // each pin. we divide by 10 to determine which register to use (0-5), and then use the
             // modulo operator to get the offset within the register. we first mask out the 3 bits
@@ -158,7 +172,7 @@ class GPIO {
             return this;
         }
 
-        Function getPinFunction (uint pin) {
+        Function getFunction (Pin pin) {
             // there are 6 function select registers (0-5) starting at the base address, each
             // controls 10 GPIO pins, with 3 bits for each pin. we divide by 10 to determine which
             // register to fetch, and then use the modulo operator to compute the offset within the
@@ -168,24 +182,24 @@ class GPIO {
             return static_cast<Function>((registers[which] >> offset) & FSEL_MASK);
         }
 
-        GPIO* getPinFunction (uint pin, Function* function) {
-            *function = getPinFunction (pin);
+        GPIO* getFunction (Pin pin, Function* function) {
+            *function = getFunction (pin);
             return this;
         }
 
-        GPIO* setPin (uint pin) {
+        GPIO* set (Pin pin) {
             return op (GPSET, pin);
         }
 
-        GPIO* clearPin (uint pin) {
+        GPIO* clear (Pin pin) {
             return op (GPCLR, pin);
         }
 
-        GPIO* writePin (uint pin, bool set) {
-            return set ? setPin (pin) : clearPin (pin);
+        GPIO* write (Pin pin, bool should) {
+            return should ? set (pin) : clear (pin);
         }
 
-        bool getPin (uint pin) {
+        bool get (Pin pin) {
             // there are two banks (0 or 1) of pins (0-31 and 32-53), so we divide by 32 to
             // determine which register to fetch, and mask out the lower 5 bits (which is equivalent
             // to a modulo 32) to compute the offset within the register.
@@ -194,12 +208,12 @@ class GPIO {
             return (registers[which] & (0x01 << offset)) ? true : false;
         }
 
-        GPIO* getPin (uint pin, bool* value) {
-            *value = getPin (pin);
+        GPIO* get (Pin pin, bool* value) {
+            *value = get (pin);
             return this;
         }
 
-        GPIO* togglePin (uint pin) {
-            return getPin (pin) ?  clearPin (pin) : setPin (pin);
+        GPIO* toggle (Pin pin) {
+            return get (pin) ?  clear (pin) : set (pin);
         }
 };

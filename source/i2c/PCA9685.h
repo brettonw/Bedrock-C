@@ -69,7 +69,7 @@ class PCA9685 : public ReferenceCountedObject {
             // the chip takes 500 microseconds to recover from turning off the SLEEP bit
             Pause::micro (500);
 
-            Log::info () << "PCA9685: " << "Ready to talk" << endl;
+            Log::info () << "PCA9685: " << "ready to talk" << endl;
 
             // setup
             setPulseFrequency (requestedPulseFrequency);
