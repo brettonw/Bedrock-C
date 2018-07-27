@@ -16,14 +16,14 @@ TEST_CASE(TestGPIO) {
         names.push_back ("ALT_2 ");
         names.push_back ("ALT_3 ");
 
-        for (uint pin = 0; pin < GPIO_PIN_COUNT;) {
-            GPIO::Function function = gpio.getFunction (static_cast<Pin> (pin));
-            //Log::debug () << "TestGPIO: " << "pin " << pin << " is " << names[function] << endl;
-            Log& log = Log::debug () << "TestGPIO: " << pin << " -> " << names[function] << " | ";
-            ++pin;
-            function = gpio.getFunction (static_cast<Pin> (pin + 1));
-            log << names[function] << " <- " << pin << endl;
-            ++pin;
+        GPIO::Function function;
+        for (uint piPin = 0; piPin < RASPBERRY_PI_PIN_COUNT;) {
+            function = gpio.getFunction (static_cast<Pin> (getPin (static_cast<PiPin> (piPin))));
+            Log& log = Log::debug () << "TestGPIO: " << piPin << " -> " << names[function] << " | ";
+            ++piPin;
+            function = gpio.getFunction (static_cast<Pin> (getPin (static_cast<PiPin> (piPin))));
+            log << names[function] << " <- " << piPin << endl;
+            ++piPin;
         }
 
     } catch (RuntimeError& runtimeError) {
