@@ -9,12 +9,12 @@ TEST_CASE(TestGPIO) {
         vector<Text>    names;
         names.push_back ("INPUT");
         names.push_back ("OUTPUT");
+        names.push_back ("ALTERNATE_5");
+        names.push_back ("ALTERNATE_4");
         names.push_back ("ALTERNATE_0");
         names.push_back ("ALTERNATE_1");
         names.push_back ("ALTERNATE_2");
         names.push_back ("ALTERNATE_3");
-        names.push_back ("ALTERNATE_4");
-        names.push_back ("ALTERNATE_5");
 
         for (uint pin = 0; pin < GPIO::PIN_COUNT; ++pin) {
             GPIO::Function function = gpio.getFunction (static_cast<GPIO::Pin> (pin));
