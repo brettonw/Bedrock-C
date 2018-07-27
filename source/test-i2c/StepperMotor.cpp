@@ -41,7 +41,7 @@ TEST_CASE(LiveTestStepperMotor) {
         PtrTo<StepperMotor<AdafruitMotorDriver<DeviceI2C> > > stepper = StepperMotor<AdafruitMotorDriver<DeviceI2C> >::getHalfStepper (driver, MotorId::MOTOR_0, MotorId::MOTOR_1, 1.8);
         backAndForth (stepper);
     } catch (RuntimeError& runtimeError) {
-        Log::error () << runtimeError.getMessage () << endl;
+        Log::exception (runtimeError);
     } catch (...) {
     }
     TEST_X(true);

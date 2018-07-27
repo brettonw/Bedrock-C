@@ -99,7 +99,7 @@ MAKE_PTR_TO(Bus) {
         void close () {
             if (handle != BUS_INVALID) {
                 ::close (handle);
-                Log::info () << "closed bus " << id << " (" << hex (handle) << ") on " << filePath << endl;
+                Log::info () << "Bus: " << "closed bus " << id << " (" << hex (handle) << ") on " << filePath << endl;
                 handle = BUS_INVALID;
             }
         }
@@ -166,7 +166,7 @@ MAKE_PTR_TO(Bus) {
                         throw RuntimeError (Text("Bus:") << "can't set 7-bit addressing (" << errno << ")");
                     }
                 } else {
-                    throw RuntimeError (Text("Bus:") << "can't open bus on " << filePath);
+                    throw RuntimeError (Text("Bus: ") << "can't open bus on " << filePath);
                 }
             }
 

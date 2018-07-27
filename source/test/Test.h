@@ -42,11 +42,14 @@ class UnitTest {
                                 Log::error () << "EMPTY: " #name " (made no assertions)" << endl << endl;   \
                                 exit (EXIT_FAILURE);                                                        \
 							}                                                                               \
-                        } catch (RuntimeError& exception) {                                                 \
-                            cerr << "    " << exception.getMessage () << endl;                              \
+                        } catch (RuntimeError& runtimeError) {                                              \
+                            Log::exception (runtimeError);                                                  \
                             exit (EXIT_FAILURE);                                                            \
                         } catch (exception& exception) {                                                    \
-                            cerr << "    " << exception.what () << endl;                                    \
+                            cerr << "[OTHER] " << exception.what () << endl;                                \
+                            exit (EXIT_FAILURE);                                                            \
+                        } catch (...) {                                                                     \
+                            cerr << "[ UNKN] exiting..." << endl;                                           \
                             exit (EXIT_FAILURE);                                                            \
                         }                                                                                   \
 					}											                                            \

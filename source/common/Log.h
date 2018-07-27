@@ -1,6 +1,6 @@
 #pragma once
 
-#include        "Types.h"
+#include        "RuntimeError.h"
 
 class Log {
     public:
@@ -106,4 +106,5 @@ class Log {
         static Log& info ()  { return singleton () << Level (INFO)  << "[ INFO] "; }
         static Log& warn ()  { return singleton () << Level (WARN)  << "[ WARN] "; }
         static Log& error () { return singleton () << Level (ERROR) << "[ERROR] "; }
+        static Log& exception (RuntimeError& runtimeError) { return singleton () << Level (ERROR) << "[EXCPT] " << runtimeError.getMessage () << endl; }
 };
