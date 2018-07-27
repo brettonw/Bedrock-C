@@ -5,13 +5,6 @@
 
 // a general abstraction for a device on an I2C bus
 
-// http://i2c.info/
-// http://i2c.info/i2c-bus-specification
-// https://www.nxp.com/docs/en/user-guide/UM10204.pdf
-// https://www.kernel.org/doc/Documentation/i2c/dev-interface
-// https://xanthium.in/serial-programming-tutorials
-// https://www.cmrr.umn.edu/~strupp/serial.html
-
 const int DEVICE_I2C_ATVALUE_BUFFER_SIZE = 128;
 
 MAKE_PTR_TO(DeviceI2C) {
