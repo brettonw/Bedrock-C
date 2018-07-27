@@ -33,3 +33,13 @@ static inline Pin getPin (PiPin piPin) {
     throw RuntimeError (Text("getPin: ") << "Raspberry Pi pin " << piPin << " does not correspond to a usable GPIO pin");
 }
 
+static inline Pin getPiPin (Pin pin) {
+    extern int mapRpiPinToGpioPin[RASPBERRY_PI_PIN_COUNT];
+    for (int i = 0; i < RASPBERRY_PI_PIN_COUNT; ++i) {
+        if (mapRpiPinToGpioPin[i] == pin) {
+            return static_cast<Pin> (i + 1);
+        }
+    }
+    throw RuntimeError (Text("getPiPin: ") << "GPIO pin " << pin << " does not correspond to a Raspberry Pi pin");
+}
+
