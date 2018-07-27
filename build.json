@@ -5,11 +5,9 @@
     },
     "configurations": {
         "debug": {
-            "compilerOptions": "-Wno-psabi $compilerOptions",
             "linkerOptions": "-lpthread"
         },
         "release": {
-            "compilerOptions": "-Wno-psabi $compilerOptions",
             "linkerOptions": "-lpthread"
         }
     }
