@@ -24,11 +24,12 @@ enum PiPin {
 const int RASPBERRY_PI_PIN_COUNT = RPI_40 + 1;
 const int GPIO_XX = -1;
 
-extern int mapRpiPinToGpioPin[RASPBERRY_PI_PIN_COUNT];
 static inline Pin getPin (PiPin piPin) {
+    extern int mapRpiPinToGpioPin[RASPBERRY_PI_PIN_COUNT];
     int gpioPin = mapRpiPinToGpioPin[piPin];
     if (gpioPin != GPIO_XX) {
         return static_cast<Pin> (gpioPin);
     }
     throw RuntimeError (Text("getPin: ") << "Raspberry Pi pin " << piPin << " does not correspond to a usable GPIO pin");
 }
+

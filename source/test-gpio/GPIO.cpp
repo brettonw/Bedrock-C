@@ -1,4 +1,5 @@
 #include        "Test.h"
+#include        "Pause.h"
 #include        "GPIO.h"
 
 TEST_CASE(TestGPIO) {
@@ -6,19 +7,8 @@ TEST_CASE(TestGPIO) {
     try {
         GPIO    gpio;
 
-        /*
-        vector<Text>    names;
-        names.push_back ("INPUT ");
-        names.push_back ("OUTPUT");
-        names.push_back ("ALT_5 ");
-        names.push_back ("ALT_4 ");
-        names.push_back ("ALT_0 ");
-        names.push_back ("ALT_1 ");
-        names.push_back ("ALT_2 ");
-        names.push_back ("ALT_3 ");
-        */
         const char* functions[] = {
-            " I ", " O ", "A_5", "A_4", "A_0", "A_1", "A_2", "A_3"
+            "I", "O", "F", "E", "A", "B", "C", "D"
         };
 
         GPIO::Function function;
@@ -42,6 +32,23 @@ TEST_CASE(TestGPIO) {
         }
         log << endl;
 
+    } catch (RuntimeError& runtimeError) {
+        Log::exception (runtimeError);
+    } catch (...) {
+    }
+    TEST_X(true);
+}
+
+TEST_CASE(TestBlinkPin6) {
+    Log::Scope scope (Log::DEBUG);
+    try {
+        GPIO    gpio;
+        for (int i = 0; i < 10; ++i) {
+            gpio.set (GPIO_06);
+            Pause::milli (500);
+            gpio.clear (GPIO_06);
+            Pause::milli (500);
+        }
     } catch (RuntimeError& runtimeError) {
         Log::exception (runtimeError);
     } catch (...) {

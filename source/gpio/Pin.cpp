@@ -8,10 +8,10 @@ pins, I adapted the following diagram from several references:
     https://pinout.xyz/
     https://www.raspberrypi.org/forums/download/file.php?id=20369
 
-Note: I removed WiringPi references because they are not relevant to me, and I changed the names.
+Note: I removed WiringPi references because they are not relevant to me
 
  +-----+-----------+------+---+---Pi 3---+---+------+---------+-----+
- | BCM |    Name   | Mode | V | Physical | V | Mode | Name    | BCM |
+ | BCM |    Name   | Mode | V | Physical | V | Mode |  Name   | BCM |
  +-----+-----------+------+---+----++----+---+------+---------+-----+
  |     |     3.3v  |      |   |  1 || 2  |   |      | 5v      |     |
  |   2 |  I2C SDA1 | ALT0 | 1 |  3 || 4  |   |      | 5V      |     |
@@ -24,7 +24,7 @@ Note: I removed WiringPi references because they are not relevant to me, and I c
  |     |      3.3v |      |   | 17 || 18 | 0 | IN   | GPIO_05 | 24  |
  |  10 |  SPI_MOSI | ALT0 | 0 | 19 || 20 |   |      | GND     |     |
  |   9 |  SPI_MISO | ALT0 | 0 | 21 || 22 | 0 | IN   | GPIO_06 | 25  |
- |  11 |   SPI_CLK | ALT0 | 0 | 23 || 24 | 1 | OUT  | CE0     | 8   |
+ |  11 |      SCLK | ALT0 | 0 | 23 || 24 | 1 | OUT  | CE0     | 8   |
  |     |       GND |      |   | 25 || 26 | 1 | OUT  | CE1     | 7   |
  |   0 |     ID_SD |   IN | 1 | 27 || 28 | 1 | IN   | SCL_0   | 1   |
  |   5 |   GPIO_21 |   IN | 1 | 29 || 30 |   |      | GND     |     |
@@ -36,6 +36,24 @@ Note: I removed WiringPi references because they are not relevant to me, and I c
  +-----+-----------+------+---+----++----+---+------+---------+-----+
  | BCM |    Name   | Mode | V | Physical | V | Mode | Name    | BCM |
  +-----+-----------+------+---+---Pi 3---+---+------+---------+-----+
+
+Some of the GPIO pins are dedicated to "alternate functions" on the Raspberry Pi, see:
+
+    https://www.raspberrypi.org/documentation/usage/gpio/
+
+- PWM (pulse-width modulation)
+    Hardware PWM available on GPIO_12, GPIO_13, GPIO_18, GPIO_19
+
+- SPI
+    SPI0: MOSI (GPIO_10); MISO (GPIO_09); SCLK (GPIO_11); CE0 (GPIO_08), CE1 (GPIO_07)
+    SPI1: MOSI (GPIO_20); MISO (GPIO_19); SCLK (GPIO_21); CE0 (GPIO_18); CE1 (GPIO_17); CE2 (GPIO_16)
+
+- I2C
+    Data: (GPIO2); Clock (GPIO3)
+    EEPROM Data: (GPIO0); EEPROM Clock (GPIO1)
+
+- Serial
+    TX (GPIO14); RX (GPIO15)
 */
 
 int mapRpiPinToGpioPin[RASPBERRY_PI_PIN_COUNT] = {
