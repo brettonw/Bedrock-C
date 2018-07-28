@@ -26,6 +26,17 @@ class UnitTest {
 #define     TEST_XYF(_x, _y, _p) TEST_XYOP(abs (_x - _y), _p, <=)
 #define     TEST_XY(_x, _y) TEST_XYOP(_x, _y, ==)
 #define     TEST_X(_x) TEST_XYOP(_x, true, ==)
+#define     EXPECT_FAIL(_x)                                                                                 \
+            {                                                                                               \
+                bool _failed = false;                                                                       \
+                try {                                                                                       \
+                    _x;                                                                                     \
+                } catch (RuntimeError& runtimeError) {                                                      \
+                    Log::debug () << "    EXPECTED: (" << runtimeError.getMessage () << ")" << endl;        \
+                    _failed = true;                                                                         \
+                }                                                                                           \
+                TEST_X(_failed);                                                                            \
+            }
 #define		TEST_CASE(name)										                                            \
 			class TEST_CASE_##name : public UnitTest {  				                                    \
 				public:											                                            \
