@@ -64,3 +64,9 @@ TEST_CASE(TestBlinkPin6) {
     }
     TEST_X(true);
 }
+
+TEST_CASE(TestPinMappings) {
+    Log::Scope scope (Log::DEBUG);
+    TEST_XY(getPin (RPI_31), GPIO_06);
+    TEST_XY(getPiPin (GPIO_06), RPI_31);
+}
