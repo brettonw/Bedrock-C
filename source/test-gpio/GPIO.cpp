@@ -67,6 +67,17 @@ TEST_CASE(TestBlinkPin6) {
 
 TEST_CASE(TestPinMappings) {
     Log::Scope scope (Log::DEBUG);
+    try {
+        // this should throw an exception
+        getPin (RPI_01);
+        TEST_X (false);
+    } catch (RuntimeError& runtimeError) {
+        TEST_X (true);
+    }
     TEST_XY(getPin (RPI_31), GPIO_06);
+    TEST_XY(getPin (RPI_40), GPIO_21);
+
+    TEST_XY(getPiPin (GPIO_00), RPI_27);
     TEST_XY(getPiPin (GPIO_06), RPI_31);
+    TEST_XY(getPiPin (GPIO_21), RPI_40);
 }
