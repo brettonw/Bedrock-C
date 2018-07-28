@@ -186,8 +186,7 @@ MAKE_PTR_TO(GPIO) {
             return high ? set (pin) : clear (pin);
         }
 
-        // method for getting the current level of a pin - this should work regardless of the pin
-        // function - but I need to confirm that...
+        // method for getting the current level of a pin - this works regardless of the pin function
         bool get (Pin pin) {
             // there are two banks (0 or 1) of pins (0-31 and 32-53), so we divide by 32 to
             // determine which register to fetch, and mask out all but the lower 5 bits (which is
