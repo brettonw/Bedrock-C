@@ -68,30 +68,27 @@ TEST_CASE(TestBlinkPin6) {
 TEST_CASE(TestPinMappings) {
     Log::Scope scope (Log::DEBUG);
 
-    EXPECT_FAIL(getPin (RPI_01));
-
-
-    TEST_XY(getPin (RPI_03), GPIO_02);
-    TEST_XY(getPin (RPI_05), GPIO_03);
+    EXPECT_FAIL(getPin (RPI_01));      EXPECT_FAIL(getPin (RPI_02));
+    TEST_XY(getPin (RPI_03), GPIO_02); EXPECT_FAIL(getPin (RPI_04));
+    TEST_XY(getPin (RPI_05), GPIO_03); EXPECT_FAIL(getPin (RPI_06));
     TEST_XY(getPin (RPI_07), GPIO_04); TEST_XY(getPin (RPI_08), GPIO_14);
-                                       TEST_XY(getPin (RPI_10), GPIO_15);
+    EXPECT_FAIL(getPin (RPI_09));      TEST_XY(getPin (RPI_10), GPIO_15);
     TEST_XY(getPin (RPI_11), GPIO_17); TEST_XY(getPin (RPI_12), GPIO_18);
-    TEST_XY(getPin (RPI_13), GPIO_27);
+    TEST_XY(getPin (RPI_13), GPIO_27); EXPECT_FAIL(getPin (RPI_14));
     TEST_XY(getPin (RPI_15), GPIO_22); TEST_XY(getPin (RPI_16), GPIO_23);
-                                       TEST_XY(getPin (RPI_18), GPIO_24);
-    TEST_XY(getPin (RPI_19), GPIO_10);
+    EXPECT_FAIL(getPin (RPI_17));      TEST_XY(getPin (RPI_18), GPIO_24);
+    TEST_XY(getPin (RPI_19), GPIO_10); EXPECT_FAIL(getPin (RPI_20));
     TEST_XY(getPin (RPI_21), GPIO_09); TEST_XY(getPin (RPI_22), GPIO_25);
     TEST_XY(getPin (RPI_23), GPIO_11); TEST_XY(getPin (RPI_24), GPIO_08);
-                                       TEST_XY(getPin (RPI_26), GPIO_07);
+    EXPECT_FAIL(getPin (RPI_25));      TEST_XY(getPin (RPI_26), GPIO_07);
     TEST_XY(getPin (RPI_27), GPIO_00); TEST_XY(getPin (RPI_28), GPIO_01);
-    TEST_XY(getPin (RPI_29), GPIO_05);
+    TEST_XY(getPin (RPI_29), GPIO_05); EXPECT_FAIL(getPin (RPI_30));
     TEST_XY(getPin (RPI_31), GPIO_06); TEST_XY(getPin (RPI_32), GPIO_12);
-    TEST_XY(getPin (RPI_33), GPIO_13);
+    TEST_XY(getPin (RPI_33), GPIO_13); EXPECT_FAIL(getPin (RPI_34));
     TEST_XY(getPin (RPI_35), GPIO_19); TEST_XY(getPin (RPI_36), GPIO_16);
     TEST_XY(getPin (RPI_37), GPIO_26); TEST_XY(getPin (RPI_38), GPIO_20);
-                                       TEST_XY(getPin (RPI_40), GPIO_21);
+    EXPECT_FAIL(getPin (RPI_39));      TEST_XY(getPin (RPI_40), GPIO_21);
 
-    EXPECT_FAIL(getPiPin (GPIO_28));
 
     TEST_XY(getPiPin (GPIO_00), RPI_27);
     TEST_XY(getPiPin (GPIO_01), RPI_28);
@@ -122,8 +119,30 @@ TEST_CASE(TestPinMappings) {
     TEST_XY(getPiPin (GPIO_26), RPI_37);
     TEST_XY(getPiPin (GPIO_27), RPI_13);
 
-
-    TEST_XY(getPiPin (GPIO_00), RPI_27);
-    TEST_XY(getPiPin (GPIO_06), RPI_31);
-    TEST_XY(getPiPin (GPIO_21), RPI_40);
+    EXPECT_FAIL(getPiPin (GPIO_28));
+    EXPECT_FAIL(getPiPin (GPIO_29));
+    EXPECT_FAIL(getPiPin (GPIO_30));
+    EXPECT_FAIL(getPiPin (GPIO_31));
+    EXPECT_FAIL(getPiPin (GPIO_32));
+    EXPECT_FAIL(getPiPin (GPIO_33));
+    EXPECT_FAIL(getPiPin (GPIO_34));
+    EXPECT_FAIL(getPiPin (GPIO_35));
+    EXPECT_FAIL(getPiPin (GPIO_36));
+    EXPECT_FAIL(getPiPin (GPIO_37));
+    EXPECT_FAIL(getPiPin (GPIO_38));
+    EXPECT_FAIL(getPiPin (GPIO_39));
+    EXPECT_FAIL(getPiPin (GPIO_40));
+    EXPECT_FAIL(getPiPin (GPIO_41));
+    EXPECT_FAIL(getPiPin (GPIO_42));
+    EXPECT_FAIL(getPiPin (GPIO_43));
+    EXPECT_FAIL(getPiPin (GPIO_44));
+    EXPECT_FAIL(getPiPin (GPIO_45));
+    EXPECT_FAIL(getPiPin (GPIO_46));
+    EXPECT_FAIL(getPiPin (GPIO_47));
+    EXPECT_FAIL(getPiPin (GPIO_48));
+    EXPECT_FAIL(getPiPin (GPIO_49));
+    EXPECT_FAIL(getPiPin (GPIO_50));
+    EXPECT_FAIL(getPiPin (GPIO_51));
+    EXPECT_FAIL(getPiPin (GPIO_52));
+    EXPECT_FAIL(getPiPin (GPIO_53));
 }
