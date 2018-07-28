@@ -66,7 +66,7 @@ TEST_CASE(TestBlinkPin6) {
 }
 
 TEST_CASE(TestPinMappings) {
-    Log::Scope scope (Log::DEBUG);
+    //Log::Scope scope (Log::DEBUG);
 
     EXPECT_FAIL(getPin (RPI_01));      EXPECT_FAIL(getPin (RPI_02));
     TEST_XY(getPin (RPI_03), GPIO_02); EXPECT_FAIL(getPin (RPI_04));
