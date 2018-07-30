@@ -97,13 +97,14 @@ class PtrTo {
             return (ptrToType) ? (ptrToType->getReferenceCount () == 1) : true;
         }
 
-        void makeUnique () {
+        PtrTo<aType>& makeUnique () {
             if (not isUnique ()) {
                 aType* ptr = new aType (*ptrToType);
                 addRefToPtr (ptr);
                 removeRefFromPtr (ptrToType);
                 ptrToType = ptr;
             }
+            return *this;
         }
 };
 

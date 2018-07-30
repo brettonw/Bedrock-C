@@ -99,3 +99,20 @@ TEST_CASE(TestBag2) {
     TEST_XY(bag, "{\"xxx\":[5,true,\"hello\",1.66500000,{\"yyy\":15}]}");
     Log::debug () << bag << endl;
 }
+
+TEST_CASE(TestBagObjectNameTable) {
+    Log::Scope scope (Log::TRACE);
+    PtrToBagArray bagArray = new BagArray ();
+    Text    def ("DEF");
+    for (int i = 0; i < 5; ++i) {
+        PtrToBagObject bagObject = (new BagObject ())
+            ->put ("ABC", "123")
+            ->put (def, "234")
+            ->put ("GHI", "345")
+            ->put ("JKL", "456")
+            ->put ("MNO", "567");
+        bagArray->add (bagObject);
+    }
+    TEST_XYOP(def.getReferenceCount(), 5, <);
+    TEST_XY(bagArray->size (), 5);
+}

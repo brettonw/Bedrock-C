@@ -207,20 +207,17 @@ MAKE_PTR_TO_SUB(BagObject, BagContainer) {
         PtrToBagObject put (const Text& name, BagThing* bagThing) {
             // look up the requested name in our name table to check to see if we already have a
             // pointer to an identical string - this will mitigate repeated copying of the same
-            // name, and reduce the memory footprint of BagObjects in aggregate.
+            // name, and reduce the memory footprint of BagObjects in aggregate. we ensure the
+            // name string is unique to make it hard to accidentally change the string after using
+            // it as a name.
             static TextMap<Text> nameTable;
             const Text* foundName = nameTable.get(name);
-            Text useName = (foundName != 0) ? *foundName : (nameTable[name] = name);
-            Log::trace () << "BagObject: " << "nameTable contains " << nameTable.size () << " reference" << ((nameTable.size () != 1 ) ? "s" : "") << endl;
-            /*
-            if (foundName != 0) {
-                // we've already got a copy of this string - use that one
-                useName = *foundName;
-            } else {
-                // we don't already have a copy, save this one
-                nameTable[name] = useName = name;
-            }
-            */
+            //Log::trace () << "BagObject: " << "name (" << name << ") " << (name.isUnique() ? "is" : "is NOT") << " unique" << endl;
+            ///Log::trace () << "           " << "name (" << name << ") " << (foundName ? "is" : "is NOT") << " already in the name table" << endl;
+            //Log::trace () << "           " << "nameTable contains " << nameTable.size () << " reference" << ((nameTable.size () != 1 ) ? "s" : "") << endl;
+            Text useName = (foundName != 0) ? *foundName : (nameTable[name] = name.makeUnique ());
+            //Log::trace () << "           " << "nameTable contains " << nameTable.size () << " reference" << ((nameTable.size () != 1 ) ? "s" : "") << endl;
+            //Log::trace () << "           " << "using (" << useName << ") with " << useName.getReferenceCount () << " references" << endl;
 
             // and now actually assign the thing...
             value[useName] = bagThing;

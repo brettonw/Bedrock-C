@@ -247,6 +247,21 @@ class Text {
         }
 
         // Text& operator >> (to a value type)
+
+        uint getReferenceCount (void) const{
+            return ptr->getReferenceCount();
+        }
+
+        bool isUnique () const {
+            return ptr.isUnique();
+        }
+
+        Text& makeUnique () {
+            if (not isUnique()) {
+                ptr = RawText::make (ptr->get (), ptr->getLength ());
+            }
+            return *this;
+        }
 };
 
 inline
