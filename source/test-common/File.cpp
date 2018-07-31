@@ -2,7 +2,7 @@
 #include "File.h"
 
 TEST_CASE(TestFileExists) {
-    File    file ("Utf8Test.txt");
+    File    file ("test.txt");
     TEST_XY(file.getExists (), true);
 
     File    directory ("..");
@@ -13,9 +13,9 @@ TEST_CASE(TestFileExists) {
 }
 
 TEST_CASE(TestFileBasename) {
-    File    file ("./Utf8Test.txt");
-    TEST_XY(file.getPath (), "./Utf8Test.txt");
-    TEST_XY(file.getBasename (), "Utf8Test");
+    File    file ("./test.txt");
+    TEST_XY(file.getPath (), "./test.txt");
+    TEST_XY(file.getBasename (), "test");
     TEST_XY(file.getExtension (), "txt");
 
     File file2 ("./dir/dir2");
@@ -35,7 +35,7 @@ TEST_CASE(TestFileBasename) {
 TEST_CASE(TestFileIsDirectory) {
     //Log::Scope scope (Log::DEBUG);
 
-    File    file ("Utf8Test.txt");
+    File    file ("test.txt");
     TEST_XY(file.isDirectory (), false);
 
     File    directory ("..");

@@ -235,7 +235,7 @@ class Text {
         }
 
         Text& operator << (bool value) {
-            return append (value ? "true" : "false");
+            return append (value ? TRUE : FALSE);
         }
 
         // XXX TODO temporary hack, should do something smarter here
@@ -262,6 +262,10 @@ class Text {
             }
             return *this;
         }
+
+        // public statics
+        static const Text TRUE;
+        static const Text FALSE;
 };
 
 inline
