@@ -5,6 +5,7 @@
 MAKE_PTR_TO_SUB(BagArray, BagContainer) {
     protected:
         vector<PtrToBagThing> value;
+        friend class BagArraySort;
 
         PtrToBagArray add (BagThing* bagThing) {
             value.push_back (bagThing);
@@ -92,32 +93,5 @@ MAKE_PTR_TO_SUB(BagArray, BagContainer) {
                 }
             }
             return ptrToBagThing;
-        }
-
-        class SimpleSort {
-            private:
-                bool ascending;
-
-            public:
-                SimpleSort (bool _ascending) : ascending (_ascending) {}
-
-                // should left be ordered before right?
-                bool operator () (PtrToBagThing leftThing,PtrToBagThing rightThing) {
-                    // strategy:
-                    // start by trying to do a numeric comparison, if that's not possible, convert
-                    // both sides to strings and do a string comparison
-                    double delta = leftThing->sortValue() - rightThing->sortValue();
-                    if (delta == 0) {
-                        delta = leftThing->toText().compare(rightThing->toText ());
-                    }
-                    return ascending ? (delta < 0) : (delta > 0);
-                }
-        };
-
-        PtrToBagArray   sort (bool ascending = true) {
-            SimpleSort simpleSort (ascending);
-            PtrToBagArray copy = new BagArray (*this);
-            ::sort (copy->value.begin(), copy->value.end(), simpleSort);
-            return copy;
         }
 };
