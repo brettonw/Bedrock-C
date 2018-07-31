@@ -14,4 +14,5 @@ MAKE_PTR_TO_SUB(BagContainer, BagThing) {
         }
 
         virtual const PtrToBagThing get (const Text& path) const = 0;
+        virtual double sortValue () const { return 0.0; };
 };

@@ -5,9 +5,6 @@
 MAKE_PTR_TO_SUB(BagArray, BagContainer) {
     protected:
         vector<PtrToBagThing> value;
-        Text beginEnclosure;
-        Text endEnclosure;
-        Text separator;
 
         PtrToBagArray add (BagThing* bagThing) {
             value.push_back (bagThing);
@@ -15,8 +12,9 @@ MAKE_PTR_TO_SUB(BagArray, BagContainer) {
         }
 
     public:
-        BagArray () : BagContainer (BagThing::ARRAY_TYPE), beginEnclosure ("["), endEnclosure ("]"), separator (",") {}
-        BagArray (const Text& _begin, const Text& _end, const Text& _separator) : BagContainer (BagThing::ARRAY_TYPE), beginEnclosure (_begin), endEnclosure (_end), separator (_separator) {}
+        BagArray () : BagContainer (BagThing::ARRAY_TYPE) {}
+        BagArray (const BagArray& source) : BagContainer (BagThing::ARRAY_TYPE), value (source.value) {}
+
         virtual ~BagArray () {}
 
         virtual Text toJson () const {
@@ -24,19 +22,19 @@ MAKE_PTR_TO_SUB(BagArray, BagContainer) {
             Text out;
             for (vector<PtrToBagThing>::const_iterator it = value.begin (); it != value.end (); ++it) {
                 out << prepend << (*it)->toJson ();
-                prepend = separator;
+                prepend = ",";
             }
-            return enclose (out, beginEnclosure, endEnclosure);
+            return enclose (out, "[", "]");
         }
 
         virtual Text toText () const {
-            Text prepend = "";
+            const char* prepend = "";
             Text out;
             for (vector<PtrToBagThing>::const_iterator it = value.begin (); it != value.end (); ++it) {
                 out << prepend << (*it)->toText ();
-                prepend = END_LINE;
+                prepend = ", ";
             }
-            return out << END_LINE;
+            return out;
         }
 
         template<typename BagThingSubtype>
@@ -96,14 +94,30 @@ MAKE_PTR_TO_SUB(BagArray, BagContainer) {
             return ptrToBagThing;
         }
 
-        struct SimpleSort {
-                bool operator () (PtrToBagThing left,PtrToBagThing right) {
-                    // should left be ordered before right?
-                    return false;
+        class SimpleSort {
+            private:
+                bool ascending;
+
+            public:
+                SimpleSort (bool _ascending) : ascending (_ascending) {}
+
+                // should left be ordered before right?
+                bool operator () (PtrToBagThing leftThing,PtrToBagThing rightThing) {
+                    // strategy:
+                    // start by trying to do a numeric comparison, if that's not possible, convert
+                    // both sides to strings and do a string comparison
+                    double delta = leftThing->sortValue() - rightThing->sortValue();
+                    if (delta == 0) {
+                        delta = leftThing->toText().compare(rightThing->toText ());
+                    }
+                    return ascending ? (delta < 0) : (delta > 0);
                 }
         };
 
-        PtrToBagArray   sort () {
-            return this;
+        PtrToBagArray   sort (bool ascending = true) {
+            SimpleSort simpleSort (ascending);
+            PtrToBagArray copy = new BagArray (*this);
+            ::sort (copy->value.begin(), copy->value.end(), simpleSort);
+            return copy;
         }
 };

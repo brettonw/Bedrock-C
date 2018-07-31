@@ -35,7 +35,7 @@ void backAndForth (PtrTo<StepperMotor<AdafruitMotorDriver<DeviceType> > > steppe
 
 
 TEST_CASE(LiveTestStepperMotor) {
-    Log::Scope scope (Log::DEBUG);
+    //Log::Scope scope (Log::DEBUG);
     try {
         PtrTo<AdafruitMotorDriver<DeviceI2C> > driver = new AdafruitMotorDriver<DeviceI2C> ();
         PtrTo<StepperMotor<AdafruitMotorDriver<DeviceI2C> > > stepper = StepperMotor<AdafruitMotorDriver<DeviceI2C> >::getHalfStepper (driver, MotorId::MOTOR_0, MotorId::MOTOR_1, 1.8);

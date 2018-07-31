@@ -11,4 +11,5 @@ MAKE_PTR_TO_SUB(BagText, BagThing) {
         virtual ~BagText () { }
         virtual Text toJson () const { return enquote (toText ()); }
         virtual Text toText () const { return value; }
+        virtual double sortValue () const { return strtod (value.get(), 0); };
 };

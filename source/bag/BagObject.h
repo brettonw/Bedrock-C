@@ -29,6 +29,7 @@ MAKE_PTR_TO_SUB(BagObject, BagContainer) {
 
     public:
         BagObject () : BagContainer (BagThing::OBJECT_TYPE) {}
+        BagObject (const BagObject& source) : BagContainer (BagThing::OBJECT_TYPE), value (source.value) {}
         virtual ~BagObject () {}
         virtual Text toJson () const {
             const char* prepend = "";

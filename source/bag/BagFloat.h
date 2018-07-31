@@ -10,4 +10,5 @@ MAKE_PTR_TO_SUB(BagFloat, BagThing) {
         BagFloat (double _value) : BagThing (BagThing::FLOAT_TYPE), value (_value) {}
         virtual ~BagFloat () {}
         virtual Text toText () const { return Text () << value; }
+        virtual double sortValue () const { return value; };
 };

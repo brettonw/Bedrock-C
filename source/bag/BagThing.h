@@ -19,6 +19,7 @@ MAKE_PTR_TO(BagThing) {
         Type getType () const { return type; };
         virtual Text toJson () const { return toText (); };
         virtual Text toText () const = 0;
+        virtual double sortValue () const = 0;
 
     protected:
         Type type;
