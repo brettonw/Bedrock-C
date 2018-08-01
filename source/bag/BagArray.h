@@ -106,17 +106,17 @@ MAKE_PTR_TO_SUB(BagArray, BagContainer) {
         }
 
         static PtrToBagArray sort (const PtrToBagArray& source, SortDir sortDir = ASCENDING) {
-            Log::debug() << "BagArray: " << "simple sort" << endl;
+            //Log::debug() << "BagArray: " << "simple sort" << endl;
             return withSortAdapter (source, SimpleSort (sortDir));
         }
 
         static PtrToBagArray sort (const PtrToBagArray& source, const Text& field, SortDir sortDir = ASCENDING) {
-            Log::debug() << "BagArray: " << "field sort" << endl;
+            //Log::debug() << "BagArray: " << "field sort" << endl;
             return withSortAdapter (source, FieldSort (field, sortDir));
         }
 
         static PtrToBagArray sort (const PtrToBagArray& source, const DbSort& dbSort) {
-            Log::debug() << "BagArray: " << "db sort" << endl;
+            //Log::debug() << "BagArray: " << "db sort" << endl;
             return withSortAdapter (source, dbSort);
         }
 };
