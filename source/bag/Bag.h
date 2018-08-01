@@ -6,7 +6,6 @@
 #include    "BagInteger.h"
 #include    "BagFloat.h"
 #include    "BagBool.h"
-#include    "BagContainer.h"
-#include    "BagArray.h"
 #include    "BagObject.h"
+#include    "BagArray.h"
 

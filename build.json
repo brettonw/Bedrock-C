@@ -1,7 +1,6 @@
 {
     "values": {
-    	"sourcePath": "source",
-        "target": "test-common"
+    	"sourcePath": "source"
     },
     "configurations": {
         "debug": {
