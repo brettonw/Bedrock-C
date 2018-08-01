@@ -70,7 +70,7 @@ class StepperMotor : public ReferenceCountedObject {
 
     public:
     // the most basic stepper traverses the unit circle, starting at 0 degrees and proceeds at 90
-    // degree intervals in 4 cycle. i find this method to be unreliable, often missing steps, so I
+    // degree intervals in 4 steps. i find this method to be unreliable, often missing steps, so I
     // don't suggest using it. the next most basic case also proceeds at 90 degrees intervals in 4
     // steps, but starts at a 45 degree offset and saturates the control values. this way, both
     // coils are always fully activated, making the cycle robust.
