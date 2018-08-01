@@ -1,6 +1,7 @@
 #pragma once
 
-#include    "BagContainer.h"
+#include    "Log.h"
+#include    "BagObject.h"
 
 // sort helpers
 enum SortDir { DESCENDING, ASCENDING };
@@ -16,8 +17,9 @@ class SimpleSort {
             // strategy:
             // start by trying to do a numeric comparison, if that's not possible, convert
             // both sides to strings and do a string comparison
-            double delta = leftThing->sortValue() - rightThing->sortValue();
-            if (delta == 0) {
+            double leftThingSortValue = leftThing->sortValue();
+            double delta = leftThingSortValue - rightThing->sortValue();
+            if ((delta == 0) and (leftThingSortValue == 0)) {
                 Log::debug() << "SimpleSort: " << "comparing as text ([" << leftThing->toText() << "], [" <<  rightThing->toText () << "])" << endl;
                 delta = static_cast<double> (leftThing->toText().compare(rightThing->toText ()));
             }
@@ -123,9 +125,9 @@ MAKE_PTR_TO_SUB(BagArray, BagContainer) {
             Text out;
             for (vector<PtrToBagThing>::const_iterator it = value.begin (); it != value.end (); ++it) {
                 out << prepend << (*it)->toText ();
-                prepend = ", ";
+                prepend = ",";
             }
-            return out;
+            return enclose (out, "[", "]");
         }
 
         template<typename BagThingSubtype>

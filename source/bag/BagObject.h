@@ -46,9 +46,9 @@ MAKE_PTR_TO_SUB(BagObject, BagContainer) {
             Text out;
             for (TextMap<PtrToBagThing>::const_iterator it = value.begin (); it != value.end (); ++it) {
                 out << prepend << it->first << "=" << it->second->toText ();
-                prepend = END_LINE;
+                prepend = ",";
             }
-            return out << END_LINE;
+            return enclose (out, "{", "}");
         }
 
         template<typename BagThingSubtype>

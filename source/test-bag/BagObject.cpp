@@ -5,7 +5,7 @@ TEST_CASE(TestEmptyBagObject) {
     PtrToBagObject bagObject = new BagObject ();
     TEST_XY(bagObject->size (), 0);
     TEST_XY(bagObject->toJson (), "{}");
-    TEST_XY(bagObject->toText (), "\n");
+    TEST_XY(bagObject->toText (), "{}");
 }
 
 TEST_CASE(TestBagObject) {
@@ -17,7 +17,7 @@ TEST_CASE(TestBagObject) {
         ->put ("DD", 6.5);
     TEST_XY(bagObject->size (), 4);
     TEST_XY(bagObject->toJson (), "{\"A\":\"Hello World\",\"B\":5,\"C\":true,\"DD\":6.50000000}");
-    TEST_XY(bagObject->toText (), "A=Hello World\nB=5\nC=true\nDD=6.50000000\n");
+    TEST_XY(bagObject->toText (), "{A=Hello World,B=5,C=true,DD=6.50000000}");
 
     TEST_XY(bagObject->get ("A")->toJson (), "\"Hello World\"");
     TEST_XY(bagObject->get ("B")->toText (), "5");

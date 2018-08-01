@@ -5,7 +5,7 @@ TEST_CASE(TestEmptyBagArray) {
     PtrToBagArray bagArray = new BagArray ();
     TEST_XY(bagArray->size (), 0);
     TEST_XY(bagArray->toJson (), "[]");
-    TEST_XY(bagArray->toText (), "");
+    TEST_XY(bagArray->toText (), "[]");
 }
 
 TEST_CASE(TestBagArray) {
@@ -16,7 +16,7 @@ TEST_CASE(TestBagArray) {
         ->add (6.5);
     TEST_XY(bagArray->size (), 4);
     TEST_XY(bagArray->toJson (), "[\"Hello World\",5,true,6.50000000]");
-    TEST_XY(bagArray->toText (), "Hello World, 5, true, 6.50000000");
+    TEST_XY(bagArray->toText (), "[Hello World,5,true,6.50000000]");
 
     TEST_XY(bagArray->get (0)->toJson (), "\"Hello World\"");
     TEST_XY(bagArray->get (0)->toText (), "Hello World");
@@ -46,12 +46,12 @@ TEST_CASE(TestBagArraySimpleSort) {
     Log::debug () << "TestBagArraySort: " << "unsorted (" << bagArray->toText() << ")" << endl;
     TEST_XY(bagArray->get(0)->sortValue(), 5);
 
-    PtrToBagArray sortedBagArray = BagArraySort::sort (bagArray);
+    PtrToBagArray sortedBagArray = BagArray::sort (bagArray);
     Log::debug () << "TestBagArraySort: " << "sorted (" << sortedBagArray->toText () << ")" << endl;
     TEST_XY(bagArray->size(), sortedBagArray->size ());
     TEST_XY(sortedBagArray->get(0)->sortValue(), 0);
 
-    sortedBagArray = BagArraySort::sort (bagArray, DESCENDING);
+    sortedBagArray = BagArray::sort (bagArray, DESCENDING);
     Log::debug () << "TestBagArraySort: " << "sorted (" << sortedBagArray->toText () << ")" << endl;
     TEST_XY(bagArray->size(), sortedBagArray->size ());
     TEST_XY(sortedBagArray->get(0)->sortValue(), 5.6);
@@ -98,12 +98,12 @@ TEST_CASE(TestBagArrayDbSort) {
     Log::debug () << "TestBagArraySort: " << "unsorted (" << bagArray->toText() << ")" << endl;
     //TEST_XY(bagArray->get(0)->sortValue(), 5);
 
-    PtrToBagArray sortedBagArray = BagArray::sort (bagArray, BagArraySort::DbSort);
+    PtrToBagArray sortedBagArray = BagArray::sort (bagArray, DbSort ("x")("y", DESCENDING));
     Log::debug () << "TestBagArraySort: " << "sorted (" << sortedBagArray->toText () << ")" << endl;
     TEST_XY(bagArray->size(), sortedBagArray->size ());
     //TEST_XY(sortedBagArray->get(0)->sortValue(), 0);
 
-    sortedBagArray = BagArray::sort (bagArray, "x", DESCENDING);
+    sortedBagArray = BagArray::sort (bagArray, DbSort ("y")("x", DESCENDING));
     Log::debug () << "TestBagArraySort: " << "sorted (" << sortedBagArray->toText () << ")" << endl;
     TEST_XY(bagArray->size(), sortedBagArray->size ());
     //TEST_XY(sortedBagArray->get(0)->sortValue(), 5.6);
