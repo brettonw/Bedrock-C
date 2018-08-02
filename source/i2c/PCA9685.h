@@ -84,7 +84,7 @@ class PCA9685 : public ReferenceCountedObject {
         // @param off     - when to turn the pulse off within the tick, out of 4096, off
         //                  should be greater than on, but control bit 4 (value 4096) will force
         //                  the output off for the whole
-        void setChannelPulse (byte channel, ushort on, ushort off) {
+        void setChannelPulse (byte channel, u2 on, u2 off) {
             // (https://cdn-shop.adafruit.com/datasheets/PCA9685.pdf - Section 7.3.3)
             Log::debug () << "PCA9685: " << "setChannelPulse - CHANNEL(" << hex(channel) << ") ON(" << hex (on) << ") OFF(" << hex (off) << ")" << endl;
             auto channelOffset = channel * CHANNEL_OFFSET_MULTIPLIER;

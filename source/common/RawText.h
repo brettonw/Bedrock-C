@@ -22,7 +22,7 @@ MAKE_PTR_TO(RawText) {
         static uint mapCapacity (uint capacity) {
             if (capacity < MAX_CAPACITY) {
                 // bump capacity to the next power of 2 above it
-                ulong bitsNeeded = static_cast<ulong> (ceil (log2 (capacity)));
+                uint bitsNeeded = static_cast<uint> (ceil (log2 (capacity)));
                 capacity = 1 << bitsNeeded;
             } else {
                 // make the size be the next multiple of MAX_CAPACITY
