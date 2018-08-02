@@ -1,18 +1,15 @@
 #pragma once
 
-// a few basic types
+// a few basic types, somewhat pedantic...
 typedef unsigned char   byte;
-typedef unsigned short  ushort;
+typedef unsigned int    sint;
 typedef unsigned int    uint;
-typedef unsigned long   ulong;
 
-// my echos of the posix types, with some checks to see what the memory/architecture model is
-static_assert((sizeof(int) == 4) and (sizeof(long) == 8), "unsupported data model");
-
-typedef char            s1;
-typedef short           s2;
-typedef int             s4;
-typedef long            s8;
+// if you want to care about the actual size of a storage type in use, these are guaranteed
+typedef signed char     s1;
+typedef signed short    s2;
+typedef signed int      s4;
+typedef signed long     s8;
 
 typedef unsigned char   u1;
 typedef unsigned short  u2;
