@@ -1,6 +1,6 @@
 {
     "values": {
-        "type": "noLink",
+        "type": "sharedLibrary",
         "dependencies": ["common"]
     }
 }
