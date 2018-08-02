@@ -1,6 +1,6 @@
 #pragma once
 
-#include    "Text.h"
+#include "Text.h"
 
 MAKE_PTR_TO(BagThing) {
     public:

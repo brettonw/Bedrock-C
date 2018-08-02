@@ -1,7 +1,6 @@
 #pragma once
 
-#include    "Log.h"
-#include    "Bus.h"
+#include "Bus.h"
 
 // a general abstraction for a device on an I2C bus
 

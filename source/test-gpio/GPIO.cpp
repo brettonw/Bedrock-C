@@ -1,6 +1,6 @@
-#include        "Test.h"
-#include        "Pause.h"
-#include        "GPIO.h"
+#include "Test.h"
+#include "Pause.h"
+#include "GPIO.h"
 
 TEST_CASE(TestGPIO) {
     Log::Scope scope (Log::DEBUG);

@@ -1,4 +1,4 @@
-#include    "Text.h"
+#include "Text.h"
 
 // public statics
 const Text Text::TRUE ("true");

@@ -1,52 +1,28 @@
 #pragma once
 
-// standard includes
-#include    <cstring>
-#include    <cmath>
-#include    <cstdlib>
-#include    <cstdio>
-#include    <iostream>
-#include    <iomanip>
-#include    <sstream>
-#include    <vector>
-#include    <set>
-#include    <map>
-#include    <stdexcept>
-#include    <algorithm>
-#include    <chrono>
-#include    <thread>
-#include    <pthread.h>
-
-using namespace std;
-
 // a few basic types
 typedef unsigned char   byte;
 typedef unsigned short  ushort;
 typedef unsigned int    uint;
 typedef unsigned long   ulong;
 
-// my echos of the posix types
-typedef char            s08;
-typedef short           s16;
-typedef int             s32;
-typedef long            s64;
-typedef unsigned char   u08;
-typedef unsigned short  u16;
-typedef unsigned int    u32;
-typedef unsigned long   u64;
-typedef float           f32;
-typedef double          f64;
+// my echos of the posix types, with some checks to see what the memory/architecture model is
+static_assert((sizeof(int) == 4) and (sizeof(long) == 8), "unsupported data model");
 
-//------------------------------------------------------------------------------
-// helpers
-//------------------------------------------------------------------------------
+typedef char            s1;
+typedef short           s2;
+typedef int             s4;
+typedef long            s8;
 
-template <typename T>
-int signum(T value) {
-    return (T(0) < value) - (value < T(0));
-}
+typedef unsigned char   u1;
+typedef unsigned short  u2;
+typedef unsigned int    u4;
+typedef unsigned long   u8;
 
-inline
-double saturate (double value) {
-    return (abs (value) > 0.5) ? double (signum (value)) : 0;
-}
+typedef float           f4;
+typedef double          f8;
+
+// a few definitions to substitute for the standard names
+#define bit_and         &
+#define bit_or          |
+#define complement      ~

@@ -1,5 +1,4 @@
-#include    "Log.h"
-#include    "RuntimeError.h"
+#include "Log.h"
 
 #pragma once
 

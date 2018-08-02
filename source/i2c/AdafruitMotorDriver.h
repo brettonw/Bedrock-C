@@ -1,7 +1,7 @@
 #pragma once
 
-#include        "PCA9685.h"
-#include        "MotorId.h"
+#include "PCA9685.h"
+#include "MotorId.h"
 
 // DC and Stepper Motor "Hat" Driver
 //

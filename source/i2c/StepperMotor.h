@@ -1,6 +1,6 @@
 #pragma once
 
-#include        "Motor.h"
+#include "Motor.h"
 
 // Stepper Motor
 //

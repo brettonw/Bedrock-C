@@ -1,7 +1,6 @@
 #pragma once
 
-#include        "Log.h"
-#include        "RuntimeError.h"
+#include "Log.h"
 
 // this UTF-8 handling is modeled after the javascript at: https://github.com/mathiasbynens/utf8.js
 // for the UTF-8 specification, see: https://encoding.spec.whatwg.org/#utf-8

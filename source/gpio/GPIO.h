@@ -1,13 +1,13 @@
 #pragma once
 
-#include        "Log.h"
-#include        "RuntimeError.h"
+#include "Log.h"
+#include "RuntimeError.h"
 
-#include        <fcntl.h>
-#include        <unistd.h>
-#include        <sys/ioctl.h>
-#include        <errno.h>
-#include        <sys/mman.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
+#include <errno.h>
+#include <sys/mman.h>
 
 /*
 This documentation is abstracted from the BCM2835 and BCM2837 datasheets, see chapter 6 for GPIO
@@ -44,7 +44,7 @@ The GPIO has 41 registers. All accesses are assumed to be 32-bit. The registers 
 The function select registers are used to define the operation of the general-purpose I/O
 pins. Each of the 54 GPIO pins has at least two alternative functions as defined in section
 16.2. The FSEL{n} field determines the functionality of the nth GPIO pin. All unused
-alternative function lines are tied to ground and will output a “0” if selected. All pins reset
+alternative function lines are tied to ground and will output a 0 if selected. All pins reset
 to normal GPIO input operation.
 
 Each 32-bit GPFSEL register controls 10 GPIO pins, using a 3 bit code per pin:
@@ -59,7 +59,7 @@ Each 32-bit GPFSEL register controls 10 GPIO pins, using a 3 bit code per pin:
 
 - GPIO Pin Output Set Registers (GPSETn)
 The output set registers are used to set a GPIO pin. The SET{n} field defines the
-respective GPIO pin to set, writing a “0” to the field has no effect. If the GPIO pin is
+respective GPIO pin to set, writing a 0 to the field has no effect. If the GPIO pin is
 being used as in input (by default) then the value in the SET{n} field is ignored.
 However, if the pin is subsequently defined as an output then the bit will be set
 according to the last set/clear operation. Separating the set and clear functions
@@ -67,7 +67,7 @@ removes the need for read-modify-write operations.
 
 - GPIO Pin Output Clear Registers (GPCLRn)
 The output clear registers are used to clear a GPIO pin. The CLR{n} field defines
-the respective GPIO pin to clear, writing a “0” to the field has no effect. If the GPIO
+the respective GPIO pin to clear, writing a 0 to the field has no effect. If the GPIO
 pin is being used as in input (by default) then the value in the CLR{n} field is
 ignored. However, if the pin is subsequently defined as an output then the bit will
 be set according to the last set/clear operation. Separating the set and clear

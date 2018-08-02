@@ -1,6 +1,6 @@
 #pragma once
 
-#include        "RuntimeError.h"
+#include "RuntimeError.h"
 
 class Log {
     public:
@@ -48,8 +48,7 @@ class Log {
         uint filterLevel;
         uint level;
 
-        Log (ostream& _stream, uint _filterLevel = INFO, uint _level = INFO) : stream (&_stream), filterLevel (_filterLevel), level (_level) {
-        }
+        Log (ostream& _stream, uint _filterLevel = INFO, uint _level = INFO) : stream (&_stream), filterLevel (_filterLevel), level (_level) {}
 
         static Log* log;
         static Log& singleton () {

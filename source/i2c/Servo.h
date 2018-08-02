@@ -1,7 +1,7 @@
 #pragma once
 
-#include        "Log.h"
-#include        "ServoId.h"
+#include "Log.h"
+#include "ServoId.h"
 
 template<typename DriverType>
 class Servo : public ReferenceCountedObject {

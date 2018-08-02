@@ -1,7 +1,7 @@
 #pragma once
 
-#include        "PCA9685.h"
-#include        "ServoId.h"
+#include "PCA9685.h"
+#include "ServoId.h"
 
 /**
 * Servo Driver Board

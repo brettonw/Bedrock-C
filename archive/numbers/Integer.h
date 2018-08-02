@@ -1,5 +1,5 @@
 #pragma once
-//----------------------------------------------------------------------------------------------------
+
 #include "DigitOps.h"
 
 //----------------------------------------------------------------------------------------------------
@@ -49,7 +49,7 @@ class	Integer
 		Integer		operator -- (int postdecrement);
 		Integer		operator bit_and (const Integer& a) const;
 		Integer		operator bit_or (const Integer& a) const;
-		Integer		operator exclusive_or (const Integer& a) const;
+		Integer		operator xor (const Integer& a) const;
 		Integer		operator complement (void) const;
 		sInt4		operator == (const Integer& a) const;
 		sInt4		operator != (const Integer& a) const;

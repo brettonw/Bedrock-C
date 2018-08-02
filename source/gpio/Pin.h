@@ -1,6 +1,6 @@
 #pragma once
 
-#include        "RuntimeError.h"
+#include "RuntimeError.h"
 
 // the default Broadcom (BCM) GPIO peripheral provides 54 GPIO pins, numbered 0..53
 enum Pin {

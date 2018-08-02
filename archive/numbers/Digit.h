@@ -1,26 +1,14 @@
-//------------------------------------------------------------------------------
-//	Copyright ©1996-2004 Bretton Wade, All rights reserved.
-//------------------------------------------------------------------------------
+#pragma once
 
-#ifndef     _DIGIT_
-#define     _DIGIT_
+#include        "Types.h"
 
-//------------------------------------------------------------------------------
-#if         1
-typedef uInt2               uDigit;
-typedef sInt2               sDigit;
-//typedef	uInt1								uHalfDigit;
-//typedef	sInt1								sHalfDigit;
-typedef	uInt4               uTwoDigit;
-typedef	sInt4               sTwoDigit;
-#else
-typedef uInt4               uDigit;
-typedef sInt4               sDigit;
-typedef	uInt2			    uHalfDigit;
-typedef	sInt2			    sHalfDigit;
-typedef	uInt8               uTwoDigit;
-typedef	sInt8               sTwoDigit;
-#endif
+// the basic memory types to use for half-digits, whole-digits, and double-digits
+typedef u16 uHalfDigit;
+typedef s16 sHalfDigit;
+typedef u32 uDigit;
+typedef s32 sDigit;
+typedef	u64 uTwoDigit;
+typedef	s64 sTwoDigit;
 
 //------------------------------------------------------------------------------
 #define     DIGIT_BITS      (sizeof (uDigit) * 8)

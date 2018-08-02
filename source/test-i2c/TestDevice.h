@@ -1,7 +1,6 @@
 #pragma once
 
-#include        "Log.h"
-#include        "RuntimeError.h"
+#include "Log.h"
 
 class Expectation {
     public:

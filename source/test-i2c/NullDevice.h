@@ -1,6 +1,6 @@
 #pragma once
 
-#include        "Text.h"
+#include "Common.h"
 
 MAKE_PTR_TO(NullDevice) {
     public:

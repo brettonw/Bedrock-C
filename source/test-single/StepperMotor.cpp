@@ -1,7 +1,7 @@
-#include        "Test.h"
-#include        "AdafruitMotorDriver.h"
-#include        "DeviceI2C.h"
-#include        "StepperMotor.h"
+#include "Test.h"
+#include "AdafruitMotorDriver.h"
+#include "DeviceI2C.h"
+#include "StepperMotor.h"
 
 template<typename DeviceType>
 void backAndForth (PtrTo<StepperMotor<AdafruitMotorDriver<DeviceType> > > stepper) {

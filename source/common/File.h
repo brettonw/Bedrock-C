@@ -1,9 +1,9 @@
 #pragma once
 
-#include        <sys/types.h>
-#include        <sys/stat.h>
-#include        <dirent.h>
-#include        "RuntimeError.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <dirent.h>
+#include "RuntimeError.h"
 
 MAKE_PTR_TO(File) {
     private:

@@ -1,6 +1,6 @@
 #pragma once
 
-#include    "BagSort.h"
+#include "BagSort.h"
 
 MAKE_PTR_TO_SUB(BagArray, BagContainer) {
     protected:

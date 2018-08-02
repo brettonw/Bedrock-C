@@ -1,6 +1,6 @@
 #pragma once
 
-#include    "BagThing.h"
+#include "BagThing.h"
 
 MAKE_PTR_TO_SUB(BagText, BagThing) {
     protected:

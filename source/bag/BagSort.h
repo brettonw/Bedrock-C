@@ -1,7 +1,6 @@
 #pragma once
 
-#include    "Log.h"
-#include    "BagObject.h"
+#include "BagObject.h"
 
 // sort helpers
 enum SortDir { DESCENDING, ASCENDING };
@@ -20,7 +19,7 @@ class SimpleSort {
             double leftThingSortValue = leftThing->sortValue();
             double delta = leftThingSortValue - rightThing->sortValue();
             if ((delta == 0) and (leftThingSortValue == 0)) {
-                Log::debug() << "SimpleSort: " << "comparing as text ([" << leftThing->toText() << "], [" <<  rightThing->toText () << "])" << endl;
+                //Log::debug() << "SimpleSort: " << "comparing as text ([" << leftThing->toText() << "], [" <<  rightThing->toText () << "])" << endl;
                 delta = static_cast<double> (leftThing->toText().compare(rightThing->toText ()));
             }
             return (sortDir == ASCENDING) ? delta : -delta;

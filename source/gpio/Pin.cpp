@@ -1,4 +1,4 @@
-#include        "Pin.h"
+#include "Pin.h"
 
 /*
 the Raspberry Pi maps these pins to a 40-pin J-8 header, and only exposes some of the real GPIO

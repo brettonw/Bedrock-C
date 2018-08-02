@@ -1,8 +1,8 @@
-#include        "Test.h"
-#include        "AdafruitServoDriver.h"
-#include        "Servo.h"
-#include        "NullDevice.h"
-#include        "DeviceI2C.h"
+#include "Test.h"
+#include "AdafruitServoDriver.h"
+#include "Servo.h"
+#include "NullDevice.h"
+#include "DeviceI2C.h"
 
 TEST_CASE(TestServo) {
     //Log::Scope scope (Log::TRACE);

@@ -1,8 +1,8 @@
-#include        "Test.h"
-#include        "AdafruitMotorDriver.h"
-#include        "NullDevice.h"
-#include        "DeviceI2C.h"
-#include        "Motor.h"
+#include "Test.h"
+#include "AdafruitMotorDriver.h"
+#include "NullDevice.h"
+#include "DeviceI2C.h"
+#include "Motor.h"
 
 TEST_CASE(TestAMotor) {
     //Log::Scope scope (Log::TRACE);

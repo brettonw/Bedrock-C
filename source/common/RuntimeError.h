@@ -1,6 +1,6 @@
 #pragma once
 
-#include        "Text.h"
+#include "Text.h"
 
 class RuntimeError: public exception {
     protected:

@@ -1,5 +1,5 @@
-#include        "Test.h"
-#include        "Text.h"
+#include "Test.h"
+#include "Log.h"
 
 TEST_CASE (TestLogFilterTrace) {
     Log::Scope scope;

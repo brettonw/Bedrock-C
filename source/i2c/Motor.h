@@ -1,7 +1,7 @@
 #pragma once
 
-#include        "Log.h"
-#include        "MotorId.h"
+#include "Log.h"
+#include "MotorId.h"
 
 /**
 * Motor

@@ -1,9 +1,9 @@
 #pragma once
 
-#include    "BagText.h"
-#include    "BagInteger.h"
-#include    "BagFloat.h"
-#include    "BagBool.h"
+#include "BagText.h"
+#include "BagInteger.h"
+#include "BagFloat.h"
+#include "BagBool.h"
 
 MAKE_PTR_TO_SUB(BagContainer, BagThing) {
     public:

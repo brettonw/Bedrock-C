@@ -1,6 +1,6 @@
 #pragma once
 
-#include        "TextContainer.h"
+#include "TextContainer.h"
 
 // an XML node is an object with an object of attributes, an array of children,
 // a name, and a body

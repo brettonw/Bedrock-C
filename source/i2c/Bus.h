@@ -1,33 +1,33 @@
 #pragma once
 
-#include        "Log.h"
-#include        "File.h"
+#include "Log.h"
+#include "File.h"
 
 // headers needed for open, close, and ioctl
-#include        <fcntl.h>
-#include        <unistd.h>
-#include        <sys/ioctl.h>
-#include        <errno.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
+#include <errno.h>
 
 #ifndef __APPLE__
-#include        <linux/i2c.h>
-#include        <linux/i2c-dev.h>
+#include <linux/i2c.h>
+#include <linux/i2c-dev.h>
 #else
 // shamelessly copied from a linux i2c.h and i2c-dev.h headers to facilitate compilation and unit
 // testing on platforms other than linux, or that don't have an I2C bus. prefer the linux source if
 // it is available
 
-#define         I2C_SLAVE               0x0703  // use this slave address
-#define         I2C_TENBIT              0x0704  // set to 0 for 7 bit addrs (pretty much everything we care about)
-#define         I2C_SMBUS               0x0720  // perform a SMBus operation
+#define I2C_SLAVE               0x0703  // use this slave address
+#define I2C_TENBIT              0x0704  // set to 0 for 7 bit addrs (pretty much everything we care about)
+#define I2C_SMBUS               0x0720  // perform a SMBus operation
 
 // SMBus read or write markers
-#define         I2C_SMBUS_READ          1
-#define         I2C_SMBUS_WRITE         0
+#define I2C_SMBUS_READ          1
+#define I2C_SMBUS_WRITE         0
 
 // sizes of transfers for byte and byte data
-#define         I2C_SMBUS_BYTE          1
-#define         I2C_SMBUS_BYTE_DATA     2
+#define I2C_SMBUS_BYTE          1
+#define I2C_SMBUS_BYTE_DATA     2
 
 #endif
 

@@ -1,3 +1,3 @@
-#include        "Bus.h"
+#include "Bus.h"
 
 map<int, PtrToBus> Bus::buses;

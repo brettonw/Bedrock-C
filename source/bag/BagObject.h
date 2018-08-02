@@ -1,7 +1,7 @@
 #pragma once
 
-#include    "BagContainer.h"
-#include    "TextContainer.h"
+#include "BagContainer.h"
+#include "TextContainer.h"
 
 MAKE_PTR_TO_SUB(BagObject, BagContainer) {
     protected:

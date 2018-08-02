@@ -1,8 +1,8 @@
 #pragma once
 
-#include        "Log.h"
-#include        "Pause.h"
-#include        "Text.h"
+#include "Log.h"
+#include "Pause.h"
+#include "Text.h"
 
 // values used for setting the pulse frequency, the default is 1ms per cycle
 const double PCA9685_CLOCK_FREQUENCY = 25000000.0; // PCA9685 has a 25 MHz internal oscillator
