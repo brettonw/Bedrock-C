@@ -2,6 +2,7 @@
 
 // standard includes
 #include <cstring>
+#include <cstdint>
 #include <cstdlib>
 #include <cstdio>
 #include <iostream>

@@ -6,15 +6,15 @@ typedef unsigned int    sint;
 typedef unsigned int    uint;
 
 // if you want to care about the actual size of a storage type in use, these are guaranteed
-typedef signed char     s1;
-typedef signed short    s2;
-typedef signed int      s4;
-typedef signed long     s8;
+typedef int8_t          s1;
+typedef int16_t         s2;
+typedef int32_t         s4;
+typedef int64_t         s8;
 
-typedef unsigned char   u1;
-typedef unsigned short  u2;
-typedef unsigned int    u4;
-typedef unsigned long   u8;
+typedef uint8_t         u1;
+typedef uint16_t        u2;
+typedef uint32_t        u4;
+typedef uint64_t        u8;
 
 typedef float           f4;
 typedef double          f8;
