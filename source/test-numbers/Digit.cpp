@@ -129,14 +129,16 @@ TEST_CASE(TestDigitDigitToStr) {
     */
 }
 
+// this is a "test case" that computes the needed radix maximum values
+#if 0
 TEST_CASE(TestDigitComputeDigitDivisors) {
     // XXX TODO: still not sure about this
     Log::Scope scope (Log::DEBUG);
     Log& log = Log::debug () << "TestDigitComputeDigitDivisors: 0, 0";
     for (uint i = 2; i < 37; ++i) {
         uTwoDigit divisor = 1;
-        uDigit testValue = 0xffffffff;
-        while (testValue >= i) {
+        sTwoDigit testValue = 0xffffffff;
+        while (testValue > i) {
             testValue /= i;
             divisor *= i;
         }
@@ -145,6 +147,7 @@ TEST_CASE(TestDigitComputeDigitDivisors) {
     log << endl;
     TEST_X(true);
 }
+#endif
 
 TEST_CASE(TestDigitDigitBits) {
     //Log::Scope scope (Log::DEBUG);
@@ -154,4 +157,28 @@ TEST_CASE(TestDigitDigitBits) {
     TEST_XY(Digit::bits (3), 30);
     TEST_XY(Digit::bits (0xffffffff), 0);
     TEST_XY(Digit::bits (0x0000ffff), 16);
+}
+
+TEST_CASE(TestDigitCompare) {
+    // static sTwoDigit compare (int size, const uDigit* a, const uDigit* b) {
+    //Log::Scope scope (Log::DEBUG);
+    uDigit a[] = {0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff};
+    uDigit b[] = {0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff};
+    TEST_XY(Digit::compare (5, a, b), 0);
+
+    uDigit c[] = {0x00000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff};
+    uDigit d[] = {0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff};
+    TEST_XY(Digit::compare (5, c, d), -0x00ffffffffLL);
+
+    uDigit e[] = {0xffffffff, 0x00000000, 0xffffffff, 0xffffffff, 0xffffffff};
+    uDigit f[] = {0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff};
+    TEST_XY(Digit::compare (5, e, f), -0x00ffffffffLL);
+}
+
+TEST_CASE(TestDigitSubtract) {
+    TEST_X(true);
+}
+
+TEST_CASE(TestDigitSubtractMultiply) {
+    TEST_X(true);
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include        "Types.h"
+#include        "Common.h"
 
 // the basic memory types to use for half-digits, whole-digits, and double-digits
 typedef u2 uHalfDigit;
@@ -39,7 +39,7 @@ struct Digit {
     // buffer
     static int digitToStr (uDigit digit, char* string, uDigit radix, bool pad = true) {
         int count = 0;
-        for (int i = 0, maxLength = maxLengthByRadix[radix]; (i < maxLength) && (pad || digit || (count == 0)); ++i) {
+        for (int i = 0, maxLength = maxLengthByRadix[radix]; (i < maxLength) and (pad || digit || (count == 0)); ++i) {
             uDigit  remainder = digit % radix;
             digit /= radix;
             string[--count] = digit2char[remainder];
@@ -59,10 +59,11 @@ struct Digit {
         return 0;
     }
 
+    // subtract one array of digits from another, return the borrow
     static uDigit subtract (sDigit size, const uDigit* a, const uDigit* b, uDigit* result) {
         uTwoDigit borrow = 0;
         for (sDigit i = 0; i < size; i++) {
-            result[i] = uDigit (borrow = a[i] - b[i] - ((borrow & (uTwoDigit (0x01) << DIGIT_BITS)) >> DIGIT_BITS));
+            result[i] = uDigit (borrow = a[i] - b[i] - ((borrow bit_and (uTwoDigit (0x01) << DIGIT_BITS)) >> DIGIT_BITS));
         }
         return uDigit (borrow);
     }
@@ -72,7 +73,7 @@ struct Digit {
         uTwoDigit borrow = 0;
         for (sDigit i = 0; i < size; i++) {
             carry = (b[i] * c) + (carry >> DIGIT_BITS);
-            borrow = a[i] - uDigit (carry) - ((borrow & (uTwoDigit(0x01) << DIGIT_BITS)) >> DIGIT_BITS);
+            borrow = a[i] - uDigit (carry) - ((borrow bit_and (uTwoDigit(0x01) << DIGIT_BITS)) >> DIGIT_BITS);
             result[i] = uDigit (borrow);
         }
         return borrow;
