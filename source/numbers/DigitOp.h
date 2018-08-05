@@ -4,29 +4,29 @@
 
 // DigitOp is a helper class for working with arrays of "digits", as part of an implementation of a
 // big-integer class. arrays of digits are organized in Least-Significant-Digit first fashion, so
-// digit 0 is the LSD (aka little endian)
+// digit 0 is the LSD - this matches the mathematical operations of all the processors we target,
+// but can be a bit confusing as numbers are written right to left instead of left to right.
 
-#define Q ((N - M) - 1)
-
-template<typename DigitType, int N, int M = 0>
-struct DigitOp {
+template<typename DigitType, int N>
+struct  DigitOp {
     // basic operations on a single array of digits
 
-    // return the number of digits in the number, ignoring leading zeroes. this is used extensively
-    // in framing the calculations between two numbers
+    // numbers in digit arrays may have leading zeroes, this method returns the number of
+    // significant (non-zero-leading) digits in the number, where 0 means no digits are
+    // non-zero. this is used extensively in framing the calculations between two numbers
     static uint top (const DigitType* a) {
-        return a[Q] ? (N - M) : DigitOp<DigitType, N, M + 1>::top (a);
+        return a[N - 1] ? N : DigitOp<DigitType, N - 1>::top (a);
     }
 
     // set all the digits of an array to a source value
     static void set (DigitType* dst, DigitType src) {
         *dst++ = src;
-        DigitOp<DigitType, N, M + 1>::set (dst, src);
+        DigitOp<DigitType, N - 1>::set (dst, src);
     }
 
     // return true if any digit in the array is non-zero
     static bool test (const DigitType* a) {
-        return *a ? true : DigitOp<DigitType, N, M + 1>::test (++a);
+        return a[N - 1] ? true : DigitOp<DigitType, N - 1>::test (a);
     }
 
     // basic operations on two arrays of digits
@@ -34,62 +34,59 @@ struct DigitOp {
     // copy one digit array to another
     static void copy (DigitType* dst, const DigitType* src) {
         *dst++ = *src++;
-        DigitOp<DigitType, N, M + 1>::copy (dst, src);
+        DigitOp<DigitType, N - 1>::copy (dst, src);
     }
 
     // compare two digit arrays, returning a signum (-1, 0, 1) if a <, == , or > b, respectively
     static int compare (const DigitType* a, const DigitType* b) {
-        return (a[Q] > b[Q]) ? 1 : ((a[Q] < b[Q]) ? -1 : DigitOp<DigitType, N, M + 1>::compare (a, b));
+        return (a[N - 1] > b[N - 1]) ? 1 : ((a[N - 1] < b[N - 1]) ? -1 : DigitOp<DigitType, N - 1>::compare (a, b));
     }
 
     // operations with an array of digits and a single digit
 
-    // roll the entire array one digit to the left, returns the rolled out digit - safe to shift a
-    // digit array onto itself
-    static DigitType rotateLeft (const DigitType* a, DigitType* result, DigitType fill = 0) {
-        DigitType temp = a[M];
-        result[M] = fill;
-        return DigitOp<DigitType, N, M + 1>::digitShiftLeft (a, result, temp);
+    // shift the entire array one digit to the left
+    static DigitType digitShiftLeft (const DigitType* a, DigitType* result, DigitType fill = 0) {
+        DigitType r = a[N - 1];
+        result[N - 1] = DigitOp<DigitType, N - 1>::digitShiftLeft (a, result, fill);
+        return r;
     }
 
-    // roll the entire array one digit to the right, returns the rolled out digit - safe to shift a
-    // digit array onto itself
-    static DigitType rotateRight (const DigitType* a, DigitType* result, DigitType fill = 0) {
-        DigitType temp = a[Q];
-        result[Q] = fill;
-        return DigitOp<DigitType, N, M + 1>::digitShiftRight (a, result, temp);
+    // shift the entire array one digit to the right
+    static DigitType digitShiftRight (const DigitType* a, DigitType* result, DigitType fill = 0) {
+        DigitType r = *a;
+        *result = DigitOp<DigitType, N - 1>::digitShiftRight (a + 1, result + 1, fill);
+        return r;
     }
 
-    // compare a digit array against a single digit, returning a signum (-1, 0, 1) if a <, == , or
-    // > b, respectively. it is safe to shift a digit array onto itself
+    // compare a digit array against a single digit, returning a signum (-1, 0, 1) if a <, == , or > b, respectively
     static int compareDigit (const DigitType* a, DigitType b) {
-        return a[Q] ? 1 : DigitOp<DigitType, N, M +1>::compareDigit (a, b);
+        return a[N - 1] ? 1 : DigitOp<DigitType, N - 1>::compareDigit (a, b);
     }
 
     static void bitAnd (const DigitType* a, const DigitType* b, DigitType* result) {
-        result[M] = a[M] bit_and b[M];
-        DigitOp<DigitType, N, M + 1>::bitAnd (a, b, result);
+        result[N - 1] = a[N - 1] bit_and b[N - 1];
+        DigitOp<DigitType, N - 1>::bitAnd (a, b, result);
     }
 
     static void bitOr (const DigitType* a, const DigitType* b, DigitType* result) {
-        result[M] = a[M] bit_or b[M];
-        DigitOp<DigitType, N, M + 1>::bitOr (a, b, result);
+        result[N - 1] = a[N - 1] bit_or b[N - 1];
+        DigitOp<DigitType, N - 1>::bitOr (a, b, result);
     }
 
     static void bitXor (const DigitType* a, const DigitType* b, DigitType* result) {
-        result[M] = a[M] xor b[M];
-        DigitOp<DigitType, N, M + 1>::bitXor (a, b, result);
+        result[N - 1] = a[N - 1] ^ b[N - 1];
+        DigitOp<DigitType, N - 1>::bitXor (a, b, result);
     }
 
     static void bitComplement (const DigitType* a, DigitType* result) {
-        result[M] = complement a[M];
-        DigitOp<DigitType, N, M + 1>::bitComplement (a, result);
+        result[N - 1] = complement a[N - 1];
+        DigitOp<DigitType, N - 1>::bitComplement (a, result);
     }
 };
 
 // specialized for N = 0
-template<typename DigitType, int N>
-struct DigitOp<DigitType, N, N> {
+template<typename DigitType>
+struct  DigitOp<DigitType, 0> {
     // basic operations on a single array of digits
     static uint top (const DigitType* a) { return 0; }
     static void set (DigitType* dst, DigitType src) {}
@@ -100,9 +97,9 @@ struct DigitOp<DigitType, N, N> {
     static int compare (const DigitType* a, const DigitType* b) { return 0; }
 
     // operations with an array of digits and a single digit
-    static DigitType rotateLeft (const DigitType* a, DigitType* result, DigitType fill = 0) { return fill; }
-    static DigitType rotateRight (const DigitType* a, DigitType* result, DigitType fill = 0) { return fill; }
-    static int compareDigit (const DigitType* a, DigitType b) { return  (a[0] < b) ? -1 : ((a[0] > b) ? 1 : 0); }
+    static DigitType digitShiftLeft (const DigitType* a, DigitType* result, DigitType fill = 0) { return fill; }
+    static DigitType digitShiftRight (const DigitType* a, DigitType* result, DigitType fill = 0) { return fill; }
+    static int compareDigit (const DigitType* a, DigitType b) { return (*a > b) ? 1 : ((*a < b) ? -1 : 0); }
 
     // bit operations on a single array of digits
     static void bitAnd (const DigitType* a, const DigitType* b, DigitType* result) {}
@@ -110,5 +107,3 @@ struct DigitOp<DigitType, N, N> {
     static void bitXor (const DigitType* a, const DigitType* b, DigitType* result) {}
     static void bitComplement (const DigitType* a, DigitType* result) {}
 };
-
-#undef Q
