@@ -12,21 +12,21 @@ template<typename DigitType, int N, int M = 0>
 struct DigitOp {
     // basic operations on a single array of digits
 
-    // return the index of the first non-zero digit in the number, where 0 means no digits are
-    // non-zero. this is used extensively in framing the calculations between two numbers
+    // return the number of digits in the number, ignoring leading zeroes. this is used extensively
+    // in framing the calculations between two numbers
     static uint top (const DigitType* a) {
-        return a[Q] ? M : DigitOp<DigitType, N, M + 1>::top (a);
+        return a[Q] ? (N - M) : DigitOp<DigitType, N, M + 1>::top (a);
     }
 
     // set all the digits of an array to a source value
     static void set (DigitType* dst, DigitType src) {
-        dst[M] = src;
+        *dst++ = src;
         DigitOp<DigitType, N, M + 1>::set (dst, src);
     }
 
     // return true if any digit in the array is non-zero
     static bool test (const DigitType* a) {
-        return a[M] ? true : DigitOp<DigitType, N, M + 1>::test (a);
+        return *a ? true : DigitOp<DigitType, N, M + 1>::test (++a);
     }
 
     // basic operations on two arrays of digits
@@ -91,7 +91,7 @@ struct DigitOp {
 template<typename DigitType, int N>
 struct DigitOp<DigitType, N, N> {
     // basic operations on a single array of digits
-    static uint top (const DigitType* a) { return N; }
+    static uint top (const DigitType* a) { return 0; }
     static void set (DigitType* dst, DigitType src) {}
     static bool test (const DigitType* a) { return false; }
 
@@ -111,3 +111,4 @@ struct DigitOp<DigitType, N, N> {
     static void bitComplement (const DigitType* a, DigitType* result) {}
 };
 
+#undef Q

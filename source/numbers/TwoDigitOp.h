@@ -6,18 +6,17 @@
 // that might overflow a single digit type
 
 #define DIGIT_BITS (sizeof (DigitType) * 8)
+#define Q ((N - M) - 1)
 
-template<typename DigitType, typename TwoDigitType, int N>
+template<typename DigitType, typename TwoDigitType, int N, int M = 0>
 struct  TwoDigitOp {
-    // basic operations on a single array of digits
-
     // basic operations on two arrays of digits
 
     // add two arrays of digits, returning the carry
     static DigitType add (const DigitType* a, const DigitType* b, DigitType* result, DigitType carry) {
-        TwoDigitType	r = *a + *b + carry;
+        TwoDigitType	r = a[M] + b[M] + carry;
         *result = DigitType (r);
-        return TwoDigitOp<DigitType, TwoDigitType, N - 1>::add (a + 1, b + 1, result + 1, r >> DIGIT_BITS);
+        return TwoDigitOp<DigitType, TwoDigitType, N - 1>::add (a, b, result + 1, r >> DIGIT_BITS);
     }
 
     // subtract two arrays of digits, returning the borrow
@@ -81,8 +80,8 @@ struct  TwoDigitOp {
 };
 
 // specialized for N = 0
-template<typename DigitType, typename TwoDigitType>
-struct  TwoDigitOp<DigitType, TwoDigitType, 0> {
+template<typename DigitType, typename TwoDigitType, int N>
+struct  TwoDigitOp<DigitType, TwoDigitType, N, N> {
     // basic operations on two arrays of digits
     static DigitType add (const DigitType* a, const DigitType* b, DigitType* result, DigitType carry) { return carry; }
     static DigitType subtract (const DigitType* a, const DigitType* b, DigitType* result, DigitType borrow) { return borrow; }
@@ -99,5 +98,6 @@ struct  TwoDigitOp<DigitType, TwoDigitType, 0> {
     static DigitType bitShiftRight (const DigitType* a, DigitType bits, DigitType* result) { return 0; }
 };
 
+#undef Q
 #undef DIGIT_BITS
 
