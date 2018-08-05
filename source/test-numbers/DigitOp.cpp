@@ -22,6 +22,7 @@
     static void bitXor (const DigitType* a, const DigitType* b, DigitType* result) {}
     static void bitComplement (const DigitType* a, DigitType* result) {}
 */
+
 TEST_CASE(TestDigitOpTop) {
     Log::Scope scope (Log::DEBUG);
     u4 testValue;
@@ -29,29 +30,28 @@ TEST_CASE(TestDigitOpTop) {
 
     testValue = 0;
     top = DigitOp<u1, 4>::top (reinterpret_cast<u1*>(&testValue));
-    TEST_XY(top, 0);
+    TEST_XY(top, 4);
 
     testValue = 0x01000000;
     top = DigitOp<u1, 4>::top (reinterpret_cast<u1*>(&testValue));
-    TEST_XY(top, 1);
+    TEST_XY(top, 0);
 
     testValue = 0x00010000;
     top = DigitOp<u1, 4>::top (reinterpret_cast<u1*>(&testValue));
-    TEST_XY(top, 2);
+    TEST_XY(top, 1);
 
     testValue = 0x00000100;
     top = DigitOp<u1, 4>::top (reinterpret_cast<u1*>(&testValue));
-    TEST_XY(top, 3);
+    TEST_XY(top, 2);
 
     testValue = 0x00000001;
     top = DigitOp<u1, 4>::top (reinterpret_cast<u1*>(&testValue));
-    TEST_XY(top, 4);
+    TEST_XY(top, 3);
 }
 
 TEST_CASE(TestDigitOpSet) {
     Log::Scope scope (Log::DEBUG);
     u4 testValue;
     //top = DigitOp<u1, 4>::top (&testValue);
-
-    TEST_X(true);
 }
+
