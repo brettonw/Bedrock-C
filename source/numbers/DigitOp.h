@@ -3,8 +3,8 @@
 #include "Common.h"
 
 // DigitOp is a helper class for working with arrays of "digits", as part of an implementation of a
-// big-integer class. arrays of digits are organized in Most-Significant-Digit first fashion, so
-// digit 0 is the MSD
+// big-integer class. arrays of digits are organized in Least-Significant-Digit first fashion, so
+// digit 0 is the LSD (aka little endian)
 
 #define Q ((N - M) - 1)
 
