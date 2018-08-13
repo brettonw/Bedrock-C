@@ -71,7 +71,8 @@ TEST_CASE(TestDigitOpTop) {
 
 TEST_CASE(TestDigitOpSet) {
     Log::Scope scope (Log::DEBUG);
-    u4 testValue;
+    //u4 testValue;
     //top = DigitOp<u1, 4>::top (&testValue);
+    TEST_X(true);
 }
 
