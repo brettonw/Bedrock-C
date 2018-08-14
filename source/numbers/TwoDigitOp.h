@@ -2,7 +2,7 @@
 
 #include "Common.h"
 
-// TwoDigitOp is like TwoDigitOp, but it needs to know about a TwoDigit type so it can contain values
+// TwoDigitOp is like DigitOp, but it needs to know about a TwoDigit type so it can contain values
 // that might overflow a single digit type
 
 #define DIGIT_BITS (sizeof (DigitType) * 8)
