@@ -8,8 +8,8 @@ int signum(NumberType value) {
 */
 
 template <typename NumberType> inline constexpr
-int signum (T value, false_type is_signed) {
-    return (T(0) < value);
+int signum (NumberType value, false_type is_signed) {
+    return (NumberType(0) < value);
 }
 
 template <typename NumberType> inline constexpr
