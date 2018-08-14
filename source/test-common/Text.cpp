@@ -114,3 +114,26 @@ TEST_CASE(TestTextSplit) {
     TEST_XY(splitResult[3].isEmpty (), true);
     TEST_XY(splitResult[4].isEmpty (), true);
 }
+
+TEST_CASE(TestTextReplace) {
+    Text longString = "abcd--efgh";
+    Text replaceResult = longString.replace ("--", "");
+    TEST_XY(replaceResult.length (), 8);
+    TEST_XY(replaceResult, "abcdefgh");
+
+    replaceResult = longString.replace ("--", "&");
+    TEST_XY(replaceResult.length (), 9);
+    TEST_XY(replaceResult, "abcd&efgh");
+
+    replaceResult = longString.replace ("gh", "&");
+    TEST_XY(replaceResult.length (), 9);
+    TEST_XY(replaceResult, "abcd--ef&");
+
+    replaceResult = longString.replace ("ab", "&");
+    TEST_XY(replaceResult.length (), 9);
+    TEST_XY(replaceResult, "&cd--efgh");
+
+    replaceResult = longString.replace ("xy", "&");
+    TEST_XY(replaceResult.length (), 10);
+    TEST_XY(replaceResult, longString);
+}

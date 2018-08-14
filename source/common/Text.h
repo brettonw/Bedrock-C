@@ -215,6 +215,22 @@ class Text {
             return result;
         }
 
+        Text replace (const Text& pattern, const Text& value) {
+            vector<Text> parts = split (pattern);
+            Text result = parts[0];
+            switch (parts.size ()) {
+                case 1:
+                    if (parts[0].length () != ptr->getLength ()) {
+                        result << value;
+                    }
+                    break;
+                case 2:
+                    result << value << parts[1];
+                    break;
+            }
+            return result;
+        }
+
         // format
 
         // operators
