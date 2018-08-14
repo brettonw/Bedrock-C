@@ -38,16 +38,6 @@ MAKE_PTR_TO_SUB(BagArray, BagContainer) {
             return enclose (out, "[", "]");
         }
 
-        virtual Text toText () const {
-            const char* prepend = "";
-            Text out;
-            for (vector<PtrToBagThing>::const_iterator it = value.begin (); it != value.end (); ++it) {
-                out << prepend << (*it)->toText ();
-                prepend = ",";
-            }
-            return enclose (out, "[", "]");
-        }
-
         template<typename BagThingSubtype>
         PtrToBagArray add (PtrTo<BagThingSubtype> bagThing) {
             value.push_back (ptr_upcast<BagThing>(bagThing));

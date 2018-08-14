@@ -20,7 +20,7 @@ class SimpleSort {
             double delta = leftThingSortValue - rightThing->sortValue();
             if ((delta == 0) and (leftThingSortValue == 0)) {
                 //Log::debug() << "SimpleSort: " << "comparing as text ([" << leftThing->toText() << "], [" <<  rightThing->toText () << "])" << endl;
-                delta = static_cast<double> (leftThing->toText().compare(rightThing->toText ()));
+                delta = static_cast<double> (leftThing->toJson().compare(rightThing->toJson ()));
             }
             return (sortDir == ASCENDING) ? delta : -delta;
         }

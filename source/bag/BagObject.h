@@ -31,21 +31,12 @@ MAKE_PTR_TO_SUB(BagObject, BagContainer) {
         BagObject () : BagContainer (BagThing::OBJECT_TYPE) {}
         BagObject (const BagObject& source) : BagContainer (BagThing::OBJECT_TYPE), value (source.value) {}
         virtual ~BagObject () {}
+
         virtual Text toJson () const {
             const char* prepend = "";
             Text out;
             for (TextMap<PtrToBagThing>::const_iterator it = value.begin (); it != value.end (); ++it) {
                 out << prepend << enquote (it->first) << ":" << it->second->toJson ();
-                prepend = ",";
-            }
-            return enclose (out, "{", "}");
-        }
-
-        virtual Text toText () const {
-            const char* prepend = "";
-            Text out;
-            for (TextMap<PtrToBagThing>::const_iterator it = value.begin (); it != value.end (); ++it) {
-                out << prepend << it->first << "=" << it->second->toText ();
                 prepend = ",";
             }
             return enclose (out, "{", "}");
