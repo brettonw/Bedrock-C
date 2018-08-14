@@ -204,7 +204,7 @@ class Text {
             return result;
         }
 
-        vector<Text> split (const Text& pattern) {
+        vector<Text> split (const Text& pattern) const {
             vector<Text> result;
             vector<Text> splitResult = splitFirst (pattern);
             while (splitResult.size() == 2) {
@@ -215,7 +215,7 @@ class Text {
             return result;
         }
 
-        Text replace (const Text& pattern, const Text& value) {
+        Text replace (const Text& pattern, const Text& value) const {
             vector<Text> parts = split (pattern);
             Text result = parts[0];
             switch (parts.size ()) {
