@@ -10,6 +10,6 @@ MAKE_PTR_TO_SUB(BagBool, BagThing) {
         BagBool (bool _value) : BagThing (BagThing::BOOL_TYPE), value (_value) {}
         virtual ~BagBool () {}
         virtual Text toJson () const { return value ? Text::TRUE : Text ::FALSE; }
-        virtual double sortValue () const { return value ? 1.0 : 0.0; };
+        virtual f8 sortValue () const { return value ? 1.0 : 0.0; };
         bool get () { return value; }
 };
