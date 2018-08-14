@@ -27,6 +27,8 @@ TEST_CASE(TestBagObject) {
     TEST_XY(bagObject->get ("B")->getType (), BagThing::INTEGER_TYPE);
     TEST_XY(bagObject->get ("C")->getType (), BagThing::BOOL_TYPE);
     TEST_XY(bagObject->get ("DD")->getType (), BagThing::FLOAT_TYPE);
+
+    //bagObject->put ("XX", new BagArray ());
 }
 
 TEST_CASE(TestBag1) {
