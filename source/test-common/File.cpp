@@ -2,18 +2,18 @@
 #include "File.h"
 
 TEST_CASE(TestFileExists) {
-    File    file ("test.txt");
+    File file ("test.txt");
     TEST_XY(file.getExists (), true);
 
-    File    directory ("..");
+    File directory ("..");
     TEST_XY(directory.getExists (), true);
 
-    File    junk ("nonexistent-file.txt");
+    File junk ("nonexistent-file.txt");
     TEST_XY(junk.getExists (), false);
 }
 
 TEST_CASE(TestFileBasename) {
-    File    file ("./test.txt");
+    File file ("./test.txt");
     TEST_XY(file.getPath (), "./test.txt");
     TEST_XY(file.getBasename (), "test");
     TEST_XY(file.getExtension (), "txt");
@@ -35,13 +35,13 @@ TEST_CASE(TestFileBasename) {
 TEST_CASE(TestFileIsDirectory) {
     //Log::Scope scope (Log::DEBUG);
 
-    File    file ("test.txt");
+    File file ("test.txt");
     TEST_XY(file.isDirectory (), false);
 
-    File    directory ("..");
+    File directory ("..");
     TEST_XY(directory.isDirectory (), true);
 
-    File    junk ("nonexistent-file.txt");
+    File junk ("nonexistent-file.txt");
     TEST_XY(junk.isDirectory (), false);
 
     vector<PtrToFile> files =  directory.getFiles ();
@@ -51,3 +51,10 @@ TEST_CASE(TestFileIsDirectory) {
     Log::debug () << files.size () << " files in directory (" << directory.getPath () << ")" << endl;
 }
 
+TEST_CASE(TestFileRead) {
+    File    file ("test.txt");
+    PtrToBuffer buffer = file.read ();
+    byte compare[] = { 'T', 'e', 's', 't', '\n' };
+    TEST_XY(buffer->getLength (), 5);
+    TEST_XY(buffer->compare (compare, 5), 0);
+}

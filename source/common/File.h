@@ -3,7 +3,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
+#include <fstream>
 #include "RuntimeError.h"
+#include "Buffer.h"
 
 MAKE_PTR_TO(File) {
     private:
@@ -65,6 +67,20 @@ MAKE_PTR_TO(File) {
                 extension = components.back ();
             }
             return extension;
+        }
+
+        PtrToBuffer read () {
+            PtrToBuffer buffer;
+            ifstream file (path, ios::in | ios::binary | ios::ate);
+            if (file.is_open()) {
+                streampos size = file.tellg ();
+                buffer = Buffer::make (size);
+                file.seekg (0, ios::beg);
+                file.read ((char*) buffer->get (), size);
+                buffer->setLength (size);
+                file.close();
+            }
+            return buffer;
         }
 
         // open, close

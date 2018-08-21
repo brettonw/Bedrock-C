@@ -1,0 +1,81 @@
+#pragma once
+
+#include "PtrTo.h"
+
+// Buffer is a block of memory, this is not a resizable entity
+MAKE_PTR_TO(Buffer) {
+    private:
+        uint capacity;
+        uint length;
+        byte bytes[1];
+
+        // private constructor
+        Buffer (uint _capacity) : capacity (_capacity), length (0) {}
+
+        // we want to allocate RawText objects on 16-byte memory boundaries for performance, so this
+        // structure gives us a tool to do that
+        struct BlockType { byte a[16]; };
+
+        // function to encapsulate making the raw text pointer, using an already mapped capacity
+        static void* makeBufferPtr (uint capacity) {
+            // we want to allocate Buffer objects on 16-byte memory boundaries for performance
+            uint totalAlloc = sizeof (Buffer) + capacity;
+            uint blocksToAlloc = (totalAlloc / sizeof(BlockType)) + ((totalAlloc % sizeof(BlockType)) ? 1 : 0);
+            return new BlockType[blocksToAlloc];
+        }
+
+    public:
+        static PtrToBuffer make (uint capacity) {
+            return new (makeBufferPtr (capacity)) Buffer (capacity);
+        }
+
+        ~Buffer () {}
+
+        void operator delete (void* ptr) {
+            // the memory was allocated using the new byte[] method
+            delete[] reinterpret_cast<BlockType*> (ptr);
+        }
+
+        bool set (const byte* source, uint sourceLength) {
+            if (sourceLength <= capacity) {
+                memcpy (&bytes[0], source, sourceLength);
+                length = sourceLength;
+                return true;
+            }
+            return false;
+        }
+
+        void setLength (uint sourceLength) {
+            length = sourceLength;
+        }
+
+        byte* get () {
+            return bytes;
+        }
+
+        const byte* get () const {
+            return bytes;
+        }
+
+        uint getLength () const {
+            return length;
+        }
+
+        uint getCapacity () const {
+            return capacity;
+        }
+
+        int compare (const byte* source, uint sourceLength) const {
+            uint minLength = min (length, sourceLength);
+            int comparison = memcmp (bytes, source, minLength);
+            if ((comparison != 0) or (length == sourceLength)) {
+                return signum (comparison);
+            } else {
+                return signum ((int) length - (int) sourceLength);
+            }
+        }
+
+        int compare (const Buffer* buffer) {
+            return compare (buffer->bytes, buffer->length);
+        }
+};
