@@ -58,3 +58,9 @@ TEST_CASE(TestFileRead) {
     TEST_XY(buffer->getLength (), 5);
     TEST_XY(buffer->compare (compare, 5), 0);
 }
+
+TEST_CASE(TestFileReadText) {
+    File file ("test.txt");
+    Text text = file.readText ();
+    TEST_XY(text, "Test\n");
+}

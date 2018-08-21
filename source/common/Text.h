@@ -1,6 +1,7 @@
 #pragma once
 
 #include "RawText.h"
+#include "Buffer.h"
 
 class Text {
     private:
@@ -11,17 +12,11 @@ class Text {
         }
 
     public:
-        Text () : ptr (RawText::getEmpty ()) {
-        }
-
-        Text (const Text& text) : ptr (text.ptr) {
-        }
-
-        Text (const char* source, uint sourceLength) : ptr (RawText::make (source, sourceLength)) {
-        }
-
-        Text (const char* source) : ptr (source ? RawText::make (source, strlen (source)) : RawText::getEmpty ()) {
-        }
+        Text () : ptr (RawText::getEmpty ()) {}
+        Text (const Text& text) : ptr (text.ptr) {}
+        Text (const char* source, uint sourceLength) : ptr (RawText::make (source, sourceLength)) {}
+        Text (const char* source) : ptr (source ? RawText::make (source, strlen (source)) : RawText::getEmpty ()) {}
+        Text (const PtrToBuffer& buffer) : ptr ((buffer->getLength () > 0) ? RawText::make ((const char*) (buffer->get ()), buffer->getLength ()) : RawText::getEmpty ()) {}
 
         // do not subclass this type
         ~Text () {
@@ -82,6 +77,10 @@ class Text {
         Text& clear () {
             ptr = RawText::getEmpty ();
             return *this;
+        }
+
+        PtrToBuffer getBuffer () const {
+            return Buffer::make ((const byte*) (get ()), length ());
         }
 
         bool operator == (const Text& text) const {

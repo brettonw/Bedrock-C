@@ -71,16 +71,28 @@ MAKE_PTR_TO(File) {
 
         PtrToBuffer read () {
             PtrToBuffer buffer;
+
+            // open the file with the file pointer at the end of the file, and check if that worked
             ifstream file (path, ios::in | ios::binary | ios::ate);
             if (file.is_open()) {
+                // get the size of the file and create the buffer to hold it,
                 streampos size = file.tellg ();
                 buffer = Buffer::make (size);
+
+                // go back to the beginning of the file, and read the contents into the buffer, set
+                // the buffer length to indicate success
                 file.seekg (0, ios::beg);
                 file.read ((char*) buffer->get (), size);
                 buffer->setLength (size);
+
+                // close the file before returning
                 file.close();
             }
             return buffer;
+        }
+
+        Text readText () {
+            return Text (read ());
         }
 
         // open, close

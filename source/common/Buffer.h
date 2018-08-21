@@ -29,6 +29,12 @@ MAKE_PTR_TO(Buffer) {
             return new (makeBufferPtr (capacity)) Buffer (capacity);
         }
 
+        static PtrToBuffer make (const byte* source, uint sourceLength) {
+            PtrToBuffer buffer = new (makeBufferPtr (sourceLength)) Buffer (sourceLength);
+            buffer->set (source, sourceLength);
+            return buffer;
+        }
+
         ~Buffer () {}
 
         void operator delete (void* ptr) {
@@ -41,6 +47,8 @@ MAKE_PTR_TO(Buffer) {
                 memcpy (&bytes[0], source, sourceLength);
                 length = sourceLength;
                 return true;
+            } else {
+                //throw RuntimeError (Text ("Buffer: ") << "Source length (" << sourceLength << ") is greater than the capacity (" << capacity << ")");
             }
             return false;
         }

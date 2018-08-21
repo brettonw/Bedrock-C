@@ -5,11 +5,11 @@
     "configurations": {
         "debug": {
             "compilerOptions": "-Wno-psabi $compilerOptions",
-            "linkerOptions": "-lpthread"
+            "linkerOptions": "-lpthread -lcurl"
         },
         "release": {
             "compilerOptions": "-Wno-psabi $compilerOptions",
-            "linkerOptions": "-lpthread"
+            "linkerOptions": "-lpthread -lcurl"
         }
     }
 }
