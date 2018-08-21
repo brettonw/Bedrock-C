@@ -3,7 +3,7 @@
 #include "BagContainer.h"
 #include "TextContainer.h"
 
-MAKE_PTR_TO_SUB(BagObject, BagContainer) {
+class BagObject : public BagContainer {
     protected:
         TextMap<PtrToBagThing> value;
 
@@ -58,11 +58,15 @@ MAKE_PTR_TO_SUB(BagObject, BagContainer) {
             return put (name, Text (thing));
         }
 
-        PtrToBagObject put (const Text& name, int thing) {
+        PtrToBagObject put (const Text& name, s4 thing) {
             return put (name, new BagInteger (thing));
         }
 
-        PtrToBagObject put (const Text& name, double thing) {
+        PtrToBagObject put (const Text& name, s8 thing) {
+            return put (name, new BagInteger (thing));
+        }
+
+        PtrToBagObject put (const Text& name, f8 thing) {
             return put (name, new BagFloat (thing));
         }
 

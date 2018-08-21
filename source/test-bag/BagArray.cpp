@@ -69,24 +69,20 @@ TEST_CASE(TestBagArrayFieldSort) {
     bagArray->add((new BagObject ())->put ("x", 0.5));
     bagArray->add((new BagObject ())->put ("x", "0.75"));
     Log::debug () << "TestBagArraySort: " << "unsorted " << bagArray->toJson() << endl;
-    PtrToBagObject bagObject = ptr_downcast<BagObject> (bagArray->get(0));
+    PtrToBagObject bagObject = bagArray->getBagObject(0);
     TEST_XY(bagObject->get ("x")->sortValue(), 5);
 
     PtrToBagArray sortedBagArray = BagArray::sort (bagArray, "x");
     Log::debug () << "TestBagArraySort: " << "sorted " << sortedBagArray->toJson () << endl;
     TEST_XY(bagArray->size(), sortedBagArray->size ());
-    bagObject = ptr_downcast<BagObject> (sortedBagArray->get(0));
-    TEST_XY(bagObject->get ("x")->sortValue(), 0);
-    bagObject = ptr_downcast<BagObject> (sortedBagArray->get(8));
-    TEST_XY(bagObject->get ("x")->sortValue(), 5.6);
+    TEST_XY(sortedBagArray->getBagObject(0)->get ("x")->sortValue(), 0);
+    TEST_XY(sortedBagArray->getBagObject(8)->get ("x")->sortValue(), 5.6);
 
     sortedBagArray = BagArray::sort (bagArray, "x", DESCENDING);
     Log::debug () << "TestBagArraySort: " << "sorted " << sortedBagArray->toJson () << endl;
     TEST_XY(bagArray->size(), sortedBagArray->size ());
-    bagObject = ptr_downcast<BagObject> (sortedBagArray->get(0));
-    TEST_XY(bagObject->get ("x")->sortValue(), 5.6);
-    bagObject = ptr_downcast<BagObject> (sortedBagArray->get(8));
-    TEST_XY(bagObject->get ("x")->sortValue(), 0);
+    TEST_XY(sortedBagArray->getBagObject(0)->get ("x")->sortValue(), 5.6);
+    TEST_XY(sortedBagArray->getBagObject(8)->get ("x")->sortValue(), 0);
 }
 
 TEST_CASE(TestBagArrayDbSort) {
@@ -102,27 +98,27 @@ TEST_CASE(TestBagArrayDbSort) {
     bagArray->add((new BagObject ())->put ("x", 3)->put ("y", 2));
     bagArray->add((new BagObject ())->put ("x", 3)->put ("y", 3));
     Log::debug () << "TestBagArraySort: " << "unsorted (" << bagArray->toJson() << ")" << endl;
-    PtrToBagObject bagObject = ptr_downcast<BagObject> (bagArray->get(0));
+    PtrToBagObject bagObject = bagArray->getBagObject(0);
     TEST_XY(bagObject->get ("x")->sortValue(), 5);
     TEST_XY(bagObject->get ("y")->sortValue(), 1);
 
     PtrToBagArray sortedBagArray = BagArray::sort (bagArray, DbSort ("x")("y", DESCENDING));
     Log::debug () << "TestBagArraySort: " << "sorted (" << sortedBagArray->toJson () << ")" << endl;
     TEST_XY(bagArray->size(), sortedBagArray->size ());
-    bagObject = ptr_downcast<BagObject> (sortedBagArray->get(0));
+    bagObject = sortedBagArray->getBagObject(0);
     TEST_XY(bagObject->get ("x")->sortValue(), 3);
     TEST_XY(bagObject->get ("y")->sortValue(), 3);
-    bagObject = ptr_downcast<BagObject> (sortedBagArray->get(8));
+    bagObject = sortedBagArray->getBagObject(8);
     TEST_XY(bagObject->get ("x")->sortValue(), 5);
     TEST_XY(bagObject->get ("y")->sortValue(), 1);
 
     sortedBagArray = BagArray::sort (bagArray, DbSort ("y")("x", DESCENDING));
     Log::debug () << "TestBagArraySort: " << "sorted (" << sortedBagArray->toJson () << ")" << endl;
     TEST_XY(bagArray->size(), sortedBagArray->size ());
-    bagObject = ptr_downcast<BagObject> (sortedBagArray->get(0));
+    bagObject = sortedBagArray->getBagObject(0);
     TEST_XY(bagObject->get ("x")->sortValue(), 5);
     TEST_XY(bagObject->get ("y")->sortValue(), 1);
-    bagObject = ptr_downcast<BagObject> (sortedBagArray->get(8));
+    bagObject = sortedBagArray->getBagObject(8);
     TEST_XY(bagObject->get ("x")->sortValue(), 3);
     TEST_XY(bagObject->get ("y")->sortValue(), 3);
 }

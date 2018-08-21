@@ -23,6 +23,11 @@ TEST_CASE(TestBagObject) {
     TEST_XY(bagObject->get ("DD")->toJson (), "6.50000000");
     TEST_XY(bagObject->get ("D"), (BagThing*) 0);
 
+    TEST_XY(bagObject->getText ("A"), "Hello World");
+    TEST_XY(bagObject->getInteger ("B"), 5);
+    TEST_XY(bagObject->getBool ("C"), true);
+    TEST_XY(bagObject->getFloat ("DD"), 6.5);
+
     TEST_XY(bagObject->get ("A")->getType (), BagThing::TEXT_TYPE);
     TEST_XY(bagObject->get ("B")->getType (), BagThing::INTEGER_TYPE);
     TEST_XY(bagObject->get ("C")->getType (), BagThing::BOOL_TYPE);

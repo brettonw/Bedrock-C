@@ -58,10 +58,10 @@ class	Integer
 		sInt4		operator > (const Integer& a) const;
 		sInt4		operator >= (const Integer& a) const;
 		/* void* */	operator void* (void) const;
-		cstr		ConvertToString (uDigit radix) const;
-		void		ConvertFromString (cstr string, uDigit radix);
-static	Integer		PowerMod (Integer a, const Integer& b, const Integer& n);
-static	sInt4		IsComposite (const Integer& a, const Integer& n);
+		Text		toText (uDigit radix) const;
+		void		fromString (const char* string, uDigit radix);
+static	Integer		powerMod (Integer a, const Integer& b, const Integer& n);
+static	sInt4		isComposite (const Integer& a, const Integer& n);
 
 	protected:
 		/* void */	Integer (uDigit *array, uDigit negative, uDigit overflow);

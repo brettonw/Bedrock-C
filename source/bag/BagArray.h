@@ -2,7 +2,7 @@
 
 #include "BagSort.h"
 
-MAKE_PTR_TO_SUB(BagArray, BagContainer) {
+class BagArray : public BagContainer {
     protected:
         vector<PtrToBagThing> value;
         friend class BagArraySort;
@@ -55,11 +55,15 @@ MAKE_PTR_TO_SUB(BagArray, BagContainer) {
             return add (Text (thing));
         }
 
-        PtrToBagArray add(int thing) {
+        PtrToBagArray add(s4 thing) {
             return add (new BagInteger (thing));
         }
 
-        PtrToBagArray add(double thing) {
+        PtrToBagArray add(s8 thing) {
+            return add (new BagInteger (thing));
+        }
+
+        PtrToBagArray add(f8 thing) {
             return add (new BagFloat (thing));
         }
 
@@ -94,6 +98,32 @@ MAKE_PTR_TO_SUB(BagArray, BagContainer) {
             }
             return ptrToBagThing;
         }
+
+        #define GET_TYPE(bagType, baseType)                                                         \
+            baseType get ## bagType (uint index) const {                                            \
+                PtrToBagThing bagThing = get (index);                                               \
+                PtrToBag ## bagType bag ## bagType = ptr_downcast<Bag ## bagType> (bagThing);       \
+                baseType thing = bag ## bagType->get ();                                            \
+                return thing;                                                                       \
+            }
+
+        GET_TYPE(Text, Text);
+        GET_TYPE(Integer, s8);
+        GET_TYPE(Float, f8);
+        GET_TYPE(Bool, bool);
+
+        #undef GET_TYPE
+        #define GET_TYPE(bagType, baseType)                                                         \
+            baseType getBag ## bagType (uint index) const  {                                        \
+                PtrToBagThing bagThing = get (index);                                               \
+                PtrToBag ## bagType bag ## bagType = ptr_downcast<Bag ## bagType> (bagThing);       \
+                return bag ## bagType;                                                              \
+            }
+
+        GET_TYPE(Array, PtrToBagArray);
+        GET_TYPE(Object, PtrToBagObject);
+
+        #undef GET_TYPE
 
         static PtrToBagArray sort (const PtrToBagArray& source, SortDir sortDir = ASCENDING) {
             //Log::debug() << "BagArray: " << "simple sort" << endl;
