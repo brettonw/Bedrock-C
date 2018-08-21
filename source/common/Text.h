@@ -79,7 +79,7 @@ class Text {
             return *this;
         }
 
-        PtrToBuffer getBuffer () const {
+        PtrToBuffer copyToBuffer () const {
             return Buffer::make ((const byte*) (get ()), length ());
         }
 

@@ -53,10 +53,6 @@ MAKE_PTR_TO(Buffer) {
             return false;
         }
 
-        void setLength (uint sourceLength) {
-            length = sourceLength;
-        }
-
         byte* get () {
             return bytes;
         }
@@ -65,8 +61,20 @@ MAKE_PTR_TO(Buffer) {
             return bytes;
         }
 
+        byte* fill (uint sourceLength) {
+            if (sourceLength <= capacity) {
+                length = sourceLength;
+                return bytes;
+            }
+            return 0;
+        }
+
         uint getLength () const {
             return length;
+        }
+
+        void setLength (uint sourceLength) {
+            length = sourceLength;
         }
 
         uint getCapacity () const {

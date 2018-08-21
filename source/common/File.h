@@ -79,11 +79,9 @@ MAKE_PTR_TO(File) {
                 streampos size = file.tellg ();
                 buffer = Buffer::make (size);
 
-                // go back to the beginning of the file, and read the contents into the buffer, set
-                // the buffer length to indicate success
+                // go back to the beginning of the file and read the contents into the buffer
                 file.seekg (0, ios::beg);
-                file.read ((char*) buffer->get (), size);
-                buffer->setLength (size);
+                file.read ((char*) buffer->fill (size), size);
 
                 // close the file before returning
                 file.close();
