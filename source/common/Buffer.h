@@ -4,7 +4,7 @@
 
 // Buffer is a block of memory, this is not a resizable entity
 MAKE_PTR_TO(Buffer) {
-    private:
+    protected:
         uint capacity;
         uint length;
         byte bytes[1];

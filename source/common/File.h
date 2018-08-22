@@ -13,20 +13,41 @@ MAKE_PTR_TO(File) {
         struct stat stats;
         bool exists;
 
+        template<typename BufferType>
+        PtrTo<BufferType> readIntoBuffer () const {
+            PtrTo<BufferType> buffer;
+
+            // open the file with the file pointer at the end of the file, and check if that worked
+            ifstream file (path, ios::in | ios::binary | ios::ate);
+            if (file.is_open()) {
+                // get the size of the file and create the buffer to hold it,
+                streampos size = file.tellg ();
+                buffer = BufferType::make (size);
+
+                // go back to the beginning of the file and read the contents into the buffer
+                file.seekg (0, ios::beg);
+                file.read ((char*) buffer->fill (size), size);
+
+                // close the file before returning
+                file.close();
+            }
+            return buffer;
+        }
+
     public:
         File (const Text& _path) : path (_path), exists (stat (path, &stats) == 0) { }
 
         ~File () {}
 
-        bool getExists () {
+        bool getExists () const {
             return exists;
         }
 
-        bool isDirectory () {
+        bool isDirectory () const {
             return exists and S_ISDIR(stats.st_mode);
         }
 
-        vector<PtrToFile> getFiles () {
+        vector<PtrToFile> getFiles () const {
             if (isDirectory ()) {
                 vector<PtrToFile> files;
                 DIR* directory = opendir (path);
@@ -45,11 +66,11 @@ MAKE_PTR_TO(File) {
             throw RuntimeError (Text ("File (") << path << ") is not a directory");
         }
 
-        Text getPath () {
+        Text getPath () const {
             return path;
         }
 
-        Text getBasename () {
+        Text getBasename () const {
             vector<Text> components = path.split ("/");
             Text basename = components.back ();
             vector<Text> nameComponents = basename.split (".");
@@ -60,7 +81,7 @@ MAKE_PTR_TO(File) {
             return basename;
         }
 
-        Text getExtension () {
+        Text getExtension () const {
             Text extension;
             vector<Text> components = path.split (getBasename () + ".");
             if (components.size () > 1) {
@@ -69,28 +90,12 @@ MAKE_PTR_TO(File) {
             return extension;
         }
 
-        PtrToBuffer read () {
-            PtrToBuffer buffer;
-
-            // open the file with the file pointer at the end of the file, and check if that worked
-            ifstream file (path, ios::in | ios::binary | ios::ate);
-            if (file.is_open()) {
-                // get the size of the file and create the buffer to hold it,
-                streampos size = file.tellg ();
-                buffer = Buffer::make (size);
-
-                // go back to the beginning of the file and read the contents into the buffer
-                file.seekg (0, ios::beg);
-                file.read ((char*) buffer->fill (size), size);
-
-                // close the file before returning
-                file.close();
-            }
-            return buffer;
+        PtrToBuffer read () const {
+            return readIntoBuffer<Buffer> ();
         }
 
-        Text readText () {
-            return Text (read ());
+        Text readText () const {
+            return Text (readIntoBuffer<RawText> ());
         }
 
         // open, close

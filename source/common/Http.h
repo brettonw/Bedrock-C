@@ -16,8 +16,9 @@ class Http {
             }
         }
 
+
     public:
-        static PtrToBuffer get (const Text& url, const Text& filename) {
+        static PtrToFile getToFile (const Text& url, const PtrToFile& file) {
             initCurl ();
 
             CURL* curlHandle = curl_easy_init();;
@@ -38,7 +39,7 @@ class Http {
                 curl_easy_setopt (curlHandle, CURLOPT_WRITEFUNCTION, writeHttpData);
 
                 /* open the file */
-                FILE* httpDataFile = fopen (filename, "wb");
+                FILE* httpDataFile = fopen (file->getPath (), "wb");
                 if(httpDataFile) {
                     // write the page body to this file handle
                     curl_easy_setopt (curlHandle, CURLOPT_WRITEDATA, httpDataFile);
@@ -55,13 +56,14 @@ class Http {
 
                 curl_easy_cleanup (curlHandle);
             }
-
-            // read the file result
-            File file (filename);
-            return file.read ();
+            return file;
         }
 
-        static Text getText (const Text& url, const Text& filename) {
-            return Text (get (url, filename));
+        static PtrToBuffer get (const Text& url, const PtrToFile& file) {
+            return getToFile (url, file)->read ();
+        }
+
+        static Text getText (const Text& url, const PtrToFile& file) {
+            return getToFile (url, file)->readText ();
         }
 };

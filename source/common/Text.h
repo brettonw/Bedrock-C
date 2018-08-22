@@ -7,16 +7,13 @@ class Text {
     private:
         PtrToRawText ptr;
 
-        Text (PtrToRawText rawText) {
-            ptr = rawText;
-        }
-
     public:
         Text () : ptr (RawText::getEmpty ()) {}
         Text (const Text& text) : ptr (text.ptr) {}
         Text (const char* source, uint sourceLength) : ptr (RawText::make (source, sourceLength)) {}
         Text (const char* source) : ptr (source ? RawText::make (source, strlen (source)) : RawText::getEmpty ()) {}
-        Text (const PtrToBuffer& buffer) : ptr ((buffer->getLength () > 0) ? RawText::make ((const char*) (buffer->get ()), buffer->getLength ()) : RawText::getEmpty ()) {}
+        //Text (const PtrToBuffer& buffer) : ptr ((buffer->getLength () > 0) ? RawText::make ((const char*) (buffer->get ()), buffer->getLength ()) : RawText::getEmpty ()) {}
+        Text (const PtrToRawText& _ptr) : ptr (_ptr) {}
 
         // do not subclass this type
         ~Text () {
@@ -36,11 +33,11 @@ class Text {
         }
 
         const char* get () const {
-            return ptr->get ();
+            return (const char*) (ptr->get ());
         }
 
         char* get () {
-            return ptr->get ();
+            return (char*) (ptr->get ());
         }
 
         operator const char* () const {
@@ -79,8 +76,8 @@ class Text {
             return *this;
         }
 
-        PtrToBuffer copyToBuffer () const {
-            return Buffer::make ((const byte*) (get ()), length ());
+        PtrToRawText getRawText () const {
+            return ptr;
         }
 
         bool operator == (const Text& text) const {
@@ -137,11 +134,11 @@ class Text {
 
         // compare
         int compare (const char* source, uint sourceLength) const {
-            return ptr->compare(source, sourceLength);
+            return ptr->compare((const byte*) (source), sourceLength);
         }
 
         int compare (const char* source) const {
-            return ptr->compare(source, source ? strlen (source) : 0);
+            return ptr->compare((const byte*) (source), source ? strlen (source) : 0);
         }
 
         int compare (const Text& text) const {
@@ -151,7 +148,7 @@ class Text {
         // append
         Text& append (const char* source, uint sourceLength) {
             if (! ptr->append(source, sourceLength)) {
-                PtrToRawText newPtr = RawText::make (length () + sourceLength, ptr->get(), ptr->getLength ());
+                PtrToRawText newPtr = RawText::make (length () + sourceLength, (const char*) (ptr->get()), ptr->getLength ());
                 newPtr->append (source, sourceLength);
                 ptr = newPtr;
             }
@@ -273,7 +270,7 @@ class Text {
 
         Text& makeUnique () {
             if (not isUnique()) {
-                ptr = RawText::make (ptr->get (), ptr->getLength ());
+                ptr = RawText::make ((const char*) (ptr->get ()), ptr->getLength ());
             }
             return *this;
         }

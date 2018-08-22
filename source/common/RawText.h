@@ -1,17 +1,13 @@
 #pragma once
 
-#include "PtrTo.h"
+#include "Buffer.h"
 
 // RawText is generally presumed to be a buffer containing a valid UTF-8 encoding of text. As such,
 // no wide-char support is provided, nor is there a direct indexing capability. the user must read
 // the text buffer as a stream text as a stream. NOTE: this means that count and length might be two
 // different things...
-MAKE_PTR_TO(RawText) {
+MAKE_PTR_TO_SUB(RawText, Buffer) {
     private:
-        uint capacity;
-        uint length;
-        char bytes[1];
-
         // we will use capacities that are powers of 2 in size to make growing strings logarithmic
         // in time complexity, but after a certain size it's probably better to grow incrementally.
         enum { MAX_CAPACITY = 16384 };
@@ -33,35 +29,23 @@ MAKE_PTR_TO(RawText) {
 
         // capacity is always one less than the total capacity, so there is always room to include
         // a null terminator for the string
-        RawText (uint _capacity) : capacity (_capacity), length (0) {
+        RawText (uint _capacity) : Buffer (_capacity) {
             bytes[0] = 0;
         }
 
-        RawText (uint _capacity, const char* source, uint sourceLength) : capacity (_capacity), length (sourceLength) {
+        RawText (uint _capacity, const char* source, uint sourceLength) : Buffer (_capacity) {
             set (source, sourceLength);
-        }
-
-        // we want to allocate RawText objects on 16-byte memory boundaries for performance, so this
-        // structure gives us a tool to do that
-        struct BlockType { byte a[16]; };
-
-        // function to encapsulate making the raw text pointer, using an already mapped capacity
-        static void* makeRawTextPtr (uint capacity) {
-            // we want to allocate RawText objects on 16-byte memory boundaries for performance
-            uint totalAlloc = sizeof (RawText) + capacity;
-            uint blocksToAlloc = (totalAlloc / sizeof(BlockType)) + ((totalAlloc % sizeof(BlockType)) ? 1 : 0);
-            return new BlockType[blocksToAlloc];
         }
 
     public:
         static PtrToRawText make (uint capacity) {
             capacity = mapCapacity (capacity);
-            return new (makeRawTextPtr (capacity)) RawText (capacity);
+            return new (makeBufferPtr (capacity)) RawText (capacity);
         }
 
         static PtrToRawText make (uint capacity, const char* source, uint sourceLength) {
             capacity = mapCapacity (capacity);
-            return new (makeRawTextPtr (capacity)) RawText (capacity, source, sourceLength);
+            return new (makeBufferPtr (capacity)) RawText (capacity, source, sourceLength);
         }
 
         static PtrToRawText make (const char* source, uint sourceLength) {
@@ -69,16 +53,14 @@ MAKE_PTR_TO(RawText) {
         }
 
         ~RawText () {}
-
+/*
         void operator delete (void* ptr) {
             // the memory was allocated using the new byte[] method
             delete[] reinterpret_cast<BlockType*> (ptr);
         }
-
+*/
         bool set (const char* source, uint sourceLength) {
-            if (sourceLength <= capacity) {
-                memcpy (&bytes[0], source, sourceLength);
-                length = sourceLength;
+            if (Buffer::set ((const byte*) (source), sourceLength)) {
                 bytes[length] = 0;
                 return true;
             }
@@ -91,37 +73,14 @@ MAKE_PTR_TO(RawText) {
         }
         */
 
-        char* get () {
-            return bytes;
-        }
-
-        const char* get () const {
-            return bytes;
-        }
-
-        uint getLength () const {
-            return length;
-        }
-
-        uint getCapacity () const {
-            return capacity;
-        }
-
-        int compare (const char* source, uint sourceLength) const {
-            uint minLength = min (length, sourceLength);
-            int comparison = memcmp (bytes, source, minLength);
-            if ((comparison != 0) or (length == sourceLength)) {
-                return signum (comparison);
-            } else {
-                return signum ((int) length - (int) sourceLength);
+        char* fill (uint sourceLength) {
+            if (sourceLength <= capacity) {
+                length = sourceLength;
+                bytes[length] = 0;
+                return (char*) bytes;
             }
+            return 0;
         }
-
-        /*
-        int compare (const RawText* rawText) {
-            return compare (rawText->bytes, rawText->length);
-        }
-        */
 
         bool append (const char* source, uint sourceLength) {
             if ((length + sourceLength) <= capacity) {
