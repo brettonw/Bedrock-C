@@ -3,27 +3,80 @@
 #include "Log.h"
 
 class Statistics {
+    public:
+        enum Outliers{
+            ELIMINATE,
+            KEEP
+        };
+
     private:
+        vector<double> array;
         Text name;
-        int count;
         double min;
         double mean;
         double median;
         double max;
         double variance;
 
-    public:
-        Statistics (const Text& _name, vector<double>& array) :
-            name (_name), count (array.size ()), min (DBL_MAX), mean (0), median (0), max (-DBL_MAX), variance (0) {
+        // compute the median on a sorted array
+        static double computeMedian (const double* array, uint count) {
+            int midpoint = count >> 1;
+            return ((count & 0x01) == 0) ? ((array[midpoint - 1] + array[midpoint]) * 0.5) : array[midpoint];
+        }
+
+        void init (const Text& _name, const double* _array, uint count, Outliers outliers) {
+            name = _name;
+            min = DBL_MAX;
+            max = -DBL_MAX;
+            mean = median = variance = 0;
 
             // none of this is meaningful unless there are samples
             if (count > 0) {
-                // sort the array to make medians easy
+                // copy, and sort the array to make medians easy
+                array.assign(_array, _array + count);
                 sort (array.begin (), array.end ());
 
+                // if we want to eliminate outliers, and there are enough samples to perform IQR...
+                if ((outliers == Outliers::ELIMINATE) and (count > 5)) {
+                    // using the Inter-Quartile Range (IQR) method for eliminating outliers
+                    // https://en.wikipedia.org/wiki/Interquartile_range
+                    int halfLength = count >> 1;
+                    double q1 = computeMedian (array.data (), halfLength);
+                    double q3 = computeMedian (array.data () + halfLength + (count & 0x01), halfLength);
+
+                    // compute the IQR fences and get the result (1.5 is a "magic" number
+                    // associated with the method, because John Tukey chose this number when he
+                    // invented the box and whisker plot method, and it has worked well enough ever
+                    // since)
+                    double iqr = (q3 - q1) * 1.5;
+                    double fenceLow = q1 - iqr;
+                    double fenceHigh = q3 + iqr;
+
+                    vector<double> filtered;
+                    double lastValue = array.back();
+                    Log& log = Log::debug () << "IQR (q1 = " << q1 << ", q3 = " << q3 << ", min << " << fenceLow << ", max << " << fenceHigh << ")";
+                    for (vector<double>::iterator it = array.begin (); it != array.end (); ++it) {
+                        double value = *it;
+                        if (value != lastValue) {
+                            log << endl << value << " ";
+                            lastValue = value;
+                        }
+
+                        if ((value >= fenceLow) and (value <= fenceHigh)) {
+                            filtered.push_back(value);
+                            log << "+";
+                        } else {
+                            log << "-";
+                        }
+                    }
+                    log << endl;
+
+                    array = filtered;
+                    count = array.size ();
+                }
+
                 // compute the median
-                int midpoint = count / 2;
-                median = ((count & 0x01) == 0) ? ((array[midpoint - 1] + array[midpoint]) * 0.5) : array[midpoint];
+                median = computeMedian (array.data (), count);
 
                 // compute the mean, capture min and max along the way
                 for (vector<double>::iterator it = array.begin (); it != array.end (); ++it) {
@@ -44,7 +97,16 @@ class Statistics {
             }
         }
 
-        int getCount () const { return count; }
+    public:
+        Statistics (const Text& _name, const double* _array, uint _count, Outliers outliers = Outliers::KEEP) {
+            init (_name, _array, _count, outliers);
+        }
+
+        Statistics (const Text& _name, const vector<double>& _array, Outliers outliers = Outliers::KEEP) {
+            init (_name, _array.data (), _array.size (), outliers);
+        }
+
+        int getCount () const { return array.size (); }
         double getMin () const { return min; }
         double getMean () const { return mean; }
         double getMedian() const { return median; }
@@ -54,6 +116,7 @@ class Statistics {
 
         const Statistics& report () const {
             cerr << "STATS (" << name << " - ";
+            uint count = array.size ();
             if (count > 0) {
                 cerr <<
                             "count: " << count << ", " <<
