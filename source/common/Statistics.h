@@ -5,7 +5,7 @@
 class Statistics {
     public:
         enum Outliers{
-            ELIMINATE,
+            ELIMINATE_OUTLIERS,
             KEEP
         };
 
@@ -37,7 +37,7 @@ class Statistics {
                 sort (array.begin (), array.end ());
 
                 // if we want to eliminate outliers, and there are enough samples to perform IQR...
-                if ((outliers == Outliers::ELIMINATE) and (count > 5)) {
+                if ((outliers == Outliers::ELIMINATE_OUTLIERS) and (count > 5)) {
                     // using the Inter-Quartile Range (IQR) method for eliminating outliers
                     // https://en.wikipedia.org/wiki/Interquartile_range
                     int halfLength = count >> 1;

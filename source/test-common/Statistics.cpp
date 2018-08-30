@@ -20,7 +20,7 @@ TEST_CASE(TestStatistics) {
     TEST_XYF(stats.getVariance(), 22.9167, 1.0e-4);
     TEST_XYF(stats.getStdDev(), sqrt (22.9167), 1.0e-5);
 
-    Statistics stats2 ("Test", array, Statistics::ELIMINATE);
+    Statistics stats2 ("Test", array, Statistics::ELIMINATE_OUTLIERS);
     TEST_XY(stats2.getCount(), 5);
     TEST_XY(stats2.getMin(), 2);
     TEST_XY(stats2.getMax(), 5);
