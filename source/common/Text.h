@@ -1,7 +1,6 @@
 #pragma once
 
 #include "RawText.h"
-#include "Buffer.h"
 
 class Text {
     private:

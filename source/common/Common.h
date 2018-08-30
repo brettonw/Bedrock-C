@@ -17,6 +17,7 @@
 #include <stdexcept>
 #include <assert.h>
 #include <cmath>
+#include <cfloat>
 
 using namespace std;
 
