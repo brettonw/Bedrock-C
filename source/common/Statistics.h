@@ -4,7 +4,7 @@
 
 class Statistics {
     public:
-        enum Outliers{
+        enum Outliers {
             ELIMINATE_OUTLIERS,
             KEEP
         };
@@ -37,7 +37,7 @@ class Statistics {
                 sort (array.begin (), array.end ());
 
                 // if we want to eliminate outliers, and there are enough samples to perform IQR...
-                if ((outliers == Outliers::ELIMINATE_OUTLIERS) and (count > 5)) {
+                if ((outliers == ELIMINATE_OUTLIERS) and (count > 5)) {
                     // using the Inter-Quartile Range (IQR) method for eliminating outliers
                     // https://en.wikipedia.org/wiki/Interquartile_range
                     int halfLength = count >> 1;
@@ -54,7 +54,7 @@ class Statistics {
 
                     vector<double> filtered;
                     double lastValue = array.back();
-                    Log& log = Log::debug () << "IQR (q1 = " << q1 << ", q3 = " << q3 << ", min << " << fenceLow << ", max << " << fenceHigh << ")";
+                    Log& log = Log::debug () << "IQR (q1: " << q1 << ", q3: " << q3 << ", iqr: " << iqr << ", min: " << fenceLow << ", max: " << fenceHigh << ")";
                     for (vector<double>::iterator it = array.begin (); it != array.end (); ++it) {
                         double value = *it;
                         if (value != lastValue) {
@@ -98,11 +98,11 @@ class Statistics {
         }
 
     public:
-        Statistics (const Text& _name, const double* _array, uint _count, Outliers outliers = Outliers::KEEP) {
+        Statistics (const Text& _name, const double* _array, uint _count, Outliers outliers = KEEP) {
             init (_name, _array, _count, outliers);
         }
 
-        Statistics (const Text& _name, const vector<double>& _array, Outliers outliers = Outliers::KEEP) {
+        Statistics (const Text& _name, const vector<double>& _array, Outliers outliers = KEEP) {
             init (_name, _array.data (), _array.size (), outliers);
         }
 

@@ -2,7 +2,7 @@
 #include "Statistics.h"
 
 TEST_CASE(TestStatistics) {
-    Log::Scope scope (Log::DEBUG);
+    //Log::Scope scope (Log::DEBUG);
 
     vector<double> array;
     array.push_back(16);
