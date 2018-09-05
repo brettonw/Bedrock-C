@@ -19,6 +19,10 @@ template<typename Scalar>
 class Tuple2 : public TupleBase<Scalar, 2, Tuple2<Scalar> > {
     typedef TupleBase<Scalar, 2, Tuple2<Scalar> > BaseClass;
     public:
+        Tuple2 () : BaseClass () {}
+        Tuple2 (Scalar x, Scalar y) {
+            (*this)[X] = x; (*this)[Y] = y;
+        }
         using BaseClass::TupleBase;
 
         Scalar operator CROSS (const Tuple2<Scalar>& right) const {
@@ -34,6 +38,10 @@ template<typename Scalar>
 class Tuple3 : public TupleBase<Scalar, 3, Tuple3<Scalar> > {
     typedef TupleBase<Scalar, 3, Tuple3<Scalar> > BaseClass;
     public:
+        Tuple3 () : BaseClass () {}
+        Tuple3 (Scalar x, Scalar y, Scalar z) {
+            (*this)[X] = x; (*this)[Y] = y; (*this)[Z] = z;
+        }
         using BaseClass::TupleBase;
 
         Tuple3<Scalar> operator CROSS (const Tuple3<Scalar>& right) const {
