@@ -22,12 +22,11 @@ class Tuple2 : public TupleBase<Scalar, 2, Tuple2<Scalar> > {
         using BaseClass::TupleBase;
 
         Scalar operator CROSS (const Tuple2<Scalar>& right) const {
-            // XXX TODO
-            return 1;
+            return ((*this)[X] * right[Y]) - ((*this)[Y] * right[X]);
         }
 
         Tuple2<Scalar> perpendicular () const {
-            return Tuple2<Scalar> (BaseClass::value[Y], -BaseClass::value[X]);
+            return Tuple2<Scalar> ((*this)[Y], -(*this)[X]);
         }
 };
 
