@@ -37,8 +37,9 @@ class Tuple3 : public TupleBase<Scalar, 3, Tuple3<Scalar> > {
         using BaseClass::TupleBase;
 
         Tuple3<Scalar> operator CROSS (const Tuple3<Scalar>& right) const {
-            // XXX TODO
-            return Tuple3<Scalar> (1);
+            return Tuple3<Scalar> (((*this)[Y] * right[Z]) - ((*this)[Z] * right[Y]),
+                                   ((*this)[Z] * right[X]) - ((*this)[X] * right[Z]),
+                                   ((*this)[X] * right[Y]) - ((*this)[Y] * right[X]));
         }
 };
 
