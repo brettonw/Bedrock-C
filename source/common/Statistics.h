@@ -26,8 +26,8 @@ class Statistics {
 
         void init (const Text& _name, const double* _array, uint count, Outliers outliers) {
             name = _name;
-            min = DBL_MAX;
-            max = -DBL_MAX;
+            min = numeric_limits<double>::max ();
+            max = numeric_limits<double>::lowest ();
             mean = median = variance = 0;
 
             // none of this is meaningful unless there are samples

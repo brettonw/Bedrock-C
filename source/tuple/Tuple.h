@@ -1,73 +1,57 @@
 #pragma once
 
+#include "TupleHelper.h"
+
 enum Coordinate {
-    X, Y, Z, W
+    X = 0, Y = 1, Z = 2, W = 3,
+    U = 0, V = 1
 };
 
 #define DOT |
 #define CROSS ^
-#define EXACTLY_EQUALS &
-#define EXACTLY_NOT_EQUALS %
 
-template<typename Scalar, unsigned int size>
-class Tuple {
-    private:
+template<typename Scalar, unsigned int size, typename DerivedType>
+class TupleBase {
+    protected:
         Scalar  value[size];
-
-        static void copy (Scalar* destination, const Scalar* source) {
-            *destination++ = *source++;
-            Tuple<Scalar, size - 1>::copy (destination, source);
-        }
-
-        static void add (const Scalar* left, const Scalar* right, Scalar* result) {
-            *result++ = *left++ + *right++;
-            Tuple<Scalar, size - 1>::add (left, right, result);
-        }
-
-        static void subtract (const Scalar* left, const Scalar* right, Scalar* result) {
-            *result++ = *left++ - *right++;
-            Tuple<Scalar, size - 1>::subtract (left, right, result);
-        }
-
-        static void multiply (const Scalar* left, Scalar right, Scalar* result) {
-            *result++ = *left++ * right;
-            Tuple<Scalar, size - 1>::multiply (left, right, result);
-        }
-
-        static void divide (const Scalar* left, Scalar right, Scalar* result) {
-            *result++ = *left++ / right;
-            Tuple<Scalar, size - 1>::divide (left, right, result);
-        }
-
-        static bool compare (const Scalar* left, const Scalar* right) {
-            return (*left++ == *right++) ? Tuple<Scalar, size - 1>::compare (left, right) : false;
-        }
+        static Scalar epsilon;
 
     public:
-        Tuple (Scalar x, ...) {
+        static const TupleBase<Scalar, size, DerivedType> ZERO;
+
+        TupleBase (Scalar fillValue = 0) {
+            TupleHelper<Scalar, size>::fill(value, fillValue);
+        }
+
+        TupleBase (const initializer_list<Scalar>& initializers) {
             // XXX OK, so does the compiler just put the arguments on the call stack in order?
-            copy (value, &x);
+            TupleHelper<Scalar, size>::copy (value, initializers.begin ());
         }
 
-        Tuple (Scalar* source) {
-            copy (value, source);
+        TupleBase (Scalar* source) {
+            TupleHelper<Scalar, size>::copy (value, source);
         }
 
-        Tuple (const Tuple<Scalar, size>& source) {
-            copy (value, source.value);
+        TupleBase (const TupleBase<Scalar, size, DerivedType>& source) {
+            TupleHelper<Scalar, size>::copy (value, source.value);
         }
 
-        Tuple (const Tuple<Scalar, size - 1>& source, Scalar fill = 0) {
-            Tuple<Scalar, size - 1>::copy (value, source.value);
+        TupleBase (const TupleBase<Scalar, size - 1, DerivedType>& source, Scalar fill = 0) {
+            TupleHelper<Scalar, size - 1>::copy (value, source.value);
             value[size - 1] = fill;
         }
 
-        Tuple (const Tuple<Scalar, size + 1>& source) {
+        TupleBase (const TupleBase<Scalar, size + 1, DerivedType>& source) {
             // just drop the last value
-            copy (value, source.value);
+            TupleHelper<Scalar, size>::copy (value, source.value);
         }
 
-        ~Tuple () {}
+        ~TupleBase () {}
+
+        // assignment
+        TupleBase<Scalar, size, DerivedType>& operator = (const TupleBase<Scalar, size, DerivedType>& source) {
+            TupleHelper<Scalar, size>::copy (value, source.value);
+        }
 
         // accessors
         Scalar& operator [] (Coordinate index) {
@@ -87,111 +71,226 @@ class Tuple {
         }
 
         // add/subtract, multiply/divide by scalar, negate
-        static Tuple<Scalar, size>& add (const Tuple<Scalar, size>& left, const Tuple<Scalar, size>& right, Tuple<Scalar, size>& result) {
-            add (left.value, right.value, result.value);
+        static TupleBase<Scalar, size, DerivedType>& add (const TupleBase<Scalar, size, DerivedType>& left, const TupleBase<Scalar, size, DerivedType>& right, TupleBase<Scalar, size, DerivedType>& result) {
+            TupleHelper<Scalar, size>::add (left.value, right.value, result.value);
             return result;
         }
 
-        static Tuple<Scalar, size>& subtract (const Tuple<Scalar, size>& left, const Tuple<Scalar, size>& right, Tuple<Scalar, size>& result) {
-            subtract (left.value, right.value, result.value);
+        static TupleBase<Scalar, size, DerivedType>& subtract (const TupleBase<Scalar, size, DerivedType>& left, const TupleBase<Scalar, size, DerivedType>& right, TupleBase<Scalar, size, DerivedType>& result) {
+            TupleHelper<Scalar, size>::subtract (left.value, right.value, result.value);
             return result;
         }
 
-        static Tuple<Scalar, size>& multiply (const Tuple<Scalar, size>& left, Scalar right, Tuple<Scalar, size>& result) {
-            subtract (left.value, right, result.value);
+        static TupleBase<Scalar, size, DerivedType>& multiply (const TupleBase<Scalar, size, DerivedType>& left, Scalar right, TupleBase<Scalar, size, DerivedType>& result) {
+            TupleHelper<Scalar, size>::multiply (left.value, right, result.value);
             return result;
         }
 
-        static Tuple<Scalar, size>& divide (const Tuple<Scalar, size>& left, Scalar right, Tuple<Scalar, size>& result) {
-            divide (left.value, right, result.value);
+        static TupleBase<Scalar, size, DerivedType>& divide (const TupleBase<Scalar, size, DerivedType>& left, Scalar right, TupleBase<Scalar, size, DerivedType>& result) {
+            TupleHelper<Scalar, size>::divide (left.value, right, result.value);
             return result;
         }
 
-        static Tuple<Scalar, size>& negate (const Tuple<Scalar, size>& left, Tuple<Scalar, size>& result) {
-            multiply (left.value, -1, result.value);
+        static TupleBase<Scalar, size, DerivedType>& negate (const TupleBase<Scalar, size, DerivedType>& left, TupleBase<Scalar, size, DerivedType>& result) {
+            TupleHelper<Scalar, size>::multiply (left.value, -1, result.value);
             return result;
         }
 
-        Tuple<Scalar, size>& operator += (const Tuple<Scalar, size>& right) {
+        TupleBase<Scalar, size, DerivedType>& operator += (const TupleBase<Scalar, size, DerivedType>& right) {
             add (value, right.value, value);
             return *this;
         }
 
-        Tuple<Scalar, size>& operator -= (const Tuple<Scalar, size>& right) {
-            subtract (value, right.value, value);
-            return *this;
+        TupleBase<Scalar, size, DerivedType>& operator -= (const TupleBase<Scalar, size, DerivedType>& right) {
+            return subtract (*this, right, *this);
         }
 
-        Tuple<Scalar, size>& operator *= (Scalar right) {
-            multiply (value, right, value);
-            return *this;
+        TupleBase<Scalar, size, DerivedType>& operator *= (Scalar right) {
+            return multiply (*this, right, *this);
         }
 
-        Tuple<Scalar, size>& operator /= (Scalar right) {
-            divide (value, right, value);
-            return *this;
+        TupleBase<Scalar, size, DerivedType>& operator /= (Scalar right) {
+            return divide (*this, right, *this);
         }
 
-        Tuple<Scalar, size> operator + (const Tuple<Scalar, size>& right) const {
-            Tuple<Scalar, size> result;
-            add (value, right.value, result.value);
-            return result;
+        TupleBase<Scalar, size, DerivedType> operator + (const TupleBase<Scalar, size, DerivedType>& right) const {
+            TupleBase<Scalar, size, DerivedType> result;
+            return add (*this, right, result);
         }
 
-        Tuple<Scalar, size> operator - (const Tuple<Scalar, size>& right) const {
-            Tuple<Scalar, size> result;
-            subtract (value, right.value, result.value);
-            return result;
+        TupleBase<Scalar, size, DerivedType> operator - (const TupleBase<Scalar, size, DerivedType>& right) const {
+            TupleBase<Scalar, size, DerivedType> result;
+            return subtract (*this, right, result);
         }
 
-        Tuple<Scalar, size> operator * (Scalar right) const {
-            Tuple<Scalar, size> result;
-            multiply (value, right, result.value);
-            return result;
+        TupleBase<Scalar, size, DerivedType> operator * (Scalar right) const {
+            TupleBase<Scalar, size, DerivedType> result;
+            return multiply (*this, right, result);
         }
 
-        Tuple<Scalar, size> operator / (Scalar right) const {
-            Tuple<Scalar, size> result;
-            divide (value, right, result.value);
-            return result;
+        TupleBase<Scalar, size, DerivedType> operator / (Scalar right) const {
+            TupleBase<Scalar, size, DerivedType> result;
+            return divide (*this, right, result);
         }
 
-        Tuple<Scalar, size> operator - () const {
-            Tuple<Scalar, size> result;
-            multiply (value, -1, result.value);
-            return result;
+        TupleBase<Scalar, size, DerivedType> operator - () const {
+            TupleBase<Scalar, size, DerivedType> result;
+            return multiply (*this, -1, result);
         }
 
+        // norms, measures, lengths
+        // norm L-1, a.k.a. Manhattan distance
+        Scalar normL1 () const {
+            return TupleHelper<Scalar, size>::sumAbs (value);
+        }
+
+        // norm L-2, a.k.a. Euclidean distance, or length
+        // this is what most people think of when they use a norm as a unit of measure, so we
+        // include the expected names in multiple implementations
+        Scalar normL2 () const {
+            return sqrt (TupleHelper<Scalar, size>::sumSquare (value));
+        }
+        Scalar norm () const {
+            return normL2 ();
+        }
+        Scalar length () const {
+            return normL2 ();
+        }
+
+        // the infinity norm, a.k.a. max norm
+        Scalar normInf () const {
+            return TupleHelper<Scalar, size>::max (value);
+        }
+
+        // the power norm general function, a.k.a. p-norm
+        // see: https://en.wikipedia.org/wiki/Norm_(mathematics)
+        Scalar normPower (double power) const {
+            return pow (TupleHelper<Scalar, size>::sumPower (value, power), 1.0 / power);
+        }
+
+        // normalization
+        static TupleBase<Scalar, size, DerivedType> normalized (const TupleBase<Scalar, size, DerivedType>& source, TupleBase<Scalar, size, DerivedType>& result) {
+            return divide (source, source.norm (), result);
+        }
+
+        TupleBase<Scalar, size, DerivedType>& normalize () {
+            return normalized (*this, *this);
+        }
+
+        TupleBase<Scalar, size, DerivedType> normalized () const {
+            TupleBase<Scalar, size, DerivedType> result;
+            return normalized (*this, result);
+        }
+
+        bool isUnit () const {
+            return (abs (norm () - 1.0) <= epsilon);
+        }
+
+        // comparisons
         // XXX there are three ways to do value comparison with tuples:
         // XXX 1. exact value comparisons per component
         // XXX 2. range value comparisons per component, this is effectively a discretized
         // XXX    value comparison, which checks whether the two tuples occupy a square region
-        // XXX    whose size is the epsilon
+        // XXX    whose size is the epsilon (option 1 is a simplified version of this option where
+        // XXX    epsilon = 0)
         // XXX 3. subtract the vectors and take the magnitude of the delta, which checks whether
         // XXX    the two vectors occupy a circular region whose radius is the epsilon. this is
         // XXX    probably the most correct method overall, but is also the most expensive.
 
-        bool operator ==
+        bool operator == (const TupleBase<Scalar, size, DerivedType>& right) const {
+            TupleBase<Scalar, size, DerivedType> delta;
+            return (subtract (*this, right, delta).norm () <= epsilon);
+        }
+
+        bool operator != (const TupleBase<Scalar, size, DerivedType>& right) const {
+            return not operator == (right);
+        }
+
+        // epsilon
+        static Scalar getEpsilon () {
+            return epsilon;
+        }
+
+        static void setEpsilon (Scalar eps) {
+            epsilon = eps;
+        }
+
+        // a scope-based helper for setting epsilon
+        class Scope {
+            private:
+                Scalar oldEpsilon;
+
+            public:
+                Scope () : oldEpsilon (TupleBase<Scalar, size, DerivedType>::epsilon) { }
+
+                Scope (Scalar newEpsilon) : oldEpsilon (TupleBase<Scalar, size, DerivedType>::epsilon) {
+                   TupleBase<Scalar, size, DerivedType>::epsilon = newEpsilon;
+                }
+
+                ~Scope () {
+                    TupleBase<Scalar, size, DerivedType>::epsilon = oldEpsilon;
+                 }
+        };
 
 
-// ==, !=
-        // norm [1, 2, mikowsky (or p), chebyshev (or max)]
-        // dot, normalize, normalized, isunit
+        // dot
+        Scalar operator DOT (const TupleBase<Scalar, size, DerivedType>& right) const {
+            return TupleHelper<Scalar, size>::sumMult (*this, right);
+        }
 };
 
-template<typename Scalar, unsigned int size>
-Tuple<Scalar, size> operator * (Scalar left, const Tuple<Scalar, size>* right) {
+template<typename Scalar, unsigned int size, typename DerivedType>
+Scalar TupleBase<Scalar, size, DerivedType>::epsilon = numeric_limits<Scalar>::epsilon();
+
+template<typename Scalar, unsigned int size, typename DerivedType>
+const TupleBase<Scalar, size, DerivedType> TupleBase<Scalar, size, DerivedType>::ZERO (0);
+
+// tuple multiplication is commutative, so we implement (left * right) by calling (right * left)
+template<typename Scalar, unsigned int size, typename DerivedType>
+TupleBase<Scalar, size, DerivedType> operator * (Scalar left, const TupleBase<Scalar, size, DerivedType>* right) {
     return right * left;
 }
 
-template<typename Scalar>
-class Tuple<Scalar, 0> {
-    private:
-        static void copy (Scalar* destination, const Scalar* source) {}
-        static void add (const Scalar* left, const Scalar* right, Scalar* result) {}
-        static void subtract (const Scalar* left, const Scalar* right, Scalar* result) {}
-        static void multiply (const Scalar* left, Scalar right, Scalar* result) {}
-        static void divide (const Scalar* left, Scalar right, Scalar* result) {}
-        static bool compare (const Scalar* left, const Scalar* right) { return true; }
+// set up a basic tuple interface
+template<typename Scalar, unsigned int size>
+class Tuple : public TupleBase<Scalar, size, Tuple<Scalar, size> > {
+        typedef TupleBase<Scalar, size, Tuple<Scalar, size> > BaseClass;
+    public:
+        using BaseClass::TupleBase;
 };
 
+// some tuples add a cross product
+// see: https://en.wikipedia.org/wiki/Cross_product
+
+template<typename Scalar>
+class Tuple2 : TupleBase<Scalar, 2, Tuple2<Scalar> > {
+    typedef TupleBase<Scalar, 2, Tuple2<Scalar> > BaseClass;
+    public:
+        using BaseClass::TupleBase;
+
+        Scalar operator CROSS (const Tuple2<Scalar>& right) const {
+            // XXX TODO
+            return 1;
+        }
+
+        Tuple2<Scalar> perpendicular () const {
+            return Tuple2<Scalar> (BaseClass::value[Y], -BaseClass::value[X]);
+        }
+};
+
+template<typename Scalar>
+class Tuple3 : TupleBase<Scalar, 3, Tuple3<Scalar> > {
+    typedef TupleBase<Scalar, 3, Tuple3<Scalar> > BaseClass;
+    public:
+        using BaseClass::TupleBase;
+
+        Tuple3<Scalar> operator CROSS (const Tuple3<Scalar>& right) const {
+            // XXX TODO
+            return Tuple3<Scalar> (1);
+        }
+};
+
+// computer graphics topics often use a homogenous coordinate space (x, y, z, w), where the w
+// component is 0 for a direction, and 1 for a point location. this enables a 4x4 transformation
+// matrix that includes translation, and perspective projections, wherre otherwise only rotation is
+// possible
