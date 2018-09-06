@@ -42,7 +42,7 @@ TEST_CASE(TestTuple) {
 }
 
 TEST_CASE(TestTupleConstructors) {
-    Log::Scope scope (Log::TRACE);
+    //Log::Scope scope (Log::TRACE);
     // basic empty constructor
     Vector3 a;
     TEST_XY(a, Vector3 (0, 0, 0));
@@ -74,8 +74,14 @@ TEST_CASE(TestTupleConstructors) {
 }
 
 TEST_CASE(TestTupleEquality) {
-    Log::Scope scope (Log::TRACE);
-    TEST_X (true);
+    //Log::Scope scope (Log::TRACE);
+    TEST_XYOP(Vector2 (2, 2), Vector2 (2.45, 2), !=);
+    {
+        Vector2::Scope epsilon (0.5);
+        TEST_XY(Vector2 (2, 2), Vector2 (2.45, 2));
+        TEST_XYOP(Vector2 (2, 2), Vector2 (2.55, 2), !=);
+    }
+    TEST_XYOP(Vector2 (2, 2), Vector2 (2.45, 2), !=);
 }
 
 TEST_CASE(TestTupleNorm) {
