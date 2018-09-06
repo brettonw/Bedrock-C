@@ -19,9 +19,11 @@ template<typename Scalar>
 class Tuple2 : public TupleBase<Scalar, 2, Tuple2<Scalar> > {
         typedef TupleBase<Scalar, 2, Tuple2<Scalar> > BaseType;
     public:
+        // expose the empty constructor, a basic 2-Scalar version, and all the Tuple constructors
         Tuple2 () : BaseType () {}
         Tuple2 (Scalar x, Scalar y) {
-            (*this)[X] = x; (*this)[Y] = y;
+            // parameters go on the stack in reverse order
+            TupleHelper<Scalar, 2>::rcopy (BaseType::value, &x);
         }
         using BaseType::TupleBase;
 
@@ -38,9 +40,11 @@ template<typename Scalar>
 class Tuple3 : public TupleBase<Scalar, 3, Tuple3<Scalar> > {
         typedef TupleBase<Scalar, 3, Tuple3<Scalar> > BaseType;
     public:
+        // expose the empty constructor, a basic 3-Scalar version, and all the Tuple constructors
         Tuple3 () : BaseType () {}
         Tuple3 (Scalar x, Scalar y, Scalar z) {
-            (*this)[X] = x; (*this)[Y] = y; (*this)[Z] = z;
+            // parameters go on the stack in reverse order
+            TupleHelper<Scalar, 3>::rcopy (BaseType::value, &x);
         }
         using BaseType::TupleBase;
 
@@ -53,5 +57,9 @@ class Tuple3 : public TupleBase<Scalar, 3, Tuple3<Scalar> > {
 
 // computer graphics topics often use a homogenous coordinate space (x, y, z, w), where the w
 // component is 0 for a direction, and 1 for a point location. this enables a 4x4 transformation
-// matrix that includes translation, and perspective projections, wherre otherwise only rotation is
+// matrix that includes translation, and perspective projections, where otherwise only rotation is
 // possible
+
+// and last - just make some actual simple names for the most commonly used types
+typedef Tuple2<double> Vector2;
+typedef Tuple3<double> Vector3;

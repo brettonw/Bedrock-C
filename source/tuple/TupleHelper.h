@@ -15,6 +15,11 @@ class TupleHelper {
             TupleHelper<Scalar, size - 1>::copy (destination + 1, source + 1);
         }
 
+        static void rcopy (Scalar* destination, const Scalar* source) {
+            *destination = *source;
+            TupleHelper<Scalar, size - 1>::rcopy (destination + 1, source - 1);
+        }
+
         static void add (const Scalar* left, const Scalar* right, Scalar* result) {
             *result = *left + *right;
             TupleHelper<Scalar, size - 1>::add (left + 1, right + 1, result + 1);
@@ -65,6 +70,7 @@ class TupleHelper<Scalar, 0> {
     public:
         static void fill (Scalar* destination, Scalar fillValue) {}
         static void copy (Scalar* destination, const Scalar* source) {}
+        static void rcopy (Scalar* destination, const Scalar* source) {}
         static void add (const Scalar* left, const Scalar* right, Scalar* result) {}
         static void subtract (const Scalar* left, const Scalar* right, Scalar* result) {}
         static void multiply (const Scalar* left, Scalar right, Scalar* result) {}

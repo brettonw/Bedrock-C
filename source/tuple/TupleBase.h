@@ -14,13 +14,23 @@ template<typename Scalar, unsigned int size, typename DerivedType>
 class TupleBase {
         typedef TupleBase<Scalar, size, DerivedType> BaseType;
     protected:
-        Scalar  value[size];
         static Scalar epsilon;
 
     public:
+        // look, this is public because we need to access it from "other" variations of the Tuple
+        // instantiations, but it should be protected. C++ implements "privacy" in a very
+        // restrictive way that prohibits this operation, and it's well night impossible to craft
+        // the syntax to declare the "other" tuple types as friends. so don't do bad things with
+        // it, alright? alright.
+        Scalar  value[size];
+
         static const BaseType ZERO;
 
-        TupleBase (Scalar fillValue = 0) {
+        TupleBase () {
+            TupleHelper<Scalar, size>::fill(value, 0);
+        }
+
+        TupleBase (Scalar fillValue) {
             TupleHelper<Scalar, size>::fill(value, fillValue);
         }
 
@@ -37,12 +47,14 @@ class TupleBase {
             TupleHelper<Scalar, size>::copy (value, source.value);
         }
 
-        TupleBase (const TupleBase<Scalar, size - 1, DerivedType>& source, Scalar fill = 0) {
+        template<typename OtherDerivedType>
+        TupleBase (const TupleBase<Scalar, size - 1, OtherDerivedType>& source, Scalar fill = 0) {
             TupleHelper<Scalar, size - 1>::copy (value, source.value);
             value[size - 1] = fill;
         }
 
-        TupleBase (const TupleBase<Scalar, size + 1, DerivedType>& source) {
+        template<typename OtherDerivedType>
+        TupleBase (const TupleBase<Scalar, size + 1, OtherDerivedType>& source) {
             // just drop the last value
             TupleHelper<Scalar, size>::copy (value, source.value);
         }
@@ -53,6 +65,7 @@ class TupleBase {
         // assignment
         BaseType& operator = (const BaseType& source) {
             TupleHelper<Scalar, size>::copy (value, source.value);
+            return *this;
         }
 
         // accessors
@@ -183,24 +196,21 @@ class TupleBase {
             return static_cast<DerivedType&> (normalize (*this, result));
         }
 
-        static BaseType unit (const initializer_list<Scalar>& initializers) {
-            return BaseType (initializers).normalized();
-        }
-
         bool isUnit () const {
             return (abs (norm () - 1.0) <= epsilon);
         }
 
         // comparisons
-        // XXX there are three ways to do value comparison with tuples:
-        // XXX 1. exact value comparisons per component
-        // XXX 2. range value comparisons per component, this is effectively a discretized
-        // XXX    value comparison, which checks whether the two tuples occupy a square region
-        // XXX    whose size is the epsilon (option 1 is a simplified version of this option where
-        // XXX    epsilon = 0)
-        // XXX 3. subtract the vectors and take the magnitude of the delta, which checks whether
-        // XXX    the two vectors occupy a circular region whose radius is the epsilon. this is
-        // XXX    probably the most correct method overall, but is also the most expensive.
+        // there are three ways to do value comparison with tuples:
+        // 1. exact value comparisons per component
+        // 2. range value comparisons per component, this is effectively a discretized
+        //    value comparison, which checks whether the two tuples occupy a square region
+        //    whose size is the epsilon (option 1 is a simplified version of this option where
+        //    epsilon = 0)
+        // 3. subtract the vectors and take the magnitude of the delta, which checks whether
+        //    the two vectors occupy a circular region whose radius is the epsilon. this is
+        //    probably the most correct method overall, but is also the most expensive.
+        // we use #3, on the theory that the cost is acceptable if you actually require this check.
 
         bool operator == (const BaseType& right) const {
             BaseType delta;
