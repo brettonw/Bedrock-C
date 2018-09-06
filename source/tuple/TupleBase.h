@@ -12,12 +12,13 @@ enum Coordinate {
 
 template<typename Scalar, unsigned int size, typename DerivedType>
 class TupleBase {
+        typedef TupleBase<Scalar, size, DerivedType> BaseType;
     protected:
         Scalar  value[size];
         static Scalar epsilon;
 
     public:
-        static const TupleBase<Scalar, size, DerivedType> ZERO;
+        static const BaseType ZERO;
 
         TupleBase (Scalar fillValue = 0) {
             TupleHelper<Scalar, size>::fill(value, fillValue);
@@ -32,7 +33,7 @@ class TupleBase {
             TupleHelper<Scalar, size>::copy (value, source);
         }
 
-        TupleBase (const TupleBase<Scalar, size, DerivedType>& source) {
+        TupleBase (const BaseType& source) {
             TupleHelper<Scalar, size>::copy (value, source.value);
         }
 
@@ -50,7 +51,7 @@ class TupleBase {
         //~TupleBase () {}
 
         // assignment
-        TupleBase<Scalar, size, DerivedType>& operator = (const TupleBase<Scalar, size, DerivedType>& source) {
+        BaseType& operator = (const BaseType& source) {
             TupleHelper<Scalar, size>::copy (value, source.value);
         }
 
@@ -72,70 +73,69 @@ class TupleBase {
         }
 
         // add/subtract, multiply/divide by scalar, negate
-        static TupleBase<Scalar, size, DerivedType>& add (const TupleBase<Scalar, size, DerivedType>& left, const TupleBase<Scalar, size, DerivedType>& right, TupleBase<Scalar, size, DerivedType>& result) {
+        static BaseType& add (const BaseType& left, const BaseType& right, BaseType& result) {
             TupleHelper<Scalar, size>::add (left.value, right.value, result.value);
             return result;
         }
 
-        static TupleBase<Scalar, size, DerivedType>& subtract (const TupleBase<Scalar, size, DerivedType>& left, const TupleBase<Scalar, size, DerivedType>& right, TupleBase<Scalar, size, DerivedType>& result) {
+        static BaseType& subtract (const BaseType& left, const BaseType& right, BaseType& result) {
             TupleHelper<Scalar, size>::subtract (left.value, right.value, result.value);
             return result;
         }
 
-        static TupleBase<Scalar, size, DerivedType>& multiply (const TupleBase<Scalar, size, DerivedType>& left, Scalar right, TupleBase<Scalar, size, DerivedType>& result) {
+        static BaseType& multiply (const BaseType& left, Scalar right, BaseType& result) {
             TupleHelper<Scalar, size>::multiply (left.value, right, result.value);
             return result;
         }
 
-        static TupleBase<Scalar, size, DerivedType>& divide (const TupleBase<Scalar, size, DerivedType>& left, Scalar right, TupleBase<Scalar, size, DerivedType>& result) {
+        static BaseType& divide (const BaseType& left, Scalar right, BaseType& result) {
             TupleHelper<Scalar, size>::divide (left.value, right, result.value);
             return result;
         }
 
-        static TupleBase<Scalar, size, DerivedType>& negate (const TupleBase<Scalar, size, DerivedType>& left, TupleBase<Scalar, size, DerivedType>& result) {
+        static BaseType& negate (const BaseType& left, BaseType& result) {
             TupleHelper<Scalar, size>::multiply (left.value, -1, result.value);
             return result;
         }
 
-        TupleBase<Scalar, size, DerivedType>& operator += (const TupleBase<Scalar, size, DerivedType>& right) {
-            add (value, right.value, value);
-            return *this;
+        DerivedType& operator += (const BaseType& right) {
+            return static_cast<DerivedType&> (add (*this, right, *this));
         }
 
-        TupleBase<Scalar, size, DerivedType>& operator -= (const TupleBase<Scalar, size, DerivedType>& right) {
-            return subtract (*this, right, *this);
+        DerivedType& operator -= (const BaseType& right) {
+            return static_cast<DerivedType&> (subtract (*this, right, *this));
         }
 
-        TupleBase<Scalar, size, DerivedType>& operator *= (Scalar right) {
-            return multiply (*this, right, *this);
+        DerivedType& operator *= (Scalar right) {
+            return static_cast<DerivedType&> (multiply (*this, right, *this));
         }
 
-        TupleBase<Scalar, size, DerivedType>& operator /= (Scalar right) {
-            return divide (*this, right, *this);
+        DerivedType& operator /= (Scalar right) {
+            return static_cast<DerivedType&> (divide (*this, right, *this));
         }
 
-        TupleBase<Scalar, size, DerivedType> operator + (const TupleBase<Scalar, size, DerivedType>& right) const {
-            TupleBase<Scalar, size, DerivedType> result;
-            return add (*this, right, result);
+        DerivedType operator + (const BaseType& right) const {
+            DerivedType result;
+            return static_cast<DerivedType&> (add (*this, right, result));
         }
 
-        TupleBase<Scalar, size, DerivedType> operator - (const TupleBase<Scalar, size, DerivedType>& right) const {
-            TupleBase<Scalar, size, DerivedType> result;
-            return subtract (*this, right, result);
+        DerivedType operator - (const BaseType& right) const {
+            DerivedType result;
+            return static_cast<DerivedType&> (subtract (*this, right, result));
         }
 
-        TupleBase<Scalar, size, DerivedType> operator * (Scalar right) const {
-            TupleBase<Scalar, size, DerivedType> result;
-            return multiply (*this, right, result);
+        DerivedType operator * (Scalar right) const {
+            DerivedType result;
+            return static_cast<DerivedType&> (multiply (*this, right, result));
         }
 
-        TupleBase<Scalar, size, DerivedType> operator / (Scalar right) const {
-            TupleBase<Scalar, size, DerivedType> result;
-            return divide (*this, right, result);
+        DerivedType operator / (Scalar right) const {
+            DerivedType result;
+            return static_cast<DerivedType&> (divide (*this, right, result));
         }
 
-        TupleBase<Scalar, size, DerivedType> operator - () const {
-            TupleBase<Scalar, size, DerivedType> result;
+        DerivedType operator - () const {
+            DerivedType result;
             return multiply (*this, -1, result);
         }
 
@@ -170,21 +170,21 @@ class TupleBase {
         }
 
         // normalization
-        static TupleBase<Scalar, size, DerivedType> normalized (const TupleBase<Scalar, size, DerivedType>& source, TupleBase<Scalar, size, DerivedType>& result) {
+        static BaseType& normalize (const BaseType& source, BaseType& result) {
             return divide (source, source.norm (), result);
         }
 
-        TupleBase<Scalar, size, DerivedType>& normalize () {
-            return normalized (*this, *this);
+        DerivedType& normalize () {
+            return static_cast<DerivedType&> (normalize (*this, *this));
         }
 
-        TupleBase<Scalar, size, DerivedType> normalized () const {
-            TupleBase<Scalar, size, DerivedType> result;
-            return normalized (*this, result);
+        DerivedType normalized () const {
+            DerivedType result;
+            return static_cast<DerivedType&> (normalize (*this, result));
         }
 
-        static TupleBase<Scalar, size, DerivedType> unit (const initializer_list<Scalar>& initializers) {
-            return TupleBase<Scalar, size, DerivedType> (initializers).normalized();
+        static BaseType unit (const initializer_list<Scalar>& initializers) {
+            return BaseType (initializers).normalized();
         }
 
         bool isUnit () const {
@@ -202,12 +202,12 @@ class TupleBase {
         // XXX    the two vectors occupy a circular region whose radius is the epsilon. this is
         // XXX    probably the most correct method overall, but is also the most expensive.
 
-        bool operator == (const TupleBase<Scalar, size, DerivedType>& right) const {
-            TupleBase<Scalar, size, DerivedType> delta;
+        bool operator == (const BaseType& right) const {
+            BaseType delta;
             return (subtract (*this, right, delta).norm () <= epsilon);
         }
 
-        bool operator != (const TupleBase<Scalar, size, DerivedType>& right) const {
+        bool operator != (const BaseType& right) const {
             return not operator == (right);
         }
 
@@ -226,20 +226,20 @@ class TupleBase {
                 Scalar oldEpsilon;
 
             public:
-                Scope () : oldEpsilon (TupleBase<Scalar, size, DerivedType>::epsilon) { }
+                Scope () : oldEpsilon (BaseType::epsilon) { }
 
-                Scope (Scalar newEpsilon) : oldEpsilon (TupleBase<Scalar, size, DerivedType>::epsilon) {
-                   TupleBase<Scalar, size, DerivedType>::epsilon = newEpsilon;
+                Scope (Scalar newEpsilon) : oldEpsilon (BaseType::epsilon) {
+                   BaseType::epsilon = newEpsilon;
                 }
 
                 ~Scope () {
-                    TupleBase<Scalar, size, DerivedType>::epsilon = oldEpsilon;
+                    BaseType::epsilon = oldEpsilon;
                  }
         };
 
 
         // dot
-        Scalar operator DOT (const TupleBase<Scalar, size, DerivedType>& right) const {
+        Scalar operator DOT (const BaseType& right) const {
             return TupleHelper<Scalar, size>::sumMult (*this, right);
         }
 };
@@ -251,9 +251,9 @@ template<typename Scalar, unsigned int size, typename DerivedType>
 const TupleBase<Scalar, size, DerivedType> TupleBase<Scalar, size, DerivedType>::ZERO (0.0);
 
 // tuple multiplication is commutative, so we implement (left * right) by calling (right * left)
-template<typename Scalar, unsigned int size, typename DerivedType>
-TupleBase<Scalar, size, DerivedType> operator * (Scalar left, const TupleBase<Scalar, size, DerivedType>* right) {
-    return right * left;
+template<typename LeftType, typename Scalar, unsigned int size, typename DerivedType>
+DerivedType operator * (LeftType left, const TupleBase<Scalar, size, DerivedType>& right) {
+    return right * Scalar (left);
 }
 
 // ostream writer...

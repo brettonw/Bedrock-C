@@ -5,9 +5,9 @@
 // set up a basic tuple interface
 template<typename Scalar, unsigned int size>
 class Tuple : public TupleBase<Scalar, size, Tuple<Scalar, size> > {
-        typedef TupleBase<Scalar, size, Tuple<Scalar, size> > BaseClass;
+        typedef TupleBase<Scalar, size, Tuple<Scalar, size> > BaseType;
     public:
-        using BaseClass::TupleBase;
+        using BaseType::TupleBase;
 };
 
 // some tuples add a cross product, in 2D it's the magnitude of the vertical vector that would
@@ -17,13 +17,13 @@ class Tuple : public TupleBase<Scalar, size, Tuple<Scalar, size> > {
 
 template<typename Scalar>
 class Tuple2 : public TupleBase<Scalar, 2, Tuple2<Scalar> > {
-    typedef TupleBase<Scalar, 2, Tuple2<Scalar> > BaseClass;
+        typedef TupleBase<Scalar, 2, Tuple2<Scalar> > BaseType;
     public:
-        Tuple2 () : BaseClass () {}
+        Tuple2 () : BaseType () {}
         Tuple2 (Scalar x, Scalar y) {
             (*this)[X] = x; (*this)[Y] = y;
         }
-        using BaseClass::TupleBase;
+        using BaseType::TupleBase;
 
         Scalar operator CROSS (const Tuple2<Scalar>& right) const {
             return ((*this)[X] * right[Y]) - ((*this)[Y] * right[X]);
@@ -36,13 +36,13 @@ class Tuple2 : public TupleBase<Scalar, 2, Tuple2<Scalar> > {
 
 template<typename Scalar>
 class Tuple3 : public TupleBase<Scalar, 3, Tuple3<Scalar> > {
-    typedef TupleBase<Scalar, 3, Tuple3<Scalar> > BaseClass;
+        typedef TupleBase<Scalar, 3, Tuple3<Scalar> > BaseType;
     public:
-        Tuple3 () : BaseClass () {}
+        Tuple3 () : BaseType () {}
         Tuple3 (Scalar x, Scalar y, Scalar z) {
             (*this)[X] = x; (*this)[Y] = y; (*this)[Z] = z;
         }
-        using BaseClass::TupleBase;
+        using BaseType::TupleBase;
 
         Tuple3<Scalar> operator CROSS (const Tuple3<Scalar>& right) const {
             return Tuple3<Scalar> (((*this)[Y] * right[Z]) - ((*this)[Z] * right[Y]),
