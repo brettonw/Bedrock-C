@@ -18,7 +18,6 @@ class TupleBase {
         static Scalar epsilon;
 
     public:
-
         static const BaseType ZERO;
 
         TupleBase () {

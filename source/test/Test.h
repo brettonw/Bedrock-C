@@ -21,8 +21,9 @@ class UnitTest {
 };
 
 #define     TEST_ASSERTION(_x) if (not (UnitTest::test (_x))) { char* buffer = new char[128]; sprintf (buffer, "ASSERTION FAILURE (FILE: %s, LINE: %d)", __FILE__, __LINE__); throw RuntimeError (buffer); }
-#define     TEST_XYOP(_x, _y, _op) { bool result_xyop = ((_x) _op (_y)); (result_xyop ? (Log::debug () << "    PASS") : (Log::error () << "    FAIL")) << ": ((" #_x ") " #_op " (" #_y ")) (" << (_x) << " " #_op " " << (_y) << ")" << endl; TEST_ASSERTION(result_xyop); }
-#define     TEST_XYF(_x, _y, _p) TEST_XYOP(abs ((_x) - (_y)), _p, <=)
+#define     TEST_XYOP(_x, _y, _op) { bool result_xyop = ((_x) _op (_y)); (result_xyop ? (Log::debug () << "    PASS") : (Log::error () << "    FAIL")) << ": ((" #_x ") " #_op " (" #_y ")), (" << (_x) << " " #_op " " << (_y) << ")" << endl; TEST_ASSERTION(result_xyop); }
+#define     TEST_XYF(_x, _y, _p) { bool result_xyop = abs((_x) - (_y)) <= _p; (result_xyop ? (Log::debug () << "    PASS") : (Log::error () << "    FAIL")) << ": (abs((" #_x ") - (" #_y ")) <= (" #_p ")), (abs(" << (_x) << " - " << (_y) << ") <= " << (_p) << "), (" << abs ((_x) - (_y)) << " <= " << (_p) << ")" << endl; TEST_ASSERTION(result_xyop); }
+//#define     TEST_XYF(_x, _y, _p) TEST_XYOP(abs ((_x) - (_y)), _p, <=)
 #define     TEST_XY(_x, _y) TEST_XYOP(_x, _y, ==)
 #define     TEST_X(_x) TEST_XYOP(_x, true, ==)
 #define     EXPECT_FAIL(_x)                                                                                 \

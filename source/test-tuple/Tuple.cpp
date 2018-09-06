@@ -132,7 +132,7 @@ TEST_CASE(TestTupleNorm) {
 }
 
 TEST_CASE(TestTupleUnit) {
-    //Log::Scope scope (Log::TRACE);
+    Log::Scope scope (Log::TRACE);
 
     Vector2 a = (Vector2 (2, 0)).normalized();
     TEST_XY(a.norm (), 1); TEST_XY(a[X], 1); TEST_XY(a[Y], 0); TEST_X(a.isUnit());
