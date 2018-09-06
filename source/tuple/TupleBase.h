@@ -14,15 +14,10 @@ template<typename Scalar, unsigned int size, typename DerivedType>
 class TupleBase {
         typedef TupleBase<Scalar, size, DerivedType> BaseType;
     protected:
+        Scalar  value[size];
         static Scalar epsilon;
 
     public:
-        // look, this is public because we need to access it from "other" variations of the Tuple
-        // instantiations, but it should be protected. C++ implements "privacy" in a very
-        // restrictive way that prohibits this operation, and it's well night impossible to craft
-        // the syntax to declare the "other" tuple types as friends. so don't do bad things with
-        // it, alright? alright.
-        Scalar  value[size];
 
         static const BaseType ZERO;
 
@@ -49,24 +44,18 @@ class TupleBase {
 
         template<typename OtherDerivedType>
         TupleBase (const TupleBase<Scalar, size - 1, OtherDerivedType>& source, Scalar fill = 0) {
-            TupleHelper<Scalar, size - 1>::copy (value, source.value);
+            TupleHelper<Scalar, size - 1>::copy (value, *source);
             value[size - 1] = fill;
         }
 
         template<typename OtherDerivedType>
         TupleBase (const TupleBase<Scalar, size + 1, OtherDerivedType>& source) {
             // just drop the last value
-            TupleHelper<Scalar, size>::copy (value, source.value);
+            TupleHelper<Scalar, size>::copy (value, *source);
         }
 
         // don't ever add a destructor...
         //~TupleBase () {}
-
-        // assignment
-        BaseType& operator = (const BaseType& source) {
-            TupleHelper<Scalar, size>::copy (value, source.value);
-            return *this;
-        }
 
         // accessors
         Scalar& operator [] (Coordinate index) {

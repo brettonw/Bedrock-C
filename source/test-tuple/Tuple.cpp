@@ -2,6 +2,12 @@
 #include "Test.h"
 #include "Tuple.h"
 
+TEST_CASE(TestTupleSize) {
+    // confirm that we haven't "accidentally" added virtual overhead to the Tuple types
+    TEST_XY(sizeof(Vector2), sizeof(double)*2);
+    TEST_XY(sizeof(Vector3), sizeof(double)*3);
+}
+
 TEST_CASE(TestTuple) {
     //Log::Scope scope (Log::TRACE);
 
@@ -60,17 +66,40 @@ TEST_CASE(TestTupleConstructors) {
     Vector3 d (xyz);
     TEST_XY(d, Vector3 (2, 2, 2));
 
+    // from a double initializer
+    Vector3 e = {3, 3, 7};
+    TEST_XY(e, Vector3 (3, 3, 7));
+
     // from a bigger tuple
-    Vector2 e (d);
-    TEST_XY(e, Vector2 (2, 2));
+    Vector2 f (d);
+    TEST_XY(f, Vector2 (2, 2));
 
     // from a smaller tuple with fill
-    Vector3 f (e, 5);
-    TEST_XY(f, Vector3 (2, 2, 5));
+    Vector3 g (f, 5);
+    TEST_XY(g, Vector3 (2, 2, 5));
 
     // and the explicitly specialized constructor from the right number of scalars
-    Vector3 g (2, 3, 4);
-    TEST_XY(g, Vector3 (2, 3, 4));
+    Vector3 h (2, 3, 4);
+    TEST_XY(h, Vector3 (2, 3, 4));
+}
+
+TEST_CASE(TestTupleAssignment) {
+    // NOTE: there are no assignment operators explicitly declared
+    //Log::Scope scope (Log::TRACE);
+    Vector3 a;
+
+    // basic assignment from a tuple
+    a = Vector3 (1, 1, 1);
+    TEST_XY(a, Vector3 (1, 1, 1));
+
+    // assignment from an array
+    double xyz[] = {2, 4, 6};
+    a = xyz;
+    TEST_XY(a, Vector3 (2, 4, 6));
+
+    // assignment from an initializer
+    a = {5, 9, 11};
+    TEST_XY(a, Vector3 (5, 9, 11));
 }
 
 TEST_CASE(TestTupleEquality) {
@@ -131,7 +160,7 @@ TEST_CASE(TestTupleUnit) {
 }
 
 TEST_CASE(TestTupleOps) {
-    Log::Scope scope (Log::TRACE);
+    //Log::Scope scope (Log::TRACE);
 
     TEST_XY (-Vector2(1, 0), Vector2 (-1, 0));
 
@@ -175,7 +204,6 @@ TEST_CASE(TestTupleOps) {
 
     TEST_XYF (Vector3(1, 0, 1).normalized () DOT Vector3(1, 0, 1).normalized (), 1, 1e-9);
     TEST_XY (Vector3(1, 0, 0) CROSS Vector3 (0, 1, 0), Vector3 (0, 0, 1));
-
 }
 
 
