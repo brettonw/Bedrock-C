@@ -240,7 +240,7 @@ class TupleBase {
 
         // dot
         Scalar operator DOT (const BaseType& right) const {
-            return TupleHelper<Scalar, size>::sumMult (*this, right);
+            return TupleHelper<Scalar, size>::sumMult (value, right.value);
         }
 };
 

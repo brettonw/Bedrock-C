@@ -104,6 +104,8 @@ TEST_CASE(TestTupleOps) {
 
     TEST_XY (Tuple2<double>(1.0, 0.0) + Tuple2<double>(1.0, 0.0), Tuple2<double> (2, 0));
     TEST_XY (Tuple2<double>(1.0, 0.0) - Tuple2<double>(1.0, 0.0), Tuple2<double> (0, 0));
+
+    TEST_XY (Tuple2<double>(1.0, 0.0) DOT Tuple2<double>(1.0, 0.0), 1);
 }
 
 
