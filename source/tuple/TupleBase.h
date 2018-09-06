@@ -136,7 +136,7 @@ class TupleBase {
 
         DerivedType operator - () const {
             DerivedType result;
-            return multiply (*this, -1, result);
+            return static_cast<DerivedType&> (multiply (*this, -1, result));
         }
 
         // norms, measures, lengths

@@ -90,6 +90,8 @@ TEST_CASE(TestTupleUnit) {
 TEST_CASE(TestTupleOps) {
     Log::Scope scope (Log::TRACE);
 
+    TEST_XY (-Tuple2<double>(1.0, 0.0), Tuple2<double> (-1, 0));
+
     TEST_XY (Tuple2<double>(1.0, 0.0) * 4, Tuple2<double> (4, 0));
     TEST_XY (Tuple2<double>(0.0, 1.0) * 4, Tuple2<double> (0, 4));
     TEST_XY (Tuple2<double>(1.0, 1.0) * 4, Tuple2<double> (4, 4));
