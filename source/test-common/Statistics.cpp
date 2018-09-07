@@ -26,12 +26,12 @@ TEST_CASE(TestStatistics) {
         TEST_XY(stats.getCount(), 6);
         TEST_XY(stats.getMin(), 2);
         TEST_XY(stats.getMax(), 16);
-        TEST_XYU(stats.getMedian(), (3.0 + 4.0) / 2.0);
+        TEST_XYULP(stats.getMedian(), (3.0 + 4.0) / 2.0);
         f8 mean = 33.0 / 6.0;
-        TEST_XYU(stats.getMean(), mean);
+        TEST_XYULP(stats.getMean(), mean);
         f8 variance = (((16 - mean) * (16 - mean)) + ((5 - mean) * (5 - mean)) + ((4 - mean) * (4 - mean)) + (2 * ((3 - mean) * (3 - mean))) + ((2 - mean) * (2 - mean))) / 6.0;
-        TEST_XYU(stats.getVariance(), variance);
-        TEST_XYU(stats.getStdDev(), sqrt (variance));
+        TEST_XYULP(stats.getVariance(), variance);
+        TEST_XYULP(stats.getStdDev(), sqrt (variance));
     }
 
     {
@@ -40,12 +40,12 @@ TEST_CASE(TestStatistics) {
         TEST_XY(stats.getCount(), 6);
         TEST_XY(stats.getMin(), 2);
         TEST_XY(stats.getMax(), 16);
-        TEST_XYU(stats.getMedian(), f4 ((3.0 + 4.0) / 2.0));
+        TEST_XYULP(stats.getMedian(), f4 ((3.0 + 4.0) / 2.0));
         f4 mean = 33.0 / 6.0;
-        TEST_XYU(stats.getMean(), mean);
+        TEST_XYULP(stats.getMean(), mean);
         f4 variance = (((16 - mean) * (16 - mean)) + ((5 - mean) * (5 - mean)) + ((4 - mean) * (4 - mean)) + (2 * ((3 - mean) * (3 - mean))) + ((2 - mean) * (2 - mean))) / 6.0;
-        TEST_XYU(stats.getVariance(), variance);
-        TEST_XYU(stats.getStdDev(), sqrt (variance));
+        TEST_XYULP(stats.getVariance(), variance);
+        TEST_XYULP(stats.getStdDev(), sqrt (variance));
     }
 
     {
@@ -56,10 +56,10 @@ TEST_CASE(TestStatistics) {
         TEST_XY(stats.getMax(), 5);
         TEST_XY(stats.getMedian(), 3);
         f8 mean = 17.0 / 5.0;
-        TEST_XYU(stats.getMean(), mean);
+        TEST_XYULP(stats.getMean(), mean);
         f8 variance = (((5 - mean) * (5 - mean)) + ((4 - mean) * (4 - mean)) + (2 * ((3 - mean) * (3 - mean))) + ((2 - mean) * (2 - mean))) / 5.0;
-        TEST_XYU(stats.getVariance(), variance);
-        TEST_XYU(stats.getStdDev(), sqrt (variance));
+        TEST_XYULP(stats.getVariance(), variance);
+        TEST_XYULP(stats.getStdDev(), sqrt (variance));
     }
 
     {
@@ -70,10 +70,10 @@ TEST_CASE(TestStatistics) {
         TEST_XY(stats.getMax(), 5);
         TEST_XY(stats.getMedian(), 3);
         f4 mean = 17.0 / 5.0;
-        TEST_XYU(stats.getMean(), mean);
+        TEST_XYULP(stats.getMean(), mean);
         f4 variance = (((5 - mean) * (5 - mean)) + ((4 - mean) * (4 - mean)) + (2 * ((3 - mean) * (3 - mean))) + ((2 - mean) * (2 - mean))) / 5.0;
-        TEST_XYU(stats.getVariance(), variance);
-        TEST_XYU(stats.getStdDev(), sqrt (variance));
+        TEST_XYULP(stats.getVariance(), variance);
+        TEST_XYULP(stats.getStdDev(), sqrt (variance));
     }
 }
 

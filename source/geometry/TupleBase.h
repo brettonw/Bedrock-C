@@ -212,15 +212,22 @@ class TupleBase {
         // example). in order to use this approach to best effect, we would want to specify the
         // range of space we intend to represent, and then use precision = epsilon * range for
         // comparisons. we approximate this by exposing the epsilon value, but a fixed-point Scalar
-        // type would actually be a better solution.
+        // type would actually be a more consistent solution.
         //
         // 4. subtract the vectors and compare the magnitude of the delta to 0 in ULPs - this
         //    allows for comparison over a wide range of scales, but the relative error is sort of
         //    a function of how many operations have been performed, so might become less useful in
         //    very complex operations. this is the most computationally intensive of the methods.
+        //
+        // so all of this leads back to which method should be used... we choose #3 because it's
+        // probably going to behave the way users think it should, and if you use the ulps method
+        // you will probably find that is is not a good general purpose solution because of
+        // catastrophic cancellation errors when comparing numbers that are "near" 0. see the
+        // discussion of ULP-based floating point comparisons in Math.h.
+
 
 #ifndef TUPLE_COMPARISON_TYPE
-#define TUPLE_COMPARISON_TYPE 4
+#define TUPLE_COMPARISON_TYPE 3
 #endif
 
         bool operator == (const BaseType& right) const {

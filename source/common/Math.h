@@ -28,19 +28,22 @@ NumberType saturate (NumberType value) {
 //   https://en.wikipedia.org/wiki/Unit_in_the_last_place
 //   https://people.eecs.berkeley.edu/~wkahan/LOG10HAF.TXT
 //   https://floating-point-gui.de/errors/comparison/
+//   https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
+//   https://en.wikipedia.org/wiki/Loss_of_significance
 // we default to 4 bits of precision in comparison
 template<typename FType, typename SType>
 union FloatUlp {
         FType real;
         SType integer;
         FloatUlp (FType _real) : real (_real) {}
+        bool isNegative () const { return integer < 0; }
 };
 
 template<typename FType, typename SType>
 SType ulpDifference (FType left, FType right) {
-    FloatUlp<FType, SType> ulpLeft (left);
-    FloatUlp<FType, SType> ulpRight (right);
-    return abs (ulpLeft.integer - ulpRight.integer);
+    FloatUlp<FType, SType> floatUlpLeft (left);
+    FloatUlp<FType, SType> floatUlpRight (right);
+    return abs (floatUlpLeft.integer - floatUlpRight.integer);
 }
 
 static inline
