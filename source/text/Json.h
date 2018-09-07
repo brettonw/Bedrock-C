@@ -9,15 +9,15 @@ class Json {
         int index;
         int lineNumber;
         int lastLineIndex;
-        boolean error;
+        bool error;
 
-        Json (const Text& _inputText) : input (_inputText), inputLength (inputText.length ()), index (0), lineNumber (1), lastLineIndex (0), error (false) {}
+        Json (const Text& _inputText) : input (_inputText), inputLength (_inputText.length ()), index (0), lineNumber (1), lastLineIndex (0), error (false) {}
 
     public:
         static PtrToBagThing read (const Text& filename) {
-
+            Text text = File (filename).readText();
             Json json (text);
             PtrToBagThing bagThing;
             return bagThing;
         }
-}
+};
