@@ -147,11 +147,18 @@ class TupleBase {
         }
 
         // norm L-2, a.k.a. Euclidean distance, or length
-        // this is what most people think of when they use a norm as a unit of measure, so we
-        // include the expected names in multiple implementations
-        Scalar normL2 () const {
-            return sqrt (TupleHelper<Scalar, size>::sumSquare (value));
+        // NOTE: computing the L2 norm involves a square root, which can be computationally
+        // expensive if you want to do a lot of them, so it's useful to return a squared version of
+        // the value that can be used to reason about the result
+        Scalar normL2Sq () const {
+            return TupleHelper<Scalar, size>::sumSquare (value);
         }
+        Scalar normL2 () const {
+            return sqrt (normL2Sq ());
+        }
+
+        // the L2 norm is what most people think of when they use a norm as a unit of measure, so
+        // we define the expected names to return the L2 norm
         Scalar norm () const {
             return normL2 ();
         }
@@ -188,21 +195,48 @@ class TupleBase {
             return (abs (norm () - 1.0) <= epsilon);
         }
 
-        // comparisons
-        // there are three ways to do value comparison with tuples:
+        // there are multiple ways to do value comparison with tuples:
         // 1. exact value comparisons per component
+        //
         // 2. range value comparisons per component, this is effectively a discretized
         //    value comparison, which checks whether the two tuples occupy a square region
         //    whose size is the epsilon (option 1 is a simplified version of this option where
         //    epsilon = 0)
-        // 3. subtract the vectors and take the magnitude of the delta, which checks whether
-        //    the two vectors occupy a circular region whose radius is the epsilon. this is
-        //    probably the most correct method overall, but is also the most expensive.
-        // we use #3, on the theory that the cost is acceptable if you actually require this check.
+        //
+        // 3. subtract the vectors and take the L2 norm of the delta, which checks whether the two
+        //    vectors occupy a circular region whose radius is the epsilon.
+        //
+        // epsilon options are good if we are operating in a fixed scale, and want to control
+        // precision in a uniform way across the vector space, but aren't the best when we
+        // are using vectors across multiple scales (i.e. the classic teapot in a football stadium
+        // example). in order to use this approach to best effect, we would want to specify the
+        // range of space we intend to represent, and then use precision = epsilon * range for
+        // comparisons. we approximate this by exposing the epsilon value.
+        //
+        // 4. subtract the vectors and compare the magnitude of the delta to 0 in ULPs - this
+        //    allows for comparison over a wide range of scales, but the relative error is sort of
+        //    a function of how many operations have been performed, so might become less useful in
+        //    very complex operations. this is the most computationally intensive of the methods.
+
+#ifndef TUPLE_COMPARISON_TYPE
+#define TUPLE_COMPARISON_TYPE 2
+#endif
 
         bool operator == (const BaseType& right) const {
-            BaseType delta;
-            return (subtract (*this, right, delta).norm () <= epsilon);
+#if TUPLE_COMPARISON_TYPE == 1
+            return TupleHelper<Scalar, size>::compare (value, right.value);
+#else
+            DerivedType delta;
+            TupleHelper<Scalar, size>::subtract (value, right.value, delta.value);
+#if TUPLE_COMPARISON_TYPE == 2
+            return (TupleHelper<Scalar, size>::max (delta.value) <= epsilon);
+#elif TUPLE_COMPARISON_TYPE == 3
+            // use the L2 norm, but skip the square root
+            return (TupleHelper<Scalar, size>::sumSquare (delta.value) <= (epsilon * epsilon));
+#elif TUPLE_COMPARISON_TYPE == 4
+            return ulpEquals (delta.norm (), 0);
+#endif
+#endif
         }
 
         bool operator != (const BaseType& right) const {
@@ -216,6 +250,7 @@ class TupleBase {
 
         static void setEpsilon (Scalar eps) {
             epsilon = eps;
+            Log::debug () << "TupleBase(" << size << "): Set epsilon: " << epsilon << endl;
         }
 
         // a scope-based helper for setting epsilon
@@ -227,11 +262,11 @@ class TupleBase {
                 Scope () : oldEpsilon (BaseType::epsilon) { }
 
                 Scope (Scalar newEpsilon) : oldEpsilon (BaseType::epsilon) {
-                   BaseType::epsilon = newEpsilon;
+                   BaseType::setEpsilon (newEpsilon);
                 }
 
                 ~Scope () {
-                    BaseType::epsilon = oldEpsilon;
+                    BaseType::setEpsilon (oldEpsilon);
                  }
         };
 
@@ -243,7 +278,7 @@ class TupleBase {
 };
 
 template<typename Scalar, unsigned int size, typename DerivedType>
-Scalar TupleBase<Scalar, size, DerivedType>::epsilon = numeric_limits<Scalar>::epsilon();
+Scalar TupleBase<Scalar, size, DerivedType>::epsilon = 1e-6;
 
 template<typename Scalar, unsigned int size, typename DerivedType>
 const TupleBase<Scalar, size, DerivedType> TupleBase<Scalar, size, DerivedType>::ZERO (0.0);

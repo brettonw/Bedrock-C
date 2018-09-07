@@ -103,13 +103,20 @@ TEST_CASE(TestTupleAssignment) {
 }
 
 TEST_CASE(TestTupleEquality) {
-    //Log::Scope scope (Log::TRACE);
+    Log::Scope scope (Log::TRACE);
+
+#if (TUPLE_COMPARISON_TYPE == 2) or (TUPLE_COMPARISON_TYPE == 3)
+
     TEST_XYOP(Vector2 (2, 2), Vector2 (2.45, 2), !=);
     {
         Vector2::Scope epsilon (0.5);
         TEST_XY(Vector2 (2, 2), Vector2 (2.45, 2));
         TEST_XYOP(Vector2 (2, 2), Vector2 (2.55, 2), !=);
     }
+    TEST_XYOP(Vector2 (2, 2), Vector2 (2.45, 2), !=);
+#endif
+
+    TEST_XY(Vector2 (1, 1) * 2, Vector2 (2, 2));
     TEST_XYOP(Vector2 (2, 2), Vector2 (2.45, 2), !=);
 }
 
@@ -122,13 +129,13 @@ TEST_CASE(TestTupleNorm) {
     TEST_XYOP (a, Vector2::ZERO, !=);
 
     TEST_XY (a.normL1(), 7);
-    TEST_XY (a.normL2(), 5);
+    TEST_XYU (a.normL2(), 5);
     TEST_XY (a.normInf(), 4);
-    TEST_XY (a.normPower(1), 7);
-    TEST_XY (a.normPower(2), 5);
+    TEST_XYU (a.normPower(1), 7);
+    TEST_XYU (a.normPower(2), 5);
 
-    TEST_XY (a.norm(), a.normL2());
-    TEST_XY (a.length(), a.normL2());
+    TEST_XYU (a.norm(), a.normL2());
+    TEST_XYU (a.length(), a.normL2());
 }
 
 TEST_CASE(TestTupleUnit) {
@@ -147,16 +154,16 @@ TEST_CASE(TestTupleUnit) {
     TEST_XY(d.norm (), 1); TEST_XY(d[X], 0); TEST_XY(d[Y], -1); TEST_X(d.isUnit());
 
     Vector2 e = (Vector2 (2, 2)).normalized();
-    TEST_XYF(e.norm (), 1, 1e-9); TEST_XY(e[X], e[Y]); TEST_X(e.isUnit());
+    TEST_XYU(e.norm (), 1); TEST_XY(e[X], e[Y]); TEST_X(e.isUnit());
 
     Vector2 f = (Vector2 (-2, 2)).normalized();
-    TEST_XYF(f.norm (), 1, 1e-9); TEST_XY(-f[X], f[Y]); TEST_X(f.isUnit());
+    TEST_XYU(f.norm (), 1); TEST_XY(-f[X], f[Y]); TEST_X(f.isUnit());
 
     Vector2 g = (Vector2 (-2, -2)).normalized();
-    TEST_XYF(g.norm (), 1, 1e-9); TEST_XY(g[X], g[Y]); TEST_X(g.isUnit());
+    TEST_XYU(g.norm (), 1); TEST_XY(g[X], g[Y]); TEST_X(g.isUnit());
 
     Vector2 h = (Vector2 (2, -2)).normalized();
-    TEST_XYF(h.norm (), 1, 1e-9); TEST_XY(h[X], -h[Y]); TEST_X(h.isUnit());
+    TEST_XYU(h.norm (), 1); TEST_XY(h[X], -h[Y]); TEST_X(h.isUnit());
 }
 
 TEST_CASE(TestTupleOps) {
@@ -202,7 +209,7 @@ TEST_CASE(TestTupleOps) {
 
     Log::debug() << "Vector: " << Vector3 (1, 0, 1) << ", Normalized: " << Vector3 (1, 0, 1).normalized() << endl;
 
-    TEST_XYF (Vector3(1, 0, 1).normalized () DOT Vector3(1, 0, 1).normalized (), 1, 1e-9);
+    TEST_XYU (Vector3(1, 0, 1).normalized () DOT Vector3(1, 0, 1).normalized (), 1);
     TEST_XY (Vector3(1, 0, 0) CROSS Vector3 (0, 1, 0), Vector3 (0, 0, 1));
 }
 

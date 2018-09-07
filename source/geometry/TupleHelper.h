@@ -61,7 +61,7 @@ class TupleHelper {
         }
 
         static Scalar max (const Scalar* source) {
-            return std::max (*source,  TupleHelper<Scalar, size - 1>::max (source + 1));
+            return std::max (abs (*source), TupleHelper<Scalar, size - 1>::max (source + 1));
         }
 };
 
