@@ -29,22 +29,25 @@ TEST_CASE(TestTuple) {
     TEST_XY (uv[U], 1);
     TEST_XY (uv[V], 2);
     TEST_XYOP (uv, Vector2::ZERO, !=);
+    TEST_XY (uv.maxCoordinate(), Y);
 
     Vector3 abc = {3, 4, 5};
     TEST_XY (abc[X], 3);
     TEST_XY (abc[Y], 4);
     TEST_XY (abc[Z], 5);
+    TEST_XY (abc.maxCoordinate(), Z);
 
-    Vector3 def (6, 7, 8);
-    TEST_XY (def[X], 6);
+    Vector3 def (8, 7, 6);
+    TEST_XY (def[X], 8);
     TEST_XY (def[Y], 7);
-    TEST_XY (def[Z], 8);
+    TEST_XY (def[Z], 6);
+    TEST_XY (def.maxCoordinate(), X);
 
     Vector3 xyz = def - abc;
-    TEST_XY (xyz, Vector3 (3, 3, 3));
-    TEST_XY (xyz[X], 3);
+    TEST_XY (xyz, Vector3 (5, 3, 1));
+    TEST_XY (xyz[X], 5);
     TEST_XY (xyz[Y], 3);
-    TEST_XY (xyz[Z], 3);
+    TEST_XY (xyz[Z], 1);
 }
 
 TEST_CASE(TestTupleConstructors) {

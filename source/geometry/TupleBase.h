@@ -283,6 +283,19 @@ class TupleBase {
         Scalar operator DOT (const BaseType& right) const {
             return TupleHelper<Scalar, size>::sumMult (value, right.value);
         }
+
+        Coordinate maxCoordinate () const {
+            unsigned int maxCoordinate = 0;
+            Scalar maxValue = abs (value[maxCoordinate]);
+            for (unsigned int coordinate = 1; coordinate < size; ++coordinate) {
+                Scalar newValue = abs (value[coordinate]);
+                if (newValue > maxValue) {
+                    maxCoordinate = coordinate;
+                    maxValue = newValue;
+                }
+            }
+            return static_cast<Coordinate> (maxCoordinate);
+        }
 };
 
 template<typename Scalar, unsigned int size, typename DerivedType>

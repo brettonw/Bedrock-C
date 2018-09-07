@@ -55,6 +55,15 @@ class Tuple3 : public TupleBase<Scalar, 3, Tuple3<Scalar> > {
         }
 };
 
+template<typename Scalar>
+class Tuple4 : public TupleBase<Scalar, 4, Tuple4<Scalar> > {
+        typedef TupleBase<Scalar, 4, Tuple4<Scalar> > BaseType;
+    public:
+        // expose the empty constructor, and all the Tuple constructors
+        Tuple4 () : BaseType () {}
+        using BaseType::TupleBase;
+};
+
 // computer graphics topics often use a homogenous coordinate space (x, y, z, w), where the w
 // component is 0 for a direction, and 1 for a point location. this enables a 4x4 transformation
 // matrix that includes translation, and perspective projections, where otherwise only rotation is
