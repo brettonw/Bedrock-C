@@ -211,7 +211,8 @@ class TupleBase {
         // are using vectors across multiple scales (i.e. the classic teapot in a football stadium
         // example). in order to use this approach to best effect, we would want to specify the
         // range of space we intend to represent, and then use precision = epsilon * range for
-        // comparisons. we approximate this by exposing the epsilon value.
+        // comparisons. we approximate this by exposing the epsilon value, but a fixed-point Scalar
+        // type would actually be a better solution.
         //
         // 4. subtract the vectors and compare the magnitude of the delta to 0 in ULPs - this
         //    allows for comparison over a wide range of scales, but the relative error is sort of
@@ -219,7 +220,7 @@ class TupleBase {
         //    very complex operations. this is the most computationally intensive of the methods.
 
 #ifndef TUPLE_COMPARISON_TYPE
-#define TUPLE_COMPARISON_TYPE 2
+#define TUPLE_COMPARISON_TYPE 4
 #endif
 
         bool operator == (const BaseType& right) const {
