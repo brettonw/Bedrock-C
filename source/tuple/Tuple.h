@@ -3,9 +3,9 @@
 #include "TupleBase.h"
 
 // set up a basic tuple interface
-template<typename Scalar, unsigned int size>
-class Tuple : public TupleBase<Scalar, size, Tuple<Scalar, size> > {
-        typedef TupleBase<Scalar, size, Tuple<Scalar, size> > BaseType;
+template<typename Scalar, unsigned int dimension>
+class Tuple : public TupleBase<Scalar, dimension, Tuple<Scalar, dimension> > {
+        typedef TupleBase<Scalar, dimension, Tuple<Scalar, dimension> > BaseType;
     public:
         using BaseType::TupleBase;
 };
