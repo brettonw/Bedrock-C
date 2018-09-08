@@ -1,68 +1,39 @@
 #pragma once
 
 #include "Tuple.h"
-#include "PtrTo.h"
 
 template<typename Scalar>
-class Line2 {
+class Line3 {
     private:
-        Tuple2<Scalar> normal;
-        Scalar C;
-
+        Tuple3<Scalar> origin;
+        Tuple3<Scalar> direction;
 
     public:
-        Line2 (const Tuple2<Scalar>& _normal, Scalar _C) : normal (_normal), C (_C) {}
+        Line3 (const Tuple3<Scalar>& _origin, const Tuple3<Scalar>& _direction) : origin (_origin), direction (_direction) {}
 
-        static Line2<Scalar> LineFrom2Points (const Tuple2<Scalar>& a, const Tuple2<Scalar>& b) {
-            Tuple2<Scalar> normal = (a - b).normalized ().perpendicular ();
-            Scalar C = -(a DOT normal);
-            return Line2<Scalar> (normal, C);
+        static Line3<Scalar> LineFromTwoPoints (const Tuple3<Scalar>& a, const Tuple3<Scalar>& b) {
+            return Line3<Scalar> (a, (b - a).normalized ());
         }
 
-        static Line2<Scalar> LineFromPointNormal (const Tuple2<Scalar>& point, const Tuple2<Scalar>& normal) {
-            Scalar C = -(point DOT normal);
-            return Line2<Scalar> (normal, C);
+        // return the shortest scalar distance from a point to the line (along a perpendicular vector)
+        Scalar distance (const Tuple3<Scalar>& point) const {
+            // the wolfram method - http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html
+            return sqrt ((direction CROSS (origin - point)).normL2Sq () / direction.normL2Sq ());
         }
 
-        static Line2<Scalar> LineFromSlopeIntercept (Scalar slope, Scalar yIntercept) {
-            // compute two points on this line (y = mx + b)
-            Tuple2<Scalar> a (-10, (slope * -10) + yIntercept);
-            Tuple2<Scalar> b (10, (slope * 10) + yIntercept);
-            return LineFrom2Points (a, b);
+        bool isOnLine (const Tuple3<Scalar>& point) const {
+            return distance (point) <= Tuple3<Scalar>::getEpsilon ();
         }
 
-        static Line2<Scalar> FitLineToPoints (const vector<Tuple2<Scalar> >& points) {
-            Scalar intercept = 0;
-            // compute the mean point
-            Tuple2<Scalar> mean;
-            for (typename vector<Tuple2<Scalar> >::const_iterator iter = points.begin (); iter != points.end; ++iter) {
-                mean += *iter;
-            }
-            mean /= points.size();
-
-            // make a second pass to compute the sums needed to compute the slope
-            Scalar numerator = 0;
-            Scalar denominator = 0;
-            for (typename vector<Tuple2<Scalar> >::const_iterator iter = points.begin (); iter != points.end; ++iter) {
-                Tuple2<Scalar> delta = *iter - mean;
-                numerator += delta[X] * delta[Y];
-                denominator += delta[X] * delta[X];
-            }
-
-            // compute the slope, and then the intercept
-            if (denominator != 0) {
-                Scalar slope = numerator / denominator;
-                Scalar intercept = mean[Y] - (slope * mean[X]);
-                return LineFromSlopeIntercept (slope, intercept);
-            }
-            return Line2<Scalar> (Tuple2<Scalar> (1, 0), -mean[X]);
+        Tuple3<Scalar>& getOrigin () const {
+            return origin;
         }
 
-        Scalar distanceFromLine (const Tuple2<Scalar>& point) {
-            return (point DOT normal) + C;
+        Tuple3<Scalar>& getDirection () const {
+            return direction;
         }
 
-        bool pointIsOnLine (const Tuple2<Scalar>& point) {
-            return distanceFromLine (point) <= Tuple2<Scalar>::getEpsilon ();
+        Tuple3<Scalar> getPoint (Scalar t) {
+            return origin + (direction * t);
         }
 };

@@ -59,8 +59,12 @@ template<typename Scalar>
 class Tuple4 : public TupleBase<Scalar, 4, Tuple4<Scalar> > {
         typedef TupleBase<Scalar, 4, Tuple4<Scalar> > BaseType;
     public:
-        // expose the empty constructor, and all the Tuple constructors
+        // expose the empty constructor, a basic 4-Scalar version, and all the Tuple constructors
         Tuple4 () : BaseType () {}
+        Tuple4 (Scalar x, Scalar y, Scalar z, Scalar w) {
+            // parameters go on the stack in reverse order
+            TupleHelper<Scalar, 4>::rcopy (BaseType::value, &x);
+        }
         using BaseType::TupleBase;
 };
 
@@ -70,5 +74,6 @@ class Tuple4 : public TupleBase<Scalar, 4, Tuple4<Scalar> > {
 // possible
 
 // and last - just make some actual simple names for the most commonly used types
-typedef Tuple2<double> Vector2;
-typedef Tuple3<double> Vector3;
+typedef Tuple2<f8> Vector2;
+typedef Tuple3<f8> Vector3;
+typedef Tuple4<f8> Vector4;

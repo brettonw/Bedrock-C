@@ -157,16 +157,16 @@ TEST_CASE(TestTupleUnit) {
     TEST_XY(d.norm (), 1); TEST_XY(d[X], 0); TEST_XY(d[Y], -1); TEST_X(d.isUnit());
 
     Vector2 e = (Vector2 (2, 2)).normalized();
-    TEST_XYULP(e.norm (), 1); TEST_XYAPPROX(e.norm (), 1, 1e-9); TEST_XY(e[X], e[Y]); TEST_X(e.isUnit());
+    TEST_XYULP(e.norm (), 1); TEST_XYEPS(e.norm (), 1, 1e-9); TEST_XY(e[X], e[Y]); TEST_X(e.isUnit());
 
     Vector2 f = (Vector2 (-2, 2)).normalized();
-    TEST_XYULP(f.norm (), 1); TEST_XYAPPROX(f.norm (), 1, 1e-9); TEST_XY(-f[X], f[Y]); TEST_X(f.isUnit());
+    TEST_XYULP(f.norm (), 1); TEST_XYEPS(f.norm (), 1, 1e-9); TEST_XY(-f[X], f[Y]); TEST_X(f.isUnit());
 
     Vector2 g = (Vector2 (-2, -2)).normalized();
-    TEST_XYULP(g.norm (), 1); TEST_XYAPPROX(g.norm (), 1, 1e-9); TEST_XY(g[X], g[Y]); TEST_X(g.isUnit());
+    TEST_XYULP(g.norm (), 1); TEST_XYEPS(g.norm (), 1, 1e-9); TEST_XY(g[X], g[Y]); TEST_X(g.isUnit());
 
     Vector2 h = (Vector2 (2, -2)).normalized();
-    TEST_XYULP(h.norm (), 1); TEST_XYAPPROX(h.norm (), 1, 1e-9); TEST_XY(h[X], -h[Y]); TEST_X(h.isUnit());
+    TEST_XYULP(h.norm (), 1); TEST_XYEPS(h.norm (), 1, 1e-9); TEST_XY(h[X], -h[Y]); TEST_X(h.isUnit());
 }
 
 TEST_CASE(TestTupleOps) {

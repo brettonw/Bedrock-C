@@ -11,22 +11,21 @@ class Line2 {
     public:
         Line2 (const Tuple2<Scalar>& _normal, Scalar _C) : normal (_normal), C (_C) {}
 
-        static Line2<Scalar> LineFromTwoPoints (const Tuple2<Scalar>& a, const Tuple2<Scalar>& b) {
-            Tuple2<Scalar> normal = (b - a).normalized ().perpendicular ();
-            Scalar C = -(a DOT normal);
-            return Line2<Scalar> (normal, C);
-        }
-
         static Line2<Scalar> LineFromPointNormal (const Tuple2<Scalar>& point, const Tuple2<Scalar>& normal) {
             Scalar C = -(point DOT normal);
             return Line2<Scalar> (normal, C);
+        }
+
+        static Line2<Scalar> LineFromTwoPoints (const Tuple2<Scalar>& a, const Tuple2<Scalar>& b) {
+            Tuple2<Scalar> normal = (b - a).normalized ().perpendicular ();
+            return LineFromPointNormal (a, normal);
         }
 
         static Line2<Scalar> LineFromSlopeIntercept (Scalar slope, Scalar yIntercept) {
             // compute two points on this line (y = mx + b)
             Tuple2<Scalar> a (-10, (slope * -10) + yIntercept);
             Tuple2<Scalar> b (10, (slope * 10) + yIntercept);
-            return LineFrom2Points (a, b);
+            return LineFromTwoPoints (a, b);
         }
 
         static Line2<Scalar> FitLineToPoints (const vector<Tuple2<Scalar> >& points) {
