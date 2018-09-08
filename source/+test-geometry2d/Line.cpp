@@ -1,7 +1,7 @@
 #include "Test.h"
-#include "Line2.h"
+#include "Line.h"
 
-TEST_CASE(TestLine2) {
+TEST_CASE(TestLine) {
     //Log::Scope scope (Log::TRACE);
     TEST_X(true);
 }
