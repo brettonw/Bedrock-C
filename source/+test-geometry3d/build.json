@@ -1,5 +1,0 @@
-{ 
-    "values": {
-        "dependencies": ["geometry3d", "test"]
-    }
-}
