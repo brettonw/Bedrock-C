@@ -12,16 +12,16 @@ namespace Geometry3d {
         public:
             Plane (const Tuple<Scalar, 3>& _normal, Scalar _D) : normal (_normal), D (_D) {}
 
-            static Plane<Scalar> PlaneFromPointNormal (const Tuple<Scalar, 3>& point, const Tuple<Scalar, 3>& normal) {
+            static Plane<Scalar> fromPointNormal (const Tuple<Scalar, 3>& point, const Tuple<Scalar, 3>& normal) {
                 return Plane<Scalar> (normal, -(point DOT normal));
             }
 
-            static Plane<Scalar> PlaneFromThreePoints (const Tuple<Scalar, 3>& a, const Tuple<Scalar, 3>& b, const Tuple<Scalar, 3>& c) {
+            static Plane<Scalar> fromThreePoints (const Tuple<Scalar, 3>& a, const Tuple<Scalar, 3>& b, const Tuple<Scalar, 3>& c) {
                 Tuple<Scalar, 3> normal = ((b - a) CROSS (c - a)).normalized ();
-                return PlaneFromPointNormal (a, normal);
+                return fromPointNormal (a, normal);
             }
 
-            static Plane<Scalar> FitPlaneToPoints (const vector<Tuple<Scalar, 3> >& points) {
+            static Plane<Scalar> fitPoints (const vector<Tuple<Scalar, 3> >& points) {
                 // compute the mean point
                 Tuple<Scalar, 3> mean;
                 for (typename vector<Tuple<Scalar, 3> >::const_iterator iter = points.begin (); iter != points.end; ++iter) {
@@ -31,7 +31,7 @@ namespace Geometry3d {
 
                 // XXX this will need to have an SVD implementation
                 // see: https://math.stackexchange.com/questions/99299/best-fitting-plane-given-a-set-of-points
-                return PlaneFromPointNormal (mean, Tuple<Scalar, 3> (0, 1, 0));
+                return fromPointNormal (mean, Tuple<Scalar, 3> (0, 1, 0));
             }
 
             // return the shortest scalar distance from a point to the plane (along the normal vector)
@@ -45,7 +45,7 @@ namespace Geometry3d {
             }
 
             // return the normal vector
-            Tuple<Scalar, 3> getNormal () const {
+            const Tuple<Scalar, 3>& getNormal () const {
                 return normal;
             }
 

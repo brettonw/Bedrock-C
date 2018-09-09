@@ -16,7 +16,7 @@ namespace Geometry2d {
     // applications in the computational geometry. a positive value indicates a left turning sequence,
     // and a negative value indicates a right turning sequence.
 
-    enum LineTestResult {
+    enum LineTest {
         TURNS_LEFT =    1,
         TURNS_RIGHT =   -1,
         SPANNING =      TURNS_LEFT * TURNS_RIGHT,
@@ -36,12 +36,12 @@ namespace Geometry2d {
     }
 
     template<typename Scalar>
-    LineTestResult lineTest (const Tuple<Scalar, 2>& a, const Tuple<Scalar, 2>& b, const Tuple<Scalar, 2>& c) {
+    LineTest lineTest (const Tuple<Scalar, 2>& a, const Tuple<Scalar, 2>& b, const Tuple<Scalar, 2>& c) {
         return classifyLineTestResult (rawLineTest (a, b, c));
     }
 
     template<typename Scalar>
-    LineTestResult lineTest (const Edge<Scalar>& edge, const TPoint2<Scalar>& c) {
+    LineTest lineTest (const Edge<Scalar>& edge, const Tuple<Scalar, 2>& c) {
         return lineTest (edge.a, edge.b, c);
     }
 
@@ -51,12 +51,12 @@ namespace Geometry2d {
     }
 
     template<typename Scalar>
-    LineTestResult normalizedLineTest (const Tuple<Scalar, 2>& a, const Tuple<Scalar, 2>& b, const Tuple<Scalar, 2>& c) {
+    LineTest normalizedLineTest (const Tuple<Scalar, 2>& a, const Tuple<Scalar, 2>& b, const Tuple<Scalar, 2>& c) {
         return classifyLineTestResult (normalizedRawLineTest (a, b, c));
     }
 
     template<typename Scalar>
-    LineTestResult normalizedLineTest (const TEdge2<Scalar>& edge, const TPoint2<Scalar>& c, Scalar rEpsilon = REAL_EPSILON) {
-        return normalizedLineTest (edge.a, edge.b, c, rEpsilon);
+    LineTest normalizedLineTest (const Edge<Scalar>& edge, const Tuple<Scalar, 2>& c) {
+        return normalizedLineTest (edge.a, edge.b, c);
     }
 }

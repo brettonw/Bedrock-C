@@ -3,11 +3,6 @@
 
 using namespace Geometry3d;
 
-TEST_CASE(TestLine) {
-    //Log::Scope scope (Log::TRACE);
-    TEST_X(true);
-}
-
 TEST_CASE(TestLineDistance) {
     //Log::Scope scope (Log::TRACE);
 

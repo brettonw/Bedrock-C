@@ -12,24 +12,24 @@ namespace Geometry2d {
         public:
             Line (const Tuple<Scalar, 2>& _normal, Scalar _C) : normal (_normal), C (_C) {}
     
-            static Line<Scalar> LineFromPointNormal (const Tuple<Scalar, 2>& point, const Tuple<Scalar, 2>& normal) {
+            static Line<Scalar> fromPointNormal (const Tuple<Scalar, 2>& point, const Tuple<Scalar, 2>& normal) {
                 Scalar C = -(point DOT normal);
                 return Line<Scalar> (normal, C);
             }
     
-            static Line<Scalar> LineFromTwoPoints (const Tuple<Scalar, 2>& a, const Tuple<Scalar, 2>& b) {
-                Tuple<Scalar, 2> normal = (b - a).normalized ().perpendicular ();
-                return LineFromPointNormal (a, normal);
+            static Line<Scalar> fromTwoPoints (const Tuple<Scalar, 2>& a, const Tuple<Scalar, 2>& b) {
+                Tuple<Scalar, 2> normal = perpendicular ((b - a).normalized ());
+                return fromPointNormal (a, normal);
             }
     
-            static Line<Scalar> LineFromSlopeIntercept (Scalar slope, Scalar yIntercept) {
+            static Line<Scalar> fromSlopeIntercept (Scalar slope, Scalar yIntercept) {
                 // compute two points on this line (y = mx + b)
                 Tuple<Scalar, 2> a (-10, (slope * -10) + yIntercept);
                 Tuple<Scalar, 2> b (10, (slope * 10) + yIntercept);
-                return LineFromTwoPoints (a, b);
+                return fromTwoPoints (a, b);
             }
     
-            static Line<Scalar> FitLineToPoints (const vector<Tuple<Scalar, 2> >& points) {
+            static Line<Scalar> fitPoints (const vector<Tuple<Scalar, 2> >& points) {
                 Scalar intercept = 0;
                 // compute the mean point
                 Tuple<Scalar, 2> mean;
@@ -67,7 +67,7 @@ namespace Geometry2d {
             }
     
             // return the normal vector
-            Tuple<Scalar, 2> getNormal () const {
+            const Tuple<Scalar, 2>& getNormal () const {
                 return normal;
             }
     
