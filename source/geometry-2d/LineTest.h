@@ -1,17 +1,8 @@
 #pragma once
 
-#include "Tuple.h"
+#include "Edge.h"
 
 namespace Geometry2d {
-    template<typename Scalar>
-    struct Edge {
-        Tuple<Scalar, 2> a;
-        Tuple<Scalar, 2> b;
-
-        Edge (void) {}
-        Edge (const Tuple<Scalar, 2>& _a, const Tuple<Scalar, 2>& _b) : a (_a), b (_b) {}
-    };
-
     // line tests return the area of the parallelogram subtended by the three points, which has a lot of
     // applications in the computational geometry. a positive value indicates a left turning sequence,
     // and a negative value indicates a right turning sequence.
@@ -41,7 +32,7 @@ namespace Geometry2d {
     }
 
     template<typename Scalar>
-    LineTest lineTest (const Edge<Scalar>& edge, const Tuple<Scalar, 2>& c) {
+    LineTest lineTest (const Edge<Scalar, 2>& edge, const Tuple<Scalar, 2>& c) {
         return lineTest (edge.a, edge.b, c);
     }
 
@@ -56,7 +47,7 @@ namespace Geometry2d {
     }
 
     template<typename Scalar>
-    LineTest normalizedLineTest (const Edge<Scalar>& edge, const Tuple<Scalar, 2>& c) {
+    LineTest normalizedLineTest (const Edge<Scalar, 2>& edge, const Tuple<Scalar, 2>& c) {
         return normalizedLineTest (edge.a, edge.b, c);
     }
 }

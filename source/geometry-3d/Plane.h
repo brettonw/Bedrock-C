@@ -64,7 +64,7 @@ namespace Geometry3d {
                 return Tuple<Scalar, 4> (normal, D);
             }
 
-            Scalar getIntersection (const Line<Scalar>& line) {
+            Scalar getIntersection (const Line<Scalar, 3>& line) {
                 // compute the cosine of the angle between the line and the plane, then check to see if
                 // that angle is ever going to reach the plane (i.e. it's not effectively parallel to
                 // the plane). a parallel line get's an infinite time. otherwise, compute the time along

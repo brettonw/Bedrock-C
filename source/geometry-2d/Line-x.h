@@ -56,7 +56,7 @@ namespace Geometry2d {
                 return Line<Scalar> (Tuple<Scalar, 2> (1, 0), -mean[X]);
             }
     
-            // return the shortest scalar distance from a point to the line (along the normal vector)
+            // return the scalar perpendicular distance from a point to the line (along the normal vector)
             Scalar distance (const Tuple<Scalar, 2>& point) const {
                 return (point DOT normal) + C;
             }
@@ -84,6 +84,11 @@ namespace Geometry2d {
             // return a representation of the line as a 3 vector
             Tuple<Scalar, 3> getLine () const {
                 return Tuple<Scalar, 3> (normal, C);
+            }
+
+            // return the intersection of two lines
+            Tuple<Scalar, 2> intersect (const Line<Scalar>& line) {
+
             }
     };
 }
