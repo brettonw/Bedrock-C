@@ -12,14 +12,18 @@ class BoundingBox {
     public:
         BoundingBox () : low (numeric_limits<Scalar>::max ()), high (numeric_limits<Scalar>::lowest ()), count (0) {}
 
+        BoundingBox (const Tuple<Scalar, dimension>* points, uint pointCount) : low (numeric_limits<Scalar>::max ()), high (numeric_limits<Scalar>::lowest ()), count (0) {
+            addPoints (points, pointCount);
+        }
+
         BoundingBox& addPoint (const Tuple<Scalar, dimension>& point) {
             TupleHelper<Scalar, dimension>::updateLowHigh (*point, *low, *high);
             ++count;
             return *this;
         }
 
-        BoundingBox& addPoints (const Tuple<Scalar, dimension>* points, int count) {
-            for (int i = 0; i < count; ++i) {
+        BoundingBox& addPoints (const Tuple<Scalar, dimension>* points, uint pointCount) {
+            for (uint i = 0; i < pointCount; ++i) {
                 addPoint (points[i]);
             }
             return *this;

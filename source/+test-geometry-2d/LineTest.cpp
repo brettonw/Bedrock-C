@@ -3,7 +3,7 @@
 
 using namespace Geometry2d;
 
-TEST_CASE(TestLineTest) {
+TEST_CASE(LineTest) {
     Log::Scope scope (Log::TRACE);
 
     Vector2 a {0, 2};
@@ -12,8 +12,13 @@ TEST_CASE(TestLineTest) {
     Vector2 d {2, -1};
     Vector2 e {4, -2};
 
-    TEST_EQUALS (LineTest<f8>::classified (a, b, c), LineTest<f8>::TURNS_LEFT);
-    TEST_EQUALS (LineTest<f8>::classified (a, b, d), LineTest<f8>::TURNS_RIGHT);
-    TEST_EQUALS (LineTest<f8>::classified (a, b, e), LineTest<f8>::COLINEAR);
+    TEST_EQUALS (LineTest<f8>::classified (a, b, c), LineClass::TURNS_LEFT);
+    TEST_EQUALS (LineTest<f8>::classified (a, b, d), LineClass::TURNS_RIGHT);
+    TEST_EQUALS (LineTest<f8>::classified (a, b, e), LineClass::COLINEAR);
+
+    Edge<f8, 2> edge (a, b);
+    TEST_EQUALS (LineTest<f8>::classified (edge, c), LineClass::TURNS_LEFT);
+    TEST_EQUALS (LineTest<f8>::classified (edge, d), LineClass::TURNS_RIGHT);
+    TEST_EQUALS (LineTest<f8>::classified (edge, e), LineClass::COLINEAR);
 }
 

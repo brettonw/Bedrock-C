@@ -6,20 +6,23 @@ namespace Geometry2d {
     template<typename Scalar>
     class Triangle {
         private:
-            const Tuple<Scalar, 2>* points;
+            const Tuple<Scalar, 2> a;
+            const Tuple<Scalar, 2> b;
+            const Tuple<Scalar, 2> c;
 
         public:
-            Triangle (const Tuple<Scalar, 2>* _points) : points (_points) {}
+            Triangle (const Tuple<Scalar, 2>* points) : a (points[0]), b (points[1]), c (points[2]) {}
+            Triangle (const Tuple<Scalar, 2>* points, uint _a, uint _b, uint _c) : a (points[_a]), b (points[_b]), c (points[_c]) {}
+            Triangle (const Tuple<Scalar, 2>* points, uint* index) : a (points[index[0]]), b (points[index[1]]), c (points[index[2]]) {}
 
             Scalar area () const {
-                return LineTest<Scalar>::raw (points[0], points[1], points[2]) / 2;
+                return LineTest<Scalar>::raw (a, b, c) / 2;
             }
 
-            bool contains (const Tuple<Scalar, 2>& point) const {
-                Scalar epsilon = Tuple<Scalar, 2>::getEpsilon();
-                return  (LineTest<Scalar>::raw (points[0], points[1], point) >= -epsilon) and
-                        (LineTest<Scalar>::raw (points[1], points[2], point) >= -epsilon) and
-                        (LineTest<Scalar>::raw (points[2], points[0], point) >= -epsilon);
+            bool contains (const Tuple<Scalar, 2>& point, LineClass lineTest) const {
+                return  (LineTest<Scalar>::classified (a, b, point) == lineTest) and
+                        (LineTest<Scalar>::classified (b, c, point) == lineTest) and
+                        (LineTest<Scalar>::classified (c, a, point) == lineTest);
             }
     };
 }
