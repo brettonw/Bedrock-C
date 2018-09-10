@@ -3,6 +3,6 @@
 
 TEST_CASE(TestHttpGet) {
     Text result = Http::getText ("https://bedrock.brettonw.com/api?event=ok", new File ("result.json"));
-    TEST_XY(result, "{\"query\":{\"event\":\"ok\"},\"status\":\"ok\"}\n");
+    TEST_EQUALS(result, "{\"query\":{\"event\":\"ok\"},\"status\":\"ok\"}\n");
 }
 

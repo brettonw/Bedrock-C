@@ -16,25 +16,25 @@ TEST_CASE(TestDeviceI2C) {
         device.write (0x44, 0x10);
         Pause::milli (10);
         int x = device.read (0x44);
-        TEST_XY(x, 0x10);
+        TEST_EQUALS(x, 0x10);
         Pause::milli (10);
 
         device.write (0x44, 0x11);
         Pause::milli (10);
         x = device.read (0x44);
-        TEST_XY(x, 0x11);
+        TEST_EQUALS(x, 0x11);
         Pause::milli (10);
 
         device.write (0x44, 0x20);
         Pause::milli (10);
         x = device.read (0x44);
-        TEST_XY(x, 0x20);
+        TEST_EQUALS(x, 0x20);
         device.end ();
 
         Pause::milli (1000);
     }
     catch (RuntimeError& runtimeError) {
         Log::exception (runtimeError);
-        TEST_X(true);
+        TEST_TRUE(true);
     }
 }

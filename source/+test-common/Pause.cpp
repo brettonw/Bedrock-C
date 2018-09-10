@@ -14,7 +14,7 @@ void testMicro (int microseconds) {
     Log::debug () << "testMicro: " << "requested " << microseconds << " us pause, waited for " << (sum / sampleCount) << " us on average over " << sampleCount << " pauses" << endl;
     // ensure it is within some degree of error (20%)
     int expectedSum = microseconds * sampleCount;
-    TEST_XRANGE(sum, (expectedSum * 4) / 5, (expectedSum * 6) / 5);
+    TEST_IN_RANGE(sum, (expectedSum * 4) / 5, (expectedSum * 6) / 5);
 }
 
 TEST_CASE(TestPauseMicro) {
@@ -41,7 +41,7 @@ void testMilli (int milliseconds) {
     Log::debug () << "testMilli: " << "requested " << milliseconds << " ms pause, waited for " << (sum / sampleCount) << " ms on average over " << sampleCount << " pauses" << endl;
     // ensure it is within some degree of error (20%)
     int expectedSum = milliseconds * sampleCount;
-    TEST_XRANGE(sum, (expectedSum * 4) / 5, (expectedSum * 6) / 5);
+    TEST_IN_RANGE(sum, (expectedSum * 4) / 5, (expectedSum * 6) / 5);
 }
 
 TEST_CASE(TestPauseMilli) {

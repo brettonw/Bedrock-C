@@ -3,8 +3,8 @@
 
 TEST_CASE(TestEmptyBagObject) {
     PtrToBagObject bagObject = new BagObject ();
-    TEST_XY(bagObject->size (), 0);
-    TEST_XY(bagObject->toJson (), "{}");
+    TEST_EQUALS(bagObject->size (), 0);
+    TEST_EQUALS(bagObject->toJson (), "{}");
 }
 
 TEST_CASE(TestBagObject) {
@@ -14,24 +14,24 @@ TEST_CASE(TestBagObject) {
         ->put ("B", 5)
         ->put ("C", true)
         ->put ("DD", 6.5);
-    TEST_XY(bagObject->size (), 4);
-    TEST_XY(bagObject->toJson (), "{\"A\":\"Hello World\",\"B\":5,\"C\":true,\"DD\":6.50000000}");
+    TEST_EQUALS(bagObject->size (), 4);
+    TEST_EQUALS(bagObject->toJson (), "{\"A\":\"Hello World\",\"B\":5,\"C\":true,\"DD\":6.50000000}");
 
-    TEST_XY(bagObject->get ("A")->toJson (), "\"Hello World\"");
-    TEST_XY(bagObject->get ("B")->toJson (), "5");
-    TEST_XY(bagObject->get ("C")->toJson (), "true");
-    TEST_XY(bagObject->get ("DD")->toJson (), "6.50000000");
-    TEST_XY(bagObject->get ("D"), (BagThing*) 0);
+    TEST_EQUALS(bagObject->get ("A")->toJson (), "\"Hello World\"");
+    TEST_EQUALS(bagObject->get ("B")->toJson (), "5");
+    TEST_EQUALS(bagObject->get ("C")->toJson (), "true");
+    TEST_EQUALS(bagObject->get ("DD")->toJson (), "6.50000000");
+    TEST_EQUALS(bagObject->get ("D"), (BagThing*) 0);
 
-    TEST_XY(bagObject->getText ("A"), "Hello World");
-    TEST_XY(bagObject->getInteger ("B"), 5);
-    TEST_XY(bagObject->getBool ("C"), true);
-    TEST_XY(bagObject->getFloat ("DD"), 6.5);
+    TEST_EQUALS(bagObject->getText ("A"), "Hello World");
+    TEST_EQUALS(bagObject->getInteger ("B"), 5);
+    TEST_EQUALS(bagObject->getBool ("C"), true);
+    TEST_EQUALS(bagObject->getFloat ("DD"), 6.5);
 
-    TEST_XY(bagObject->get ("A")->getType (), BagThing::TEXT_TYPE);
-    TEST_XY(bagObject->get ("B")->getType (), BagThing::INTEGER_TYPE);
-    TEST_XY(bagObject->get ("C")->getType (), BagThing::BOOL_TYPE);
-    TEST_XY(bagObject->get ("DD")->getType (), BagThing::FLOAT_TYPE);
+    TEST_EQUALS(bagObject->get ("A")->getType (), BagThing::TEXT_TYPE);
+    TEST_EQUALS(bagObject->get ("B")->getType (), BagThing::INTEGER_TYPE);
+    TEST_EQUALS(bagObject->get ("C")->getType (), BagThing::BOOL_TYPE);
+    TEST_EQUALS(bagObject->get ("DD")->getType (), BagThing::FLOAT_TYPE);
 
     //bagObject->put ("XX", new BagArray ());
 }
@@ -42,7 +42,7 @@ TEST_CASE(TestBag1) {
     PtrToBagObject bagObject = new BagObject ();
     bagObject->put("xxx", bagArray);
     Text bag = bagObject->toJson ();
-    TEST_XY(bag, "{\"xxx\":[5]}");
+    TEST_EQUALS(bag, "{\"xxx\":[5]}");
     Log::debug () << bag << endl;
 }
 
@@ -50,7 +50,7 @@ TEST_CASE(TestBag2) {
     PtrToBagArray bagArray = (new BagArray ())->add (5)->add (true)->add ("hello")->add (1.665)->add ((new BagObject ())->put ("yyy", 15));
     PtrToBagObject bagObject = (new BagObject ())->put("xxx", bagArray);
     Text bag = bagObject->toJson ();
-    TEST_XY(bag, "{\"xxx\":[5,true,\"hello\",1.66500000,{\"yyy\":15}]}");
+    TEST_EQUALS(bag, "{\"xxx\":[5,true,\"hello\",1.66500000,{\"yyy\":15}]}");
     Log::debug () << bag << endl;
 }
 
@@ -68,5 +68,5 @@ TEST_CASE(TestBagObjectNameTable) {
         bagArray->add (bagObject);
     }
     TEST_XYOP(def.getReferenceCount(), 5, <);
-    TEST_XY(bagArray->size (), 5);
+    TEST_EQUALS(bagArray->size (), 5);
 }

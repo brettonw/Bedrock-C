@@ -9,9 +9,9 @@ TEST_CASE(TestUtf8Simple) {
     Utf8Decoder decoder (str);
     while (decoder.goNext ()) {
         uint compare = (uint) *str++;
-        TEST_XY(*decoder, compare);
+        TEST_EQUALS(*decoder, compare);
     }
-    TEST_XY(decoder.goNext (), false);
+    TEST_EQUALS(decoder.goNext (), false);
 }
 
 // useful test resource: https://www.utf8-chartable.de/unicode-utf8-table.pl?start=12288&number=128
@@ -24,9 +24,9 @@ TEST_CASE(TestUtf8Japanese) {
     Utf8Decoder decoder (str);
     while (decoder.goNext ()) {
         uint compare = *xxx++;
-        TEST_XY(*decoder, compare);
+        TEST_EQUALS(*decoder, compare);
     }
-    TEST_XY(decoder.goNext (), false);
+    TEST_EQUALS(decoder.goNext (), false);
 }
 
 TEST_CASE(TestUtf8Mixed) {
@@ -37,9 +37,9 @@ TEST_CASE(TestUtf8Mixed) {
     Utf8Decoder decoder (str);
     while (decoder.goNext ()) {
         uint compare = *xxx++;
-        TEST_XY(*decoder, compare);
+        TEST_EQUALS(*decoder, compare);
     }
-    TEST_XY(decoder.goNext (), false);
+    TEST_EQUALS(decoder.goNext (), false);
 }
 
 TEST_CASE(TestUtf8Wiki) {
@@ -50,9 +50,9 @@ TEST_CASE(TestUtf8Wiki) {
     Utf8Decoder decoder (str);
     while (decoder.goNext ()) {
         uint compare = *xxx++;
-        TEST_XY(*decoder, compare);
+        TEST_EQUALS(*decoder, compare);
     }
-    TEST_XY(decoder.goNext (), false);
+    TEST_EQUALS(decoder.goNext (), false);
 }
 
-// need 2-byte seuences and 4-byte sequences
+// need 2-byte sequences and 4-byte sequences

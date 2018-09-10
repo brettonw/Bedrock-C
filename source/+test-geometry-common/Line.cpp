@@ -13,11 +13,11 @@ TEST_CASE(TestLine2) {
 
     //TEST_XY(normal, (Vector2 {-1, -1}).normalized ());
 
-    TEST_X(line.isOnLine (a));
-    TEST_X(line.isOnLine (b));
-    TEST_X(line.isOnLine (pt));
+    TEST_TRUE(line.isOnLine (a));
+    TEST_TRUE(line.isOnLine (b));
+    TEST_TRUE(line.isOnLine (pt));
 
-    TEST_XYEPS(line.distance (Vector2 ()), sqrt (2), 1e-6);
+    TEST_EQUALS_EPS(line.distance (Vector2 ()), sqrt (2), 1e-6);
 }
 
 TEST_CASE(TestLine3) {
@@ -28,5 +28,5 @@ TEST_CASE(TestLine3) {
     Vector3 c {0, 0, 1};
 
     auto   line = Line<f8, 3>::fromTwoPoints (a, b);
-    TEST_XYEPS(line.distance (c), 0.816497, 1e-6);
+    TEST_EQUALS_EPS(line.distance (c), 0.816497, 1e-6);
 }

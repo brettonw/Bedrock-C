@@ -12,13 +12,14 @@ namespace Geometry2d {
             Triangle (const Tuple<Scalar, 2>* _points) : points (_points) {}
 
             Scalar area () const {
-                return rawLineTest (points[0], points[1], points[2]) / 2;
+                return LineTest<Scalar>::raw (points[0], points[1], points[2]) / 2;
             }
 
             bool contains (const Tuple<Scalar, 2>& point) const {
-                return  (rawLineTest (points[0], points[1], point) >= 0) and
-                        (rawLineTest (points[1], points[2], point) >= 0) and
-                        (rawLineTest (points[2], points[0], point) >= 0);
+                Scalar epsilon = Tuple<Scalar, 2>::getEpsilon();
+                return  (LineTest<Scalar>::raw (points[0], points[1], point) >= -epsilon) and
+                        (LineTest<Scalar>::raw (points[1], points[2], point) >= -epsilon) and
+                        (LineTest<Scalar>::raw (points[2], points[0], point) >= -epsilon);
             }
     };
 }

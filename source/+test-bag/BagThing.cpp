@@ -7,17 +7,17 @@ TEST_CASE(TestBagThings) {
     PtrToBagBool ptrToBagBool = new BagBool (true);
     PtrToBagFloat ptrToBagFloat = new BagFloat (6.5);
 
-    TEST_XY(ptrToBagText->toJson (), "\"Hello World\"");
-    TEST_XY(ptrToBagText->get (), "Hello World");
-    TEST_XY(ptrToBagInteger->toJson (), "5");
-    TEST_XY(ptrToBagInteger->get (), 5);
-    TEST_XY(ptrToBagBool->toJson (), "true");
-    TEST_XY(ptrToBagBool->get (), true);
-    TEST_XY(ptrToBagFloat->toJson (), "6.50000000");
-    TEST_XY(ptrToBagFloat->get (), 6.5);
+    TEST_EQUALS(ptrToBagText->toJson (), "\"Hello World\"");
+    TEST_EQUALS(ptrToBagText->get (), "Hello World");
+    TEST_EQUALS(ptrToBagInteger->toJson (), "5");
+    TEST_EQUALS(ptrToBagInteger->get (), 5);
+    TEST_EQUALS(ptrToBagBool->toJson (), "true");
+    TEST_EQUALS(ptrToBagBool->get (), true);
+    TEST_EQUALS(ptrToBagFloat->toJson (), "6.50000000");
+    TEST_EQUALS(ptrToBagFloat->get (), 6.5);
 
-    TEST_XY(ptrToBagText->getType (), BagThing::TEXT_TYPE);
-    TEST_XY(ptrToBagInteger->getType (), BagThing::INTEGER_TYPE);
-    TEST_XY(ptrToBagBool->getType (), BagThing::BOOL_TYPE);
-    TEST_XY(ptrToBagFloat->getType (), BagThing::FLOAT_TYPE);
+    TEST_EQUALS(ptrToBagText->getType (), BagThing::TEXT_TYPE);
+    TEST_EQUALS(ptrToBagInteger->getType (), BagThing::INTEGER_TYPE);
+    TEST_EQUALS(ptrToBagBool->getType (), BagThing::BOOL_TYPE);
+    TEST_EQUALS(ptrToBagFloat->getType (), BagThing::FLOAT_TYPE);
 }

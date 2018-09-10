@@ -10,12 +10,12 @@ TEST_CASE(TestStepperMotor) {
     PtrToNullDevice device = new NullDevice ();
     PtrTo<AdafruitMotorDriver<NullDevice> > driver = new AdafruitMotorDriver<NullDevice> (device);
     for (int i = 0; i < MOTOR_COUNT; ++i) {
-        TEST_XY(driver->getMotorSpeed (static_cast<MotorId>(i)), 0);
+        TEST_EQUALS(driver->getMotorSpeed (static_cast<MotorId>(i)), 0);
     }
 
     PtrTo<StepperMotor<AdafruitMotorDriver<NullDevice> > > stepper = StepperMotor<AdafruitMotorDriver<NullDevice> >::getHalfStepper (driver, MotorId::MOTOR_0, MotorId::MOTOR_1, 1.8);
-    TEST_XY(driver->getMotorSpeed (MotorId::MOTOR_0), 1);
-    TEST_XY(driver->getMotorSpeed (MotorId::MOTOR_1), 0);
+    TEST_EQUALS(driver->getMotorSpeed (MotorId::MOTOR_0), 1);
+    TEST_EQUALS(driver->getMotorSpeed (MotorId::MOTOR_1), 0);
 }
 
 template<typename DeviceType>
@@ -44,5 +44,5 @@ TEST_CASE(LiveTestStepperMotor) {
         Log::exception (runtimeError);
     } catch (...) {
     }
-    TEST_X(true);
+    TEST_TRUE(true);
 }

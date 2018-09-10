@@ -63,6 +63,16 @@ class TupleHelper {
         static Scalar max (const Scalar* source) {
             return std::max (abs (*source), TupleHelper<Scalar, size - 1>::max (source + 1));
         }
+
+        static bool inBound (const Scalar* source, const Scalar* low, const Scalar* high) {
+            return (*source >= *low) and (*source <= *high) and TupleHelper<Scalar, size - 1>::inBound (source + 1, low + 1, high + 1);
+        }
+
+        static void updateLowHigh (const Scalar* source, Scalar* low, Scalar* high) {
+            *low = std::min (*source, *low);
+            *high = std::max (*source, *high);
+            TupleHelper<Scalar, size - 1>::updateLowHigh (source + 1, low + 1, high + 1);
+        }
 };
 
 template<typename Scalar>
@@ -81,5 +91,7 @@ class TupleHelper<Scalar, 0> {
         static Scalar sumMult (const Scalar* left, const Scalar* right) { return 0; }
         static double sumPower (const Scalar* source, Scalar power) { return 0; }
         static Scalar max (const Scalar* source) { return numeric_limits<Scalar>::lowest (); }
+        static bool inBound (const Scalar* source, const Scalar* low, const Scalar* high) { return true; }
+        static void updateLowHigh (const Scalar* source, Scalar* low, Scalar* high) {}
 };
 

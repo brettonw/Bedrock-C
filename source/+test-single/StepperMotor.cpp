@@ -29,5 +29,5 @@ TEST_CASE(TestStepperMotor) {
         Log::exception (runtimeError);
     } catch (...) {
     }
-    TEST_X(true);
+    TEST_TRUE(true);
 }

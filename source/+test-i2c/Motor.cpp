@@ -10,19 +10,19 @@ TEST_CASE(TestAMotor) {
     PtrToNullDevice device = new NullDevice ();
     PtrTo<AdafruitMotorDriver<NullDevice> > driver = new AdafruitMotorDriver<NullDevice> (device);
     for (int i = 0; i < MOTOR_COUNT; ++i) {
-        TEST_XY(driver->getMotorSpeed (static_cast<MotorId>(i)), 0);
+        TEST_EQUALS(driver->getMotorSpeed (static_cast<MotorId>(i)), 0);
     }
     PtrTo<Motor<AdafruitMotorDriver<NullDevice> > > motor = new Motor<AdafruitMotorDriver<NullDevice> > (driver, MotorId::MOTOR_0);
-    TEST_XY(motor->getMotorId (), MotorId::MOTOR_0);
-    TEST_XY(driver->getMotorSpeed (MotorId::MOTOR_0), 0);
+    TEST_EQUALS(motor->getMotorId (), MotorId::MOTOR_0);
+    TEST_EQUALS(driver->getMotorSpeed (MotorId::MOTOR_0), 0);
 
     // (runMotor) - motorId: MOTOR_1, speed: 1.0
     motor->run (1.0);
-    TEST_XY(driver->getMotorSpeed (MotorId::MOTOR_0), 1.0);
+    TEST_EQUALS(driver->getMotorSpeed (MotorId::MOTOR_0), 1.0);
 
     // (runMotor) - motorId: MOTOR_1, speed: 1.5 - ensure the clamping works
     motor->run (1.5);
-    TEST_XY(driver->getMotorSpeed (MotorId::MOTOR_0), 1.0);
+    TEST_EQUALS(driver->getMotorSpeed (MotorId::MOTOR_0), 1.0);
 }
 
 TEST_CASE(LiveTestMotor) {
@@ -43,5 +43,5 @@ TEST_CASE(LiveTestMotor) {
         Log::exception (runtimeError);
     } catch (...) {
     }
-    TEST_X(true);
+    TEST_TRUE(true);
 }

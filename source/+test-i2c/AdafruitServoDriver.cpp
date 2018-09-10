@@ -24,7 +24,7 @@ TEST_CASE(TestAdafruitServoDriver) {
 
     PtrTo<AdafruitServoDriver<TestDevice> > driver = new AdafruitServoDriver<TestDevice> (device);
     for (int i = ServoId::SERVO_00; i <= ServoId::SERVO_15; ++i) {
-        TEST_XY(driver->getPulseDuration (static_cast<ServoId>(i)), 0);
+        TEST_EQUALS(driver->getPulseDuration (static_cast<ServoId>(i)), 0);
     }
 
     // followed by a call to set channel pulse to set the stop position on servo 1
@@ -35,7 +35,7 @@ TEST_CASE(TestAdafruitServoDriver) {
         ->expect (0x09, (byte) 0x01);
 
     PtrTo<Servo<AdafruitServoDriver<TestDevice> > > servo0 = new Servo<AdafruitServoDriver<TestDevice> > (driver, ServoId::SERVO_00);
-    TEST_XY(driver->getPulseDuration (ServoId::SERVO_00), 1.5);
+    TEST_EQUALS(driver->getPulseDuration (ServoId::SERVO_00), 1.5);
 
     // followed by a call to set channel pulse to set the stop position
     device
@@ -45,7 +45,7 @@ TEST_CASE(TestAdafruitServoDriver) {
         ->expect (0x0d, (byte) 0x00);
 
     PtrTo<Servo<AdafruitServoDriver<TestDevice> > > servo1 = new Servo<AdafruitServoDriver<TestDevice> > (driver, ServoId::SERVO_01, 0.5, 1.5);
-    TEST_XY(driver->getPulseDuration (ServoId::SERVO_01), 1.0);
+    TEST_EQUALS(driver->getPulseDuration (ServoId::SERVO_01), 1.0);
 
     TEST_ASSERTION(device->report ());
 }

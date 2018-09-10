@@ -6,6 +6,6 @@ TEST_CASE(TestCopy) {
     int b[8];
     Copy<int, 8>::copy (b, a);
     for (int i = 0; i < 8; ++i) {
-        TEST_XY(b[i], a[i]);
+        TEST_EQUALS(b[i], a[i]);
     }
 }

@@ -13,5 +13,5 @@ TEST_CASE(TestXmlNode) {
                                     ->setContent("content2")
                                     ->addChild (new XmlNode ("def"))
                                     );
-    TEST_XY(xmlNode->toXml (), "<xml name=\"test-xml\" src=\"https://bedrock.brettonw.com\"><abc test=\"true\"/><abc>content</abc><abc><def/>content2</abc></xml>");
+    TEST_EQUALS(xmlNode->toXml (), "<xml name=\"test-xml\" src=\"https://bedrock.brettonw.com\"><abc test=\"true\"/><abc>content</abc><abc><def/>content2</abc></xml>");
 }

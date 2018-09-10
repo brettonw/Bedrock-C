@@ -5,12 +5,12 @@ static_assert((sizeof(u2) == 2) and (sizeof(u4) == 4) and (sizeof(u8) == 8), "un
 
 TEST_CASE(TestTypeSizes) {
     // these tests should pass if compilation succeeded
-    TEST_XY(sizeof (u1), 1);
-    TEST_XY(sizeof (u2), 2);
-    TEST_XY(sizeof (u4), 4);
-    TEST_XY(sizeof (u8), 8);
+    TEST_EQUALS(sizeof (u1), 1);
+    TEST_EQUALS(sizeof (u2), 2);
+    TEST_EQUALS(sizeof (u4), 4);
+    TEST_EQUALS(sizeof (u8), 8);
 
-    TEST_XY(sizeof (f4), 4);
-    TEST_XY(sizeof (f8), 8);
+    TEST_EQUALS(sizeof (f4), 4);
+    TEST_EQUALS(sizeof (f8), 8);
 }
 

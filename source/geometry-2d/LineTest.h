@@ -7,47 +7,45 @@ namespace Geometry2d {
     // applications in the computational geometry. a positive value indicates a left turning sequence,
     // and a negative value indicates a right turning sequence.
 
-    enum LineTest {
-        TURNS_LEFT =    1,
-        TURNS_RIGHT =   -1,
-        SPANNING =      TURNS_LEFT * TURNS_RIGHT,
-        COLINEAR =      0
+    template<typename Scalar>
+    class LineTest {
+        public:
+            enum Classification {
+                TURNS_LEFT =    1,
+                TURNS_RIGHT =   -1,
+                SPANNING =      TURNS_LEFT * TURNS_RIGHT,
+                COLINEAR =      0
+            };
+
+            static Classification classify (Scalar lineTest) {
+                Scalar epsilon = Tuple<Scalar, 2>::getEpsilon();
+                return  (lineTest > epsilon) ? TURNS_LEFT :
+                        (lineTest < -epsilon) ? TURNS_RIGHT :
+                        COLINEAR;
+            }
+
+            static Scalar raw (const Tuple<Scalar, 2>& a, const Tuple<Scalar, 2>& b, const Tuple<Scalar, 2>& c) {
+                return (b - a) CROSS (c - a);
+            }
+
+            static Classification classified (const Tuple<Scalar, 2>& a, const Tuple<Scalar, 2>& b, const Tuple<Scalar, 2>& c) {
+                return classify (raw (a, b, c));
+            }
+
+            static Classification classified (const Edge<Scalar, 2>& edge, const Tuple<Scalar, 2>& c) {
+                return classified (edge.a, edge.b, c);
+            }
+
+            static Scalar normalizedRaw (const Tuple<Scalar, 2>& a, const Tuple<Scalar, 2>& b, const Tuple<Scalar, 2>& c) {
+                return (b - a).normalized () CROSS (c - a).normalized ();
+            }
+
+            static Classification normalized (const Tuple<Scalar, 2>& a, const Tuple<Scalar, 2>& b, const Tuple<Scalar, 2>& c) {
+                return classify (normalizedRaw (a, b, c));
+            }
+
+            static Classification normalizedLineTest (const Edge<Scalar, 2>& edge, const Tuple<Scalar, 2>& c) {
+                return normalized (edge.a, edge.b, c);
+            }
     };
-
-    template<typename Scalar>
-    LineTest classifyLineTestResult (Scalar lineTest) {
-        return  (lineTest > Tuple<Scalar, 2>::epsilon) ? TURNS_LEFT :
-                (lineTest < -Tuple<Scalar, 2>::epsilon) ? TURNS_RIGHT :
-                COLINEAR;
-    }
-
-    template<typename Scalar>
-    Scalar rawLineTest (const Tuple<Scalar, 2>& a, const Tuple<Scalar, 2>& b, const Tuple<Scalar, 2>& c) {
-        return (b - a) CROSS (c - a);
-    }
-
-    template<typename Scalar>
-    LineTest lineTest (const Tuple<Scalar, 2>& a, const Tuple<Scalar, 2>& b, const Tuple<Scalar, 2>& c) {
-        return classifyLineTestResult (rawLineTest (a, b, c));
-    }
-
-    template<typename Scalar>
-    LineTest lineTest (const Edge<Scalar, 2>& edge, const Tuple<Scalar, 2>& c) {
-        return lineTest (edge.a, edge.b, c);
-    }
-
-    template<typename Scalar>
-    Scalar normalizedRawLineTest (const Tuple<Scalar, 2>& a, const Tuple<Scalar, 2>& b, const Tuple<Scalar, 2>& c) {
-        return (b - a).Normalized () CROSS (c - a).Normalized ();
-    }
-
-    template<typename Scalar>
-    LineTest normalizedLineTest (const Tuple<Scalar, 2>& a, const Tuple<Scalar, 2>& b, const Tuple<Scalar, 2>& c) {
-        return classifyLineTestResult (normalizedRawLineTest (a, b, c));
-    }
-
-    template<typename Scalar>
-    LineTest normalizedLineTest (const Edge<Scalar, 2>& edge, const Tuple<Scalar, 2>& c) {
-        return normalizedLineTest (edge.a, edge.b, c);
-    }
 }

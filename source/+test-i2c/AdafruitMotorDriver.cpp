@@ -78,7 +78,7 @@ TEST_CASE(TestAdafruitMotorDriverMotor) {
 
     PtrTo<AdafruitMotorDriver<TestDevice> > driver = new AdafruitMotorDriver<TestDevice> (device);
     for (int i = 0; i < MOTOR_COUNT; ++i) {
-        TEST_XY(driver->getMotorSpeed (static_cast<MotorId>(i)), 0);
+        TEST_EQUALS(driver->getMotorSpeed (static_cast<MotorId>(i)), 0);
     }
 
     // stop motor 0
@@ -97,7 +97,7 @@ TEST_CASE(TestAdafruitMotorDriverMotor) {
         ->expect (0x29, (byte) 0x10);
 
     PtrTo<Motor<AdafruitMotorDriver<TestDevice> > > motor = new Motor<AdafruitMotorDriver<TestDevice> > (driver, MotorId::MOTOR_0);
-    TEST_XY(driver->getMotorSpeed (MotorId::MOTOR_0), 0);
+    TEST_EQUALS(driver->getMotorSpeed (MotorId::MOTOR_0), 0);
 
     // (runMotor) - motorId: MOTOR_1, speed: 1.0
     device
@@ -114,7 +114,7 @@ TEST_CASE(TestAdafruitMotorDriverMotor) {
        ->expect (0x28, (byte) 0x00)
        ->expect (0x29, (byte) 0x00);
     motor->run (1.0);
-    TEST_XY(driver->getMotorSpeed (MotorId::MOTOR_0), 1.0);
+    TEST_EQUALS(driver->getMotorSpeed (MotorId::MOTOR_0), 1.0);
 
     // (runMotor) - motorId: MOTOR_1, speed: 1.5
     device
@@ -131,7 +131,7 @@ TEST_CASE(TestAdafruitMotorDriverMotor) {
        ->expect (0x28, (byte) 0x00)
        ->expect (0x29, (byte) 0x00);
     motor->run (1.5);
-    TEST_XY(driver->getMotorSpeed (MotorId::MOTOR_0), 1.0);
+    TEST_EQUALS(driver->getMotorSpeed (MotorId::MOTOR_0), 1.0);
 
     TEST_ASSERTION(device->report ());
 }
@@ -209,7 +209,7 @@ TEST_CASE(TestAdafruitMotorDriverStepperMotor) {
 
     PtrTo<AdafruitMotorDriver<TestDevice> > driver = new AdafruitMotorDriver<TestDevice> (device);
     for (int i = 0; i < MOTOR_COUNT; ++i) {
-        TEST_XY(driver->getMotorSpeed (static_cast<MotorId>(i)), 0);
+        TEST_EQUALS(driver->getMotorSpeed (static_cast<MotorId>(i)), 0);
     }
 
     // stop motor 0
@@ -241,8 +241,8 @@ TEST_CASE(TestAdafruitMotorDriverStepperMotor) {
         ->expect (0x3d, (byte) 0x10);
 
     PtrTo<StepperMotor<AdafruitMotorDriver<TestDevice> > > stepper = StepperMotor<AdafruitMotorDriver<TestDevice> >::getHalfStepper (driver, MotorId::MOTOR_0, MotorId::MOTOR_1, 1.8);
-    TEST_XY(driver->getMotorSpeed (MotorId::MOTOR_0), 1);
-    TEST_XY(driver->getMotorSpeed (MotorId::MOTOR_1), 0);
+    TEST_EQUALS(driver->getMotorSpeed (MotorId::MOTOR_0), 1);
+    TEST_EQUALS(driver->getMotorSpeed (MotorId::MOTOR_1), 0);
 
     TEST_ASSERTION(device->report ());
 }

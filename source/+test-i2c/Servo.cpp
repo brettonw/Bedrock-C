@@ -10,18 +10,18 @@ TEST_CASE(TestServo) {
 
     PtrTo<AdafruitServoDriver<NullDevice> > driver = new AdafruitServoDriver<NullDevice> (device);
     for (int i = ServoId::SERVO_00; i <= ServoId::SERVO_15; ++i) {
-        TEST_XY(driver->getPulseDuration (static_cast<ServoId>(i)), 0);
+        TEST_EQUALS(driver->getPulseDuration (static_cast<ServoId>(i)), 0);
     }
 
     PtrTo<Servo<AdafruitServoDriver<NullDevice> > > servo0 = new Servo<AdafruitServoDriver<NullDevice> > (driver, ServoId::SERVO_00);
-    TEST_XY(servo0->getServoId (), ServoId::SERVO_00);
-    TEST_XY(servo0->getPosition (), 0);
-    TEST_XY(driver->getPulseDuration (ServoId::SERVO_00), 1.5);
+    TEST_EQUALS(servo0->getServoId (), ServoId::SERVO_00);
+    TEST_EQUALS(servo0->getPosition (), 0);
+    TEST_EQUALS(driver->getPulseDuration (ServoId::SERVO_00), 1.5);
 
     PtrTo<Servo<AdafruitServoDriver<NullDevice> > > servo1 = new Servo<AdafruitServoDriver<NullDevice> > (driver, ServoId::SERVO_01, 0.5, 1.5);
-    TEST_XY(servo1->getServoId (), ServoId::SERVO_01);
-    TEST_XY(servo1->getPosition (), 0);
-    TEST_XY(driver->getPulseDuration (ServoId::SERVO_01), 1.0);
+    TEST_EQUALS(servo1->getServoId (), ServoId::SERVO_01);
+    TEST_EQUALS(servo1->getPosition (), 0);
+    TEST_EQUALS(driver->getPulseDuration (ServoId::SERVO_01), 1.0);
 }
 
 TEST_CASE(LiveTestServo) {
@@ -41,5 +41,5 @@ TEST_CASE(LiveTestServo) {
         Log::exception (runtimeError);
     } catch (...) {
     }
-    TEST_X(true);
+    TEST_TRUE(true);
 }

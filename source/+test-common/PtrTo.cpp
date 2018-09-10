@@ -31,7 +31,7 @@ MAKE_PTR_TO(TestClass) {
             for (set<void*>::iterator it = ptrs.begin (); it != ptrs.end (); ++it) {
                 Log::warn () << "Known ptr " << *it << endl;
             }
-            TEST_XY (ptrs.size(), expect);
+            TEST_EQUALS (ptrs.size(), expect);
         }
 };
 
@@ -49,14 +49,14 @@ set<void*> TestClass::ptrs;
 void testFunctionScope (PtrToTestClass ptrToTestClass, PtrToTestClass ptrToTestClassToo) {
     // two new copies of the pointer should have a ref count of 3, they should be ==, and
     // they should not be unique
-    TEST_XY(ptrToTestClass->getReferenceCount(), 3);
-    TEST_XY(ptrToTestClass, ptrToTestClassToo);
-    TEST_XY(ptrToTestClass.isUnique(), false);
+    TEST_EQUALS(ptrToTestClass->getReferenceCount(), 3);
+    TEST_EQUALS(ptrToTestClass, ptrToTestClassToo);
+    TEST_EQUALS(ptrToTestClass.isUnique(), false);
 
     // make one of the pointers unique, it's ref count should be 1, and the pointers
     // should be !=
     ptrToTestClass.makeUnique ();
-    TEST_XY(ptrToTestClass->getReferenceCount(), 1);
+    TEST_EQUALS(ptrToTestClass->getReferenceCount(), 1);
     TEST_XYOP(ptrToTestClass, ptrToTestClassToo, !=);
 }
 
@@ -64,7 +64,7 @@ void testFunctionScope (PtrToTestClass ptrToTestClass, PtrToTestClass ptrToTestC
 // normal usage if the callee is not going to take ownership of the pointer
 void testFunctionScopeRef (const PtrToTestClass& ptrToTestClass) {
     // this shouldn't create a new pointer object, so the ref count shouldn't change
-    TEST_XY(ptrToTestClass->getReferenceCount(), 1);
+    TEST_EQUALS(ptrToTestClass->getReferenceCount(), 1);
 }
 
 // the PtrTo class should be a code-only wrapper on a normal pointer, so this test confirms that
@@ -72,14 +72,14 @@ void testFunctionScopeRef (const PtrToTestClass& ptrToTestClass) {
 // PtrTo class is modified to support derivation, which would add a virtual table pointer to the
 // class that would substantially change performance
 TEST_CASE(TestPtrTo0) {
-    TEST_XY(sizeof(PtrToTestClass), sizeof(TestClass*));
+    TEST_EQUALS(sizeof(PtrToTestClass), sizeof(TestClass*));
 }
 
 TEST_CASE(TestPtrTo1) {
     // create a false scope so the pointer will go out of scope before the program closes
     if (1) {
         PtrToDerivedTestClass ptrToDerivedTestClass = new DerivedTestClass ();
-        TEST_XY(ptrToDerivedTestClass->getReferenceCount(), 1);
+        TEST_EQUALS(ptrToDerivedTestClass->getReferenceCount(), 1);
 
         // a pointer to the object so we can check it after it has gone out of scope
         PtrToTestClass* atPtrTo;
@@ -87,14 +87,14 @@ TEST_CASE(TestPtrTo1) {
         // create a scope...
         if (1) {
             PtrToTestClass ptrToTestClass = ptr_upcast<TestClass> (ptrToDerivedTestClass);
-            TEST_XY(ptrToDerivedTestClass->getReferenceCount(), 2);
-            TEST_XY(ptrToTestClass->getReferenceCount(), 2);
+            TEST_EQUALS(ptrToDerivedTestClass->getReferenceCount(), 2);
+            TEST_EQUALS(ptrToTestClass->getReferenceCount(), 2);
 
             // and try to downcast
             PtrToDerivedTestClass ptr3 = ptr_downcast<DerivedTestClass> (ptrToTestClass);
-            TEST_XY(ptrToDerivedTestClass->getReferenceCount(), 3);
-            TEST_XY(ptrToTestClass->getReferenceCount(), 3);
-            TEST_XY(ptr3->getReferenceCount(), 3);
+            TEST_EQUALS(ptrToDerivedTestClass->getReferenceCount(), 3);
+            TEST_EQUALS(ptrToTestClass->getReferenceCount(), 3);
+            TEST_EQUALS(ptr3->getReferenceCount(), 3);
 
             // prepare to check that the memory space got zeroed after it went out of scope
             atPtrTo = &ptrToTestClass;
@@ -104,7 +104,7 @@ TEST_CASE(TestPtrTo1) {
         // over looking at memory that has been abandoned) - note that this test fails on redhat7 in
         // release builds
         #ifndef _NDEBUG_
-        TEST_XY(*(void**)atPtrTo, 0);
+        TEST_EQUALS(*(void**)atPtrTo, 0);
         #endif
 
         // call a function to test the copy semantics
@@ -120,20 +120,20 @@ TEST_CASE(TestPtrTo2) {
     if (1) {
         // a basic empty object to start
         PtrToTestClass ptrToTestClass;
-        TEST_XY(ptrToTestClass.getPtr(), 0);
-        TEST_XY(ptrToTestClass.isUnique(), true);
+        TEST_EQUALS(ptrToTestClass.getPtr(), 0);
+        TEST_EQUALS(ptrToTestClass.isUnique(), true);
 
         // create an object and check it's ref count is 1
         ptrToTestClass = new TestClass ();
-        TEST_XY(ptrToTestClass->getReferenceCount(), 1);
+        TEST_EQUALS(ptrToTestClass->getReferenceCount(), 1);
 
         // call a few functions to test the copy semantics
         testFunctionScope (ptrToTestClass, ptrToTestClass);
         testFunctionScopeRef (ptrToTestClass);
 
         // when done, it should be a unique object again
-        TEST_XY(ptrToTestClass->getReferenceCount(), 1);
-        TEST_XY(ptrToTestClass.isUnique(), true);
+        TEST_EQUALS(ptrToTestClass->getReferenceCount(), 1);
+        TEST_EQUALS(ptrToTestClass.isUnique(), true);
 
         // forcibly terminate the object, check that everything is cleaned up
         ptrToTestClass = 0;
@@ -141,7 +141,7 @@ TEST_CASE(TestPtrTo2) {
 
         // and add one more reference to check out of scope deletion
         ptrToTestClass = new TestClass ();
-        TEST_XY(ptrToTestClass->getReferenceCount(), 1);
+        TEST_EQUALS(ptrToTestClass->getReferenceCount(), 1);
     }
 
     // after exiting the scope, check that everything is cleaned up
