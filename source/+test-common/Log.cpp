@@ -1,7 +1,7 @@
 #include "Test.h"
 #include "Log.h"
 
-TEST_CASE (TestLogFilterTrace) {
+TEST_CASE(LogFilterTrace) {
     Log::Scope scope;
     ostringstream out;
 
@@ -17,7 +17,7 @@ TEST_CASE (TestLogFilterTrace) {
     TEST_EQUALS(Text (out.str ().c_str ()), Text("[TRACE] trace\n[DEBUG] debug\n[ INFO] info\n[ WARN] warn\n[ERROR] error\n"));
 }
 
-TEST_CASE (TestLogFilterDebug) {
+TEST_CASE(LogFilterDebug) {
     Log::Scope scope;
     ostringstream out;
 
@@ -32,7 +32,7 @@ TEST_CASE (TestLogFilterDebug) {
     TEST_EQUALS(Text (out.str ().c_str ()), Text("[DEBUG] debug\n[ INFO] info\n[ WARN] warn\n[ERROR] error\n"));
 }
 
-TEST_CASE (TestLogFilterInfo) {
+TEST_CASE(LogFilterInfo) {
     Log::Scope scope;
     ostringstream out;
 
@@ -47,7 +47,7 @@ TEST_CASE (TestLogFilterInfo) {
     TEST_EQUALS(Text (out.str ().c_str ()), Text("[ INFO] info\n[ WARN] warn\n[ERROR] error\n"));
 }
 
-TEST_CASE (TestLogFilterWarn) {
+TEST_CASE(LogFilterWarn) {
     Log::Scope scope;
     ostringstream out;
 
@@ -62,7 +62,7 @@ TEST_CASE (TestLogFilterWarn) {
     TEST_EQUALS(Text (out.str ().c_str ()), Text("[ WARN] warn\n[ERROR] error\n"));
 }
 
-TEST_CASE (TestLogFilterError) {
+TEST_CASE(LogFilterError) {
     Log::Scope scope;
     ostringstream out;
 
@@ -77,7 +77,7 @@ TEST_CASE (TestLogFilterError) {
     TEST_EQUALS(Text (out.str ().c_str ()), Text("[ERROR] error\n"));
 }
 
-TEST_CASE (TestLogMulti) {
+TEST_CASE(LogMulti) {
     Log::Scope scope;
     ostringstream out;
 
@@ -91,7 +91,7 @@ TEST_CASE (TestLogMulti) {
     TEST_EQUALS(Text (out.str ().c_str ()), Text("infowarnerror"));
 }
 
-TEST_CASE (TestLogScope) {
+TEST_CASE(LogScope) {
     Log::Scope scope(Log::INFO);
 
     ostringstream out;

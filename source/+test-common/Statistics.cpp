@@ -1,7 +1,7 @@
 #include "Test.h"
 #include "Statistics.h"
 
-TEST_CASE(TestStatistics) {
+TEST_CASE (Statistics) {
     //Log::Scope scope (Log::DEBUG);
 
     vector<f4> array4;

@@ -1,7 +1,7 @@
 #include "Test.h"
 #include "ReferenceCountedObject.h"
 
-TEST_CASE(TestReferenceCountedObject) {
+TEST_CASE (ReferenceCountedObject) {
     // base object constructor, addRef, and geCount
     ReferenceCountedObject  rcObject;
     TEST_EQUALS(rcObject.getReferenceCount (), 0);

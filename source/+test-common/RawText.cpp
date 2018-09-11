@@ -1,7 +1,7 @@
 #include "Test.h"
 #include "RawText.h"
 
-TEST_CASE(TestRawText) {
+TEST_CASE (RawText) {
     //Log::Scope  scope (Log::DEBUG);
 
     const char* helloWorld = "Hello World";

@@ -1,7 +1,7 @@
 #include "Test.h"
 #include "TextContainer.h"
 
-TEST_CASE(TestTextLess) {
+TEST_CASE (TextLess) {
     Text    a ("hello");
     Text    b ("there");
     Text    c ("world");
@@ -12,7 +12,7 @@ TEST_CASE(TestTextLess) {
     TEST_EQUALS (textLess (c, a), false);
 }
 
-TEST_CASE(TestTextSet) {
+TEST_CASE (TextSet) {
     TextSet ts;
     TEST_EQUALS (ts.size(), 0);
     ts.put ("Hello");
@@ -31,7 +31,7 @@ TEST_CASE(TestTextSet) {
     Log::debug () << ts << endl;
 }
 
-TEST_CASE(TestTextMap) {
+TEST_CASE (TextMap) {
     TextMap<Text>   tm;
     TEST_EQUALS (tm.size(), 0);
     tm.set ("Hello", "World");

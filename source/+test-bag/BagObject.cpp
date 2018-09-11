@@ -1,13 +1,13 @@
 #include "Test.h"
 #include "Bag.h"
 
-TEST_CASE(TestEmptyBagObject) {
+TEST_CASE(EmptyBagObject) {
     PtrToBagObject bagObject = new BagObject ();
     TEST_EQUALS(bagObject->size (), 0);
     TEST_EQUALS(bagObject->toJson (), "{}");
 }
 
-TEST_CASE(TestBagObject) {
+TEST_CASE(BagObject) {
     //Log::Scope scope (Log::TRACE);
     PtrToBagObject bagObject = (new BagObject ())
         ->put ("A", "Hello World")
@@ -36,7 +36,7 @@ TEST_CASE(TestBagObject) {
     //bagObject->put ("XX", new BagArray ());
 }
 
-TEST_CASE(TestBagConversions) {
+TEST_CASE(BagConversions) {
     //Log::Scope scope (Log::TRACE);
     PtrToBagObject bagObject = (new BagObject ())
         ->put ("A", "Hello World")
@@ -54,7 +54,7 @@ TEST_CASE(TestBagConversions) {
     TEST_EQUALS (bagObject->getText ("C"), Text::TRUE);
 }
 
-TEST_CASE(TestBag1) {
+TEST_CASE(Bag1) {
     PtrToBagArray bagArray = new BagArray ();
     bagArray->add (5);
     PtrToBagObject bagObject = new BagObject ();
@@ -64,7 +64,7 @@ TEST_CASE(TestBag1) {
     Log::debug () << bag << endl;
 }
 
-TEST_CASE(TestBag2) {
+TEST_CASE(Bag2) {
     PtrToBagArray bagArray = (new BagArray ())->add (5)->add (true)->add ("hello")->add (1.665)->add ((new BagObject ())->put ("yyy", 15));
     PtrToBagObject bagObject = (new BagObject ())->put("xxx", bagArray);
     Text bag = bagObject->toJson ();
@@ -72,7 +72,7 @@ TEST_CASE(TestBag2) {
     Log::debug () << bag << endl;
 }
 
-TEST_CASE(TestBagObjectNameTable) {
+TEST_CASE(BagObjectNameTable) {
     //Log::Scope scope (Log::TRACE);
     PtrToBagArray bagArray = new BagArray ();
     Text    def ("DEF");

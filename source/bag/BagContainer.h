@@ -1,9 +1,6 @@
 #pragma once
 
-#include "BagText.h"
-#include "BagInteger.h"
-#include "BagFloat.h"
-#include "BagBool.h"
+#include "BagConvert.h"
 
 // forward declarations of BagArray and BagObject
 class BagObject;

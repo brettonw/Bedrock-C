@@ -71,11 +71,11 @@ void testFunctionScopeRef (const PtrToTestClass& ptrToTestClass) {
 // the size of the Ptrto is the same as the size of a bare pointer - this might change if the
 // PtrTo class is modified to support derivation, which would add a virtual table pointer to the
 // class that would substantially change performance
-TEST_CASE(TestPtrTo0) {
+TEST_CASE (PtrTo0) {
     TEST_EQUALS(sizeof(PtrToTestClass), sizeof(TestClass*));
 }
 
-TEST_CASE(TestPtrTo1) {
+TEST_CASE (PtrTo1) {
     // create a false scope so the pointer will go out of scope before the program closes
     if (1) {
         PtrToDerivedTestClass ptrToDerivedTestClass = new DerivedTestClass ();
@@ -115,7 +115,7 @@ TEST_CASE(TestPtrTo1) {
     TestClass::checkPtrs ();
 }
 
-TEST_CASE(TestPtrTo2) {
+TEST_CASE (PtrTo2) {
     // create a false scope so the pointer will go out of scope before the program closes
     if (1) {
         // a basic empty object to start

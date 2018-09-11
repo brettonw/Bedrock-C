@@ -1,7 +1,7 @@
 #include "Test.h"
 #include "Copy.h"
 
-TEST_CASE(TestCopy) {
+TEST_CASE(Copy) {
     int a[] = { 0, 1, 2, 3, 4, 5, 6, 7 };
     int b[8];
     Copy<int, 8>::copy (b, a);

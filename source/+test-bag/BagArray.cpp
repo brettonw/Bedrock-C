@@ -1,13 +1,13 @@
 #include "Test.h"
 #include "Bag.h"
 
-TEST_CASE(TestEmptyBagArray) {
+TEST_CASE(EmptyBagArray) {
     PtrToBagArray bagArray = new BagArray ();
     TEST_EQUALS(bagArray->size (), 0);
     TEST_EQUALS(bagArray->toJson (), "[]");
 }
 
-TEST_CASE(TestBagArray) {
+TEST_CASE(BagArray) {
     PtrToBagArray bagArray = (new BagArray ())
         ->add ("Hello World")
         ->add (5)
@@ -28,7 +28,7 @@ TEST_CASE(TestBagArray) {
     TEST_EQUALS(bagArray->get (3)->getType (), BagType::FLOAT);
 }
 
-TEST_CASE(TestBagArraySimpleSort) {
+TEST_CASE(BagArraySimpleSort) {
     //Log::Scope scope (Log::DEBUG);
     PtrToBagArray bagArray = new BagArray ();
     bagArray->add(5);
@@ -56,7 +56,7 @@ TEST_CASE(TestBagArraySimpleSort) {
     TEST_EQUALS(sortedBagArray->get(8)->sortValue(), 0);
 }
 
-TEST_CASE(TestBagArrayFieldSort) {
+TEST_CASE(BagArrayFieldSort) {
     //Log::Scope scope (Log::DEBUG);
     PtrToBagArray bagArray = new BagArray ();
     bagArray->add((new BagObject ())->put ("x", 5));
@@ -85,7 +85,7 @@ TEST_CASE(TestBagArrayFieldSort) {
     TEST_EQUALS(sortedBagArray->getBagObject(8)->get ("x")->sortValue(), 0);
 }
 
-TEST_CASE(TestBagArrayDbSort) {
+TEST_CASE(BagArrayDbSort) {
     //Log::Scope scope (Log::DEBUG);
     PtrToBagArray bagArray = new BagArray ();
     bagArray->add((new BagObject ())->put ("x", 5)->put ("y", 1));

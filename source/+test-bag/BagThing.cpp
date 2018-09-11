@@ -1,7 +1,7 @@
 #include "Test.h"
 #include "Bag.h"
 
-TEST_CASE(TestBagThings) {
+TEST_CASE(BagThings) {
     //Log::Scope scope (Log::TRACE);
 
     PtrToBagText ptrToBagText = new BagText ("Hello World");

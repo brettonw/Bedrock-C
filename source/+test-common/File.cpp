@@ -1,7 +1,7 @@
 #include "Test.h"
 #include "File.h"
 
-TEST_CASE(TestFileExists) {
+TEST_CASE(FileExists) {
     File file ("test.txt");
     TEST_EQUALS(file.getExists (), true);
 
@@ -12,7 +12,7 @@ TEST_CASE(TestFileExists) {
     TEST_EQUALS(junk.getExists (), false);
 }
 
-TEST_CASE(TestFileBasename) {
+TEST_CASE(FileBasename) {
     File file ("./test.txt");
     TEST_EQUALS(file.getPath (), "./test.txt");
     TEST_EQUALS(file.getBasename (), "test");
@@ -32,7 +32,7 @@ TEST_CASE(TestFileBasename) {
     TEST_EQUALS(file3.getExtension (), "txt");
 }
 
-TEST_CASE(TestFileIsDirectory) {
+TEST_CASE(FileIsDirectory) {
     //Log::Scope scope (Log::DEBUG);
 
     File file ("test.txt");
@@ -51,7 +51,7 @@ TEST_CASE(TestFileIsDirectory) {
     Log::debug () << files.size () << " files in directory (" << directory.getPath () << ")" << endl;
 }
 
-TEST_CASE(TestFileRead) {
+TEST_CASE(FileRead) {
     File    file ("test.txt");
     PtrToBuffer buffer = file.read ();
     byte compare[] = { 'T', 'e', 's', 't', '\n' };
@@ -59,7 +59,7 @@ TEST_CASE(TestFileRead) {
     TEST_EQUALS(buffer->compare (compare, 5), 0);
 }
 
-TEST_CASE(TestFileReadText) {
+TEST_CASE(FileReadText) {
     File file ("test.txt");
     Text text = file.readText ();
     TEST_EQUALS(text, "Test\n");

@@ -1,11 +1,11 @@
 #include "Test.h"
 #include "Text.h"
 
-TEST_CASE(TestText0) {
+TEST_CASE (Text0) {
     TEST_EQUALS(sizeof(Text), sizeof(void*));
 }
 
-TEST_CASE(TestText1) {
+TEST_CASE (Text1) {
     const char* hello = "Hello";
     const char* world = "World";
     Text helloText = hello;
@@ -48,7 +48,7 @@ TEST_CASE(TestText1) {
     TEST_EQUALS(emptyText.isEmpty (), true);
 }
 
-TEST_CASE(TestTextFind) {
+TEST_CASE (TextFind) {
     Text longString = "This is a long string that we want to find an offset in xxx";
     TEST_EQUALS(longString.find ("long"), 10);
     TEST_EQUALS(longString.find ("short"), -1);
@@ -56,7 +56,7 @@ TEST_CASE(TestTextFind) {
     TEST_EQUALS(longString.find ("xxx"), (int) (longString.length()) - 3);
 }
 
-TEST_CASE(TestTextSubstring) {
+TEST_CASE (TextSubstring) {
     Text longString = "This is a long string";
     TEST_EQUALS(longString.substring (0), "This is a long string");
     TEST_EQUALS(longString.substring (10), "long string");
@@ -65,14 +65,14 @@ TEST_CASE(TestTextSubstring) {
     TEST_EQUALS(longString.substring (50, 4), "");
 }
 
-TEST_CASE(TestTextSplitEmpty) {
+TEST_CASE (TextSplitEmpty) {
     Text longString = "abcdefghijk";
     vector<Text> splitResult = longString.splitFirst ("/");
     TEST_EQUALS(splitResult.size (), 1);
     TEST_EQUALS(splitResult[0], longString);
 }
 
-TEST_CASE(TestTextSplit) {
+TEST_CASE (TextSplit) {
     Text longString = "xxx##yyy##zzz##aaa";
     vector<Text> splitResult = longString.splitFirst ("##");
     TEST_EQUALS(splitResult.size (), 2);
@@ -115,7 +115,7 @@ TEST_CASE(TestTextSplit) {
     TEST_EQUALS(splitResult[4].isEmpty (), true);
 }
 
-TEST_CASE(TestTextReplace) {
+TEST_CASE (TextReplace) {
     Text longString = "abcd--efgh";
     Text replaceResult = longString.replace ("--", "");
     TEST_EQUALS(replaceResult.length (), 8);

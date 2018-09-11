@@ -17,7 +17,7 @@ void testMicro (int microseconds) {
     TEST_IN_RANGE(sum, (expectedSum * 4) / 5, (expectedSum * 6) / 5);
 }
 
-TEST_CASE(TestPauseMicro) {
+TEST_CASE (PauseMicro) {
     //Log::Scope  scope (Log::DEBUG);
     testMicro (10);
     testMicro (20);
@@ -44,7 +44,7 @@ void testMilli (int milliseconds) {
     TEST_IN_RANGE(sum, (expectedSum * 4) / 5, (expectedSum * 6) / 5);
 }
 
-TEST_CASE(TestPauseMilli) {
+TEST_CASE (PauseMilli) {
     //Log::Scope  scope (Log::DEBUG);
     testMilli (10);
     testMilli (20);
