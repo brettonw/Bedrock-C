@@ -5,6 +5,7 @@
 // https://en.wikipedia.org/wiki/UTF-8
 
 TEST_CASE(TestUtf8Simple) {
+    //Log::Scope scope (Log::TRACE);
     const char* str = "Hello World";
     Utf8Decoder decoder (str);
     while (decoder.goNext ()) {

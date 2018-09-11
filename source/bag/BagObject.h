@@ -28,8 +28,8 @@ class BagObject : public BagContainer {
         }
 
     public:
-        BagObject () : BagContainer (BagThing::OBJECT_TYPE) {}
-        BagObject (const BagObject& source) : BagContainer (BagThing::OBJECT_TYPE), value (source.value) {}
+        BagObject () : BagContainer (BagType::OBJECT) {}
+        BagObject (const BagObject& source) : BagContainer (BagType::OBJECT), value (source.value) {}
         virtual ~BagObject () {}
 
         virtual Text toJson () const {
@@ -93,8 +93,8 @@ class BagObject : public BagContainer {
             PtrToBagThing ptrToBagThing = getLocal (parts[0]);
             if ((parts.size () == 2) and ptrToBagThing) {
                 switch (ptrToBagThing->getType ()) {
-                    case BagThing::OBJECT_TYPE:
-                    case BagThing::ARRAY_TYPE:
+                    case BagType::OBJECT:
+                    case BagType::ARRAY:
                         return ptr_downcast<BagContainer> (ptrToBagThing)->get (parts[1]);
                     default:
                         return (BagThing*) 0;

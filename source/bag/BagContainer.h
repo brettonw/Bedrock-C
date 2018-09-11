@@ -13,7 +13,7 @@ typedef PtrTo<BagArray> PtrToBagArray;
 
 MAKE_PTR_TO_SUB(BagContainer, BagThing) {
     public:
-        BagContainer (Type _type) : BagThing (_type) {}
+        BagContainer (BagType _type) : BagThing (_type) {}
 
         virtual f8 sortValue () const { return 0.0; };
 

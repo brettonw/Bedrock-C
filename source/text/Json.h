@@ -1,23 +1,259 @@
 #pragma once
 
 #include "Bag.h"
+#include "Utf8.h"
 
 class Json {
     private:
-        const char* input;
-        int inputLength;
-        int index;
+        const Text& input;
+        Utf8Decoder decoder;
         int lineNumber;
-        int lastLineIndex;
+        const byte* lastLine;
         bool error;
 
-        Json (const Text& _inputText) : input (_inputText), inputLength (_inputText.length ()), index (0), lineNumber (1), lastLineIndex (0), error (false) {}
+        static set<uint> bareValueStopChars;
+        static set<uint> quotedStringStopChars;
+
+        void populateSet (set<uint>& set, const char* chars) {
+            if (set.size () == 0) {
+                Utf8Decoder decoder (chars);
+                while (decoder.goNext ()) {
+                    set.insert(*decoder);
+                }
+            }
+        }
+
+        Json (const Text& _input) : input (_input), decoder (input.get()), lineNumber (1), error (false) {
+            populateSet (bareValueStopChars, " \u00a0\t\n:{}[]\",");
+            populateSet (quotedStringStopChars, "\n\"");
+
+            // start the parser
+            decoder.goNext ();
+            lastLine = decoder.getCurrent();
+        }
+
+        void onReadError (const Text& errorMessage) {
+
+            // log the messages, we only need to output the line if this is the first time the error is
+            // being reported
+            if (! error) {
+                // say where the error is
+                Log& log = Log::error ();
+                log << "Error while parsing input on line " << lineNumber << ", near: " << endl;
+
+                // find the end of the current line. note: line endings could only be '\n' because the
+                // input reader consumed the actual line endings for us and replaced them with '\n'
+                const byte* errorPosition = decoder.getCurrent();
+                while (*decoder and (*decoder != '\n')) {
+                    decoder.goNext ();
+                }
+                Text errorLine ((const char*)(lastLine), decoder.getCurrent() - lastLine);
+                log << errorLine << endl;
+
+                // build the error message, by computing a carat line, and adding the error message to it
+                Text caratLine;
+                uint spaces = errorPosition - lastLine;
+                for (uint i = 0; i < spaces; ++i) {
+                    caratLine << " ";
+                }
+                caratLine << "^";
+                log << caratLine << endl << errorMessage << endl;
+
+                // set the error state
+                error = true;
+            }
+        }
+
+        bool check () {
+            return (not error) and (*(decoder.getCurrent()));
+        }
+
+        void consumeWhiteSpace () {
+            // consume white space (space, carriage return, tab, etc.
+            while (check ()) {
+                switch (*decoder) {
+                    // tab, space, nbsp (\u00a0)
+                    case '\t': case ' ': case 0xc2a0:
+                        decoder.goNext();
+                        break;
+                    // carriage return - the file reader converts all returns to \n
+                    case '\n':
+                        decoder.goNext();
+                        ++lineNumber;
+                        lastLine = decoder.getCurrent();
+                        break;
+                    default:
+                        return;
+                }
+            }
+        }
+
+        bool expect(uint c) {
+            consumeWhiteSpace ();
+
+            // the next character should be the one we expect
+            if (check() and (*decoder == c)) {
+                decoder.goNext();
+                return true;
+            }
+            return false;
+        }
+
+        bool require (bool condition, const Text& explanation) {
+            if (! condition) {
+                onReadError (explanation + " required");
+            }
+            return condition;
+        }
+
+        bool require(uint c) {
+            return require (expect (c), Text ("'") << c << "'");
+        }
+
+        bool notIn (const set<uint>& stopChars, uint c) {
+            return (stopChars.find(c) == stopChars.end());
+        }
+
+        const byte* consumeUntilStop (const set<uint>& stopChars) {
+            const byte* start = decoder.getCurrent();
+            uint c;
+            while (check () and notIn (stopChars, (c = *decoder))) {
+                // using the escape mechanism is like a free pass for the next character, but we
+                // don't do any transformation on the substring, just return it as written
+               if (c == '\\') {
+                   decoder.goNext();
+               }
+               decoder.goNext();
+            }
+            return start;
+        }
+
+        Text readString () {
+            // " chars " | <chars>
+            const byte* start;
+            const byte* stop;
+            if (expect('"')) {
+                // digest the string, and eat the end quote
+                start = consumeUntilStop (quotedStringStopChars);
+                stop = decoder.getCurrent();
+                decoder.goNext ();
+            } else {
+                // technically, we're being sloppy allowing bare values where quoted strings are
+                // expected, but it's part of the simplified structure we support. This allows us to
+                // read valid JSON files without handling every single case.
+                start = consumeUntilStop (bareValueStopChars);
+                stop = decoder.getCurrent();
+            }
+            Text string ((const char*)(start), stop - start);
+            Log::debug () << "readString (" << string << ")" << endl;
+            return string;
+        }
+
+        PtrToBagThing readValue () {
+            // <Value> ::= <String> | <Object> | <Array>
+            consumeWhiteSpace ();
+
+            PtrToBagThing value;
+            if (check ()) {
+                switch (*decoder) {
+                    case '{':
+                        value = ptr_upcast<BagThing> (readBagObject ());
+                        break;
+
+                    case '[':
+                        value = ptr_upcast<BagThing> (readBagArray ());
+                        break;
+
+                    case '"':
+                    default:
+                        value = ptr_upcast<BagThing> (PtrToBagText (new BagText (readString ())));
+                        break;
+                }
+            }
+            return value;
+        }
+
+        bool storeValue (PtrToBagObject bagObject, Text key) {
+            // the goal here is to try to read a "value" from the input stream, and store it into the
+            // BagObject. BagObject can NOT store null values, so we have a special handling case to
+            // make sure we properly convert "null" string to null value - as distinguished from a failed
+            // read, which returns null value to start. the method returns true if a valid value was
+            // fetched from the stream, regardless of whether a null value was stored in the BagObject.
+            PtrToBagThing value = readValue ();
+            if (value) {
+                // special case for "null"
+                if (not ((value->getType() == BagType::TEXT) and (ptr_downcast<BagText> (value)->get() == "null"))) {
+                    bagObject->put (key, value);
+                }
+                return true;
+            }
+            return false;
+        }
+
+        bool readPair (PtrToBagObject bagObject) {
+            // <Pair> ::= <String> : <Value>
+            Text key = readString ();
+            return key and (key.length () > 0) and require (':') and require (storeValue (bagObject, key), "Valid value");
+        }
+
+        bool readMembers (PtrToBagObject bagObject) {
+            // <Members> ::= <Pair> | <Pair> , <Members>
+            bool result = true;
+            if (readPair (bagObject)) {
+                while (expect (',')) {
+                    result = require (readPair (bagObject), "Valid pair");
+                }
+            }
+            return result;
+        }
+
+        PtrToBagObject readBagObject () {
+            // <Object> ::= { } | { <Members> }
+            PtrToBagObject bagObject = new BagObject ();
+            return (expect('{') and readMembers (bagObject) and require('}')) ? bagObject : PtrToBagObject ();
+        }
+
+        bool storeValue (PtrToBagArray bagArray) {
+            // the goal here is to try to read a "value" from the input stream, and store it into the
+            // BagArray. BagArrays can store null values, so we have a special handling case to make
+            // sure we properly convert "null" string to null value - as distinguished from a failed
+            // read, which returns null value to start.the method returns true if a valid value was
+            // fetched from the stream (in which case it was added to the BagArray)
+            PtrToBagThing value = readValue ();
+            if (value) {
+                // special case for "null"
+                if ((value->getType() == BagType::TEXT) and (ptr_downcast<BagText> (value)->get() == "null")) {
+                    value = PtrToBagThing ();
+                }
+                bagArray->add (value);
+                return true;
+            }
+            return false;
+        }
+
+        bool readElements (PtrToBagArray bagArray) {
+            // <Elements> ::= <Value> | <Value> , <Elements>
+            bool result = true;
+            if (storeValue (bagArray)) {
+                while (expect (',')) {
+                    result = require (storeValue (bagArray), "Valid value");
+                }
+            }
+            return result;
+        }
+
+        PtrToBagArray readBagArray () {
+            // <Array> :: [ ] | [ <Elements> ]
+            PtrToBagArray bagArray = new BagArray ();
+            return (expect('[') and readElements (bagArray) and require(']')) ? bagArray : PtrToBagArray ();
+        }
 
     public:
-        static PtrToBagThing read (const Text& filename) {
-            Text text = File (filename).readText();
-            Json json (text);
-            PtrToBagThing bagThing;
-            return bagThing;
+        static PtrToBagObject readBagObject (const Text& text) {
+            return Json (text).readBagObject();
+        }
+
+        static PtrToBagArray readBagArray (const Text& text) {
+            return Json (text).readBagArray();
         }
 };

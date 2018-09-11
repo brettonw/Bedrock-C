@@ -1,6 +1,6 @@
 {
     "values": {
-        "type": "noLink",
-        "dependencies": ["common"]
+        "type": "sharedLibrary",
+        "dependencies": ["bag"]
     }
 }

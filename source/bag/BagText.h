@@ -7,7 +7,7 @@ MAKE_PTR_TO_SUB(BagText, BagThing) {
         Text value;
 
     public:
-        BagText (const Text& _value) : BagThing (BagThing::TEXT_TYPE), value (_value) {}
+        BagText (const Text& _value) : BagThing (BagType::TEXT), value (_value) {}
         virtual ~BagText () { }
         virtual Text toJson () const { return enquote (value); }
         virtual f8 sortValue () const { return strtod (value.get(), 0); };

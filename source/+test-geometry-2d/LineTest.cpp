@@ -4,7 +4,7 @@
 using namespace Geometry2d;
 
 TEST_CASE(LineTest) {
-    Log::Scope scope (Log::TRACE);
+    //Log::Scope scope (Log::TRACE);
 
     Vector2 a {0, 2};
     Vector2 b {2, 0};

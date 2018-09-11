@@ -2,6 +2,8 @@
 #include "Bag.h"
 
 TEST_CASE(TestBagThings) {
+    //Log::Scope scope (Log::TRACE);
+
     PtrToBagText ptrToBagText = new BagText ("Hello World");
     PtrToBagInteger ptrToBagInteger = new BagInteger (5);
     PtrToBagBool ptrToBagBool = new BagBool (true);
@@ -16,8 +18,8 @@ TEST_CASE(TestBagThings) {
     TEST_EQUALS(ptrToBagFloat->toJson (), "6.50000000");
     TEST_EQUALS(ptrToBagFloat->get (), 6.5);
 
-    TEST_EQUALS(ptrToBagText->getType (), BagThing::TEXT_TYPE);
-    TEST_EQUALS(ptrToBagInteger->getType (), BagThing::INTEGER_TYPE);
-    TEST_EQUALS(ptrToBagBool->getType (), BagThing::BOOL_TYPE);
-    TEST_EQUALS(ptrToBagFloat->getType (), BagThing::FLOAT_TYPE);
+    TEST_EQUALS(ptrToBagText->getType (), BagType::TEXT);
+    TEST_EQUALS(ptrToBagInteger->getType (), BagType::INTEGER);
+    TEST_EQUALS(ptrToBagBool->getType (), BagType::BOOL);
+    TEST_EQUALS(ptrToBagFloat->getType (), BagType::FLOAT);
 }

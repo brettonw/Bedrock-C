@@ -12,7 +12,7 @@ class BagArray : public BagContainer {
             return this;
         }
 
-        BagArray (const BagArray& source) : BagContainer (BagThing::ARRAY_TYPE), value (source.value) {}
+        BagArray (const BagArray& source) : BagContainer (BagType::ARRAY), value (source.value) {}
 
         template<typename SortType>
         static PtrToBagArray withSortAdapter (const PtrToBagArray& source, const SortType& sortType) {
@@ -23,8 +23,8 @@ class BagArray : public BagContainer {
         }
 
     public:
-        BagArray () : BagContainer (BagThing::ARRAY_TYPE) {}
-        BagArray (const PtrToBagArray& source) : BagContainer (BagThing::ARRAY_TYPE), value (source->value) {}
+        BagArray () : BagContainer (BagType::ARRAY) {}
+        BagArray (const PtrToBagArray& source) : BagContainer (BagType::ARRAY), value (source->value) {}
 
         virtual ~BagArray () {}
 
@@ -89,8 +89,8 @@ class BagArray : public BagContainer {
             PtrToBagThing ptrToBagThing = get (index);
             if ((parts.size () == 2) and ptrToBagThing) {
                 switch (ptrToBagThing->getType ()) {
-                    case BagThing::OBJECT_TYPE:
-                    case BagThing::ARRAY_TYPE:
+                    case BagType::OBJECT:
+                    case BagType::ARRAY:
                         return ptr_downcast<BagContainer> (ptrToBagThing)->get (parts[1]);
                     default:
                         return (BagThing*) 0;

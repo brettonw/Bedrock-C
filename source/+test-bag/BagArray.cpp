@@ -22,10 +22,10 @@ TEST_CASE(TestBagArray) {
     TEST_EQUALS(bagArray->get (3)->toJson (), "6.50000000");
     TEST_EQUALS(bagArray->get (4), (BagThing*) 0);
 
-    TEST_EQUALS(bagArray->get (0)->getType (), BagThing::TEXT_TYPE);
-    TEST_EQUALS(bagArray->get (1)->getType (), BagThing::INTEGER_TYPE);
-    TEST_EQUALS(bagArray->get (2)->getType (), BagThing::BOOL_TYPE);
-    TEST_EQUALS(bagArray->get (3)->getType (), BagThing::FLOAT_TYPE);
+    TEST_EQUALS(bagArray->get (0)->getType (), BagType::TEXT);
+    TEST_EQUALS(bagArray->get (1)->getType (), BagType::INTEGER);
+    TEST_EQUALS(bagArray->get (2)->getType (), BagType::BOOL);
+    TEST_EQUALS(bagArray->get (3)->getType (), BagType::FLOAT);
 }
 
 TEST_CASE(TestBagArraySimpleSort) {

@@ -86,6 +86,7 @@ class Utf8Decoder {
                 codePoint = ERROR;
                 next = position;
             }
+            //Log::debug () << "Utf8::goNext (" << hex (codePoint) << ")" << endl;
             return ((codePoint != END_OF_BUFFER) and (codePoint != ERROR));
         }
 

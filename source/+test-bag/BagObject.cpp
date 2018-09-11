@@ -28,10 +28,10 @@ TEST_CASE(TestBagObject) {
     TEST_EQUALS(bagObject->getBool ("C"), true);
     TEST_EQUALS(bagObject->getFloat ("DD"), 6.5);
 
-    TEST_EQUALS(bagObject->get ("A")->getType (), BagThing::TEXT_TYPE);
-    TEST_EQUALS(bagObject->get ("B")->getType (), BagThing::INTEGER_TYPE);
-    TEST_EQUALS(bagObject->get ("C")->getType (), BagThing::BOOL_TYPE);
-    TEST_EQUALS(bagObject->get ("DD")->getType (), BagThing::FLOAT_TYPE);
+    TEST_EQUALS(bagObject->get ("A")->getType (), BagType::TEXT);
+    TEST_EQUALS(bagObject->get ("B")->getType (), BagType::INTEGER);
+    TEST_EQUALS(bagObject->get ("C")->getType (), BagType::BOOL);
+    TEST_EQUALS(bagObject->get ("DD")->getType (), BagType::FLOAT);
 
     //bagObject->put ("XX", new BagArray ());
 }
