@@ -31,14 +31,13 @@ class UnitTest {
 #define     TEST_FALSE(_x) TEST_XYOP(bool (_x), false, ==)
 #define     EXPECT_FAIL(_x)                                                                                 \
             {                                                                                               \
-                bool _failed = false;                                                                       \
                 try {                                                                                       \
                     _x;                                                                                     \
+                    TEST_FALSE(#_x " succeeded (UNEXPECTED)");                                              \
                 } catch (RuntimeError& runtimeError) {                                                      \
-                    Log::debug () << "    EXPECTED: (" << runtimeError.getMessage () << ")" << endl;        \
-                    _failed = true;                                                                         \
+                    TEST_TRUE(#_x " failed (EXPECTED)");                                                    \
+                    Log::exception (runtimeError);                                                          \
                 }                                                                                           \
-                TEST_TRUE(_failed);                                                                         \
             }
 #define		TEST_CASE(name)										                                            \
 			class TEST_CASE_##name : public UnitTest {  				                                    \

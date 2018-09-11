@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Text.h"
+#include "RuntimeError.h"
 
 enum struct BagType : uint {
     TEXT,

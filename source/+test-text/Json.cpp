@@ -9,10 +9,11 @@ TEST_CASE(JsonSimple) {
 }
 
 TEST_CASE(JsonArray) {
-    Log::Scope scope (Log::TRACE);
+    //Log::Scope scope (Log::TRACE);
     PtrToBagArray bagArray = Json::readBagArray("[ \"xxx\", 1234, \"yyy\", \"abc\" ]");
     TEST_EQUALS(bagArray->getText(1), "1234");
     TEST_EQUALS(bagArray->getText(3), "abc");
+    EXPECT_FAIL(bagArray->getText(5));
 }
 
 TEST_CASE(JsonSimpleError) {
