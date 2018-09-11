@@ -7,7 +7,7 @@ MAKE_PTR_TO_SUB(BagInteger, BagThing) {
         s8 value;
 
     public:
-        BagInteger (int _value) : BagThing (BagType::INTEGER), value (_value) {}
+        BagInteger (s8 _value) : BagThing (BagType::INTEGER), value (_value) {}
         virtual ~BagInteger () {}
         virtual Text toJson () const { return Text () << value; }
         virtual f8 sortValue () const { return static_cast<f8> (value); };

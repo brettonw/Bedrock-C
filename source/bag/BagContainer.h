@@ -30,25 +30,31 @@ MAKE_PTR_TO_SUB(BagContainer, BagThing) {
             return text;
         }
 
-        #define GET_TYPE(bagType, baseType)                                                         \
+        #define GET_TYPE(bagType, bagTypeType, baseType)                                            \
             baseType get ## bagType (const Text& path) const  {                                     \
-                PtrToBagThing bagThing = get (path);                                                \
-                PtrToBag ## bagType bag ## bagType = ptr_downcast<Bag ## bagType> (bagThing);       \
-                baseType thing = bag ## bagType->get ();                                            \
-                return thing;                                                                       \
+                PtrToBagThing bagThing = convert (get (path), BagType::bagTypeType);                \
+                if (bagThing) {                                                                     \
+                    PtrToBag ## bagType bag ## bagType = ptr_downcast<Bag ## bagType> (bagThing);   \
+                    baseType thing = bag ## bagType->get ();                                        \
+                    return thing;                                                                   \
+                }                                                                                   \
+                throw RuntimeError (Text ("BagContainer: can't fetch path (") << path<< ") as (" << BagType::bagTypeType << ")"); \
             }
 
-        GET_TYPE(Text, Text);
-        GET_TYPE(Integer, s8);
-        GET_TYPE(Float, f8);
-        GET_TYPE(Bool, bool);
+        GET_TYPE(Text, TEXT, Text);
+        GET_TYPE(Integer, INTEGER, s8);
+        GET_TYPE(Float, FLOAT, f8);
+        GET_TYPE(Bool, BOOL, bool);
 
         #undef GET_TYPE
         #define GET_TYPE(bagType, baseType)                                                         \
             baseType getBag ## bagType (const Text& path) const  {                                  \
                 PtrToBagThing bagThing = get (path);                                                \
-                PtrToBag ## bagType bag ## bagType = ptr_downcast<Bag ## bagType> (bagThing);       \
-                return bag ## bagType;                                                              \
+                if (bagThing) {                                                                     \
+                    PtrToBag ## bagType bag ## bagType = ptr_downcast<Bag ## bagType> (bagThing);   \
+                    return bag ## bagType;                                                          \
+                }                                                                                   \
+                throw RuntimeError (Text ("BagContainer: can't fetch path (") << path << ")");      \
             }
 
         GET_TYPE(Array, PtrToBagArray);

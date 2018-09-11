@@ -36,6 +36,24 @@ TEST_CASE(TestBagObject) {
     //bagObject->put ("XX", new BagArray ());
 }
 
+TEST_CASE(TestBagConversions) {
+    //Log::Scope scope (Log::TRACE);
+    PtrToBagObject bagObject = (new BagObject ())
+        ->put ("A", "Hello World")
+        ->put ("B", 5)
+        ->put ("C", true)
+        ->put ("DD", 6.5)
+        ->put ("X", "1234");
+    TEST_EQUALS (bagObject->getInteger("X"), 1234);
+    TEST_EQUALS (bagObject->getFloat("X"), 1234);
+    TEST_EQUALS (bagObject->getBool("X"), true);
+    TEST_EQUALS (bagObject->getText("X"), "1234");
+    TEST_EQUALS (bagObject->getText ("B"), "5");
+    TEST_EQUALS (bagObject->getInteger ("DD"), 7);
+    TEST_EQUALS (bagObject->getText ("DD"), "6.50000000");
+    TEST_EQUALS (bagObject->getText ("C"), Text::TRUE);
+}
+
 TEST_CASE(TestBag1) {
     PtrToBagArray bagArray = new BagArray ();
     bagArray->add (5);
