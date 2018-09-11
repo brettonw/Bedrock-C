@@ -27,8 +27,8 @@ class UnitTest {
 #define     TEST_EQUALS_EPS(_x, _y, _e) { bool result_xyop = abs((_x) - (_y)) <= _e; (result_xyop ? (Log::debug () << "    PASS") : (Log::error () << "    FAIL")) << ": ((" #_x ") ~= (" #_y ")), (" << (_x) << " ~= " << (_y) << "), (delta: " << abs ((_x) - (_y)) << " < eps: " << (_e) << ")" << endl; TEST_ASSERTION(result_xyop); }
 #define     TEST_EQUALS(_x, _y) TEST_XYOP(_x, _y, ==)
 #define     TEST_NOT_EQUALS(_x, _y) TEST_XYOP(_x, _y, !=)
-#define     TEST_TRUE(_x) TEST_XYOP(_x, true, ==)
-#define     TEST_FALSE(_x) TEST_XYOP(_x, false, ==)
+#define     TEST_TRUE(_x) TEST_XYOP(bool (_x), true, ==)
+#define     TEST_FALSE(_x) TEST_XYOP(bool (_x), false, ==)
 #define     EXPECT_FAIL(_x)                                                                                 \
             {                                                                                               \
                 bool _failed = false;                                                                       \

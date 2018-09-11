@@ -80,12 +80,12 @@ class BagObject : public BagContainer {
 
         PtrToBagThing getLocal (const Text& name) {
             PtrToBagThing* handle = value.get (name);
-            return (handle) ? *handle : (BagThing*)0;
+            return (handle) ? *handle : PtrToBagThing ();
         }
 
         const PtrToBagThing getLocal (const Text& name) const {
             const PtrToBagThing* handle = value.get (name);
-            return (handle) ? *handle : (BagThing*)0;
+            return (handle) ? *handle : PtrToBagThing ();
         }
 
         virtual const PtrToBagThing get (const Text& path) const {
@@ -97,7 +97,7 @@ class BagObject : public BagContainer {
                     case BagType::ARRAY:
                         return ptr_downcast<BagContainer> (ptrToBagThing)->get (parts[1]);
                     default:
-                        return (BagThing*) 0;
+                        return PtrToBagThing ();
                 }
             }
             return ptrToBagThing;

@@ -101,7 +101,7 @@ class Json {
 
         bool require (bool condition, const Text& explanation) {
             if (! condition) {
-                onReadError (explanation + " required");
+                throw RuntimeError(Text ("Json: ") << explanation << " required");;
             }
             return condition;
         }
@@ -250,10 +250,32 @@ class Json {
 
     public:
         static PtrToBagObject readBagObject (const Text& text) {
-            return Json (text).readBagObject();
+            try {
+                Json json (text);
+                try {
+                    return json.readBagObject();
+                } catch (RuntimeError& runtimeError) {
+                    json.onReadError (runtimeError.getMessage());
+                }
+            } catch (RuntimeError& runtimeError) {
+                // this indicates a UTF read failure in the first code
+                Log::exception(runtimeError);
+            }
+            return PtrToBagObject ();
         }
 
         static PtrToBagArray readBagArray (const Text& text) {
-            return Json (text).readBagArray();
+            try {
+                Json json (text);
+                try {
+                    return json.readBagArray();
+                } catch (RuntimeError& runtimeError) {
+                    json.onReadError (runtimeError.getMessage());
+                }
+            } catch (RuntimeError& runtimeError) {
+                // this indicates a UTF read failure in the first code
+                Log::exception(runtimeError);
+            }
+            return PtrToBagArray ();
         }
 };
