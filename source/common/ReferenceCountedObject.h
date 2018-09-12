@@ -2,8 +2,15 @@
 
 #include "Common.h"
 
-class ReferenceCountedObject
-{
+class ReferenceCountedObject {
+    private:
+        uint referenceCount;
+
+        #ifndef NDEBUG
+        uint debugId;
+        static uint nextDebugId;
+        #endif
+
     public:
         ReferenceCountedObject (void){
             referenceCount = 0;
@@ -19,7 +26,7 @@ class ReferenceCountedObject
             #endif
         }
 
-virtual ~ReferenceCountedObject (void) {};
+        virtual ~ReferenceCountedObject (void) {};
 
         void addRef (void){
             referenceCount++;
@@ -32,12 +39,4 @@ virtual ~ReferenceCountedObject (void) {};
         uint getReferenceCount (void) const{
             return referenceCount;
         }
-
-    private:
-        uint referenceCount;
-
-        #ifndef NDEBUG
-        uint debugId;
-static  uint nextDebugId;
-        #endif
 };

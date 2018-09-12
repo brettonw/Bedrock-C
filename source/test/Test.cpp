@@ -7,8 +7,12 @@ TEST_CASE(ForceFailure) {
 */
 
 UnitTest* UnitTest::currentUnitTest = 0;
+BagObject* UnitTest::configurationObject;
 
 int main (int argc, char** argv) {
 	cerr << "TESTS COMPLETED SUCCESSFULLY!" << endl;
+
+	UnitTest::writeConfiguration();
+
 	return EXIT_SUCCESS;
 }

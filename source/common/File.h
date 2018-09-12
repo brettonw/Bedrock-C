@@ -116,6 +116,20 @@ MAKE_PTR_TO(File) {
             return Text (readIntoBuffer<RawText> ());
         }
 
+        void write (const char* ptr, long length) {
+            ofstream file (path, ios::out | ios::binary | ios::trunc);
+            if (file.is_open()) {
+                file.write (ptr, length);
+
+                // close the file before returning
+                file.close();
+            }
+        }
+
+        void writeText (const Text& text) {
+            write (text.get(), text.length ());
+        }
+
         static PtrToFile getExecutable () {
             #ifdef __linux
             char buffer[PATH_MAX];

@@ -91,16 +91,23 @@ class BagObject : public BagContainer {
         virtual const PtrToBagThing get (const Text& path) const {
             vector<Text> parts = path.splitFirst ("/");
             PtrToBagThing ptrToBagThing = getLocal (parts[0]);
-            if ((parts.size () == 2) and ptrToBagThing) {
-                switch (ptrToBagThing->getType ()) {
-                    case BagType::OBJECT:
-                    case BagType::ARRAY:
-                        return ptr_downcast<BagContainer> (ptrToBagThing)->get (parts[1]);
-                    default:
-                        return PtrToBagThing ();
+            if (parts.size () == 2) {
+                if (ptrToBagThing) {
+                    switch (ptrToBagThing->getType ()) {
+                        case BagType::OBJECT:
+                        case BagType::ARRAY:
+                            return ptr_downcast<BagContainer> (ptrToBagThing)->get (parts[1]);
+                        default: break;
+                    }
                 }
+                // not valid
+                return PtrToBagThing ();
             }
             return ptrToBagThing;
+        }
+
+        bool contains (const Text& name) {
+            return value.get (name);
         }
 
         /*
