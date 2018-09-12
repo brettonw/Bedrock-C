@@ -4,6 +4,9 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <fstream>
+#include <unistd.h>
+//#include <limits.h>
+
 #include "RuntimeError.h"
 #include "Buffer.h"
 
@@ -32,6 +35,17 @@ MAKE_PTR_TO(File) {
                 file.close();
             }
             return buffer;
+        }
+
+        static Text dirname (Text path, const char* separator = "/") {
+            // find the last "/"
+            int last;
+            int current = -1;
+            do  {
+                last = current;
+                current = path.find (separator, current + 1);
+            } while (current >= 0);
+            return (last >= 0) ? path.substring(0, last + 1) : path;
         }
 
     public:
@@ -70,6 +84,10 @@ MAKE_PTR_TO(File) {
             return path;
         }
 
+        PtrToFile getDirectory () const {
+            return new File (dirname (path));
+        }
+
         Text getBasename () const {
             vector<Text> components = path.split ("/");
             Text basename = components.back ();
@@ -97,6 +115,17 @@ MAKE_PTR_TO(File) {
         Text readText () const {
             return Text (readIntoBuffer<RawText> ());
         }
+
+        static PtrToFile getExecutable () {
+            #ifdef __linux
+            char buffer[PATH_MAX];
+            ssize_t length = readlink("/proc/self/exe", buffer, PATH_MAX);
+            return (length != -1) ? new File (Text (buffer, length)) : PtrToFile ();
+            #else
+            return PtrToFile ();
+            #endif
+        }
+
 
         // open, close
         // read, write

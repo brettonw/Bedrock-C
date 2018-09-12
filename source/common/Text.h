@@ -162,11 +162,13 @@ class Text {
             return append (text.get (), text.length());
         }
 
-        int find (const Text& pattern) const {
-            const char* base = get ();
-            const char* match = strstr(base, pattern.get ());
-            if (match != 0) {
-                return (match - base);
+        int find (const Text& pattern, int offset = 0) const {
+            if (static_cast<uint> (offset) < ptr->getLength ()) {
+                const char* base = get ();
+                const char* match = strstr(base + offset, pattern.get ());
+                if (match != 0) {
+                    return (match - base);
+                }
             }
             return -1;
         }
