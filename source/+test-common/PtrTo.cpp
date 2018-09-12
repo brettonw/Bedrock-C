@@ -82,7 +82,9 @@ TEST_CASE (PtrTo1) {
         TEST_EQUALS(ptrToDerivedTestClass->getReferenceCount(), 1);
 
         // a pointer to the object so we can check it after it has gone out of scope
+        #ifndef _NDEBUG_
         PtrToTestClass* atPtrTo;
+        #endif
 
         // create a scope...
         if (1) {
@@ -97,7 +99,9 @@ TEST_CASE (PtrTo1) {
             TEST_EQUALS(ptr3->getReferenceCount(), 3);
 
             // prepare to check that the memory space got zeroed after it went out of scope
+            #ifndef _NDEBUG_
             atPtrTo = &ptrToTestClass;
+            #endif
         }
 
         // confirm that the out of scope pointer got zeroed in the destructor (waves hands in fear

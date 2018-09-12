@@ -43,15 +43,15 @@ class AdafruitServoDriver : public PCA9685<DeviceType> {
         * @return this, for chaining
         */
         AdafruitServoDriver<DeviceType>*  setPulseDuration (ServoId servoId, double milliseconds) {
-            PCA9685<DeviceType>::setChannelPulseMs (servoId, milliseconds);
+            PCA9685<DeviceType>::setChannelPulseMs (static_cast<byte> (servoId), milliseconds);
 
             // if we successfully got here, then capture the pulse duration request
-            pulseDurations[servoId] = milliseconds;
+            pulseDurations[static_cast<uint>(servoId)] = milliseconds;
 
             return this;
         }
 
         double getPulseDuration (ServoId servoId) {
-            return pulseDurations[servoId];
+            return pulseDurations[static_cast<uint>(servoId)];
         }
 };

@@ -11,5 +11,8 @@
             "compilerOptions": "-Wno-psabi $compilerOptions",
             "linkerOptions": "-lpthread -lcurl"
         }
+    },
+    "tools": {
+        "cloc": "echo 'SOURCES'; wc -l `find $sourcePath -name '*.[hc]*' | grep -v '+test'`; echo 'TEST'; wc -l `find $sourcePath -name '*.[hc]*' | grep '+test'`"
     }
 }

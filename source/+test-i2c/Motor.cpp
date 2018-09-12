@@ -9,7 +9,7 @@ TEST_CASE(TestAMotor) {
 
     PtrToNullDevice device = new NullDevice ();
     PtrTo<AdafruitMotorDriver<NullDevice> > driver = new AdafruitMotorDriver<NullDevice> (device);
-    for (int i = 0; i < MOTOR_COUNT; ++i) {
+    for (byte i = 0; i < MOTOR_COUNT; ++i) {
         TEST_EQUALS(driver->getMotorSpeed (static_cast<MotorId>(i)), 0);
     }
     PtrTo<Motor<AdafruitMotorDriver<NullDevice> > > motor = new Motor<AdafruitMotorDriver<NullDevice> > (driver, MotorId::MOTOR_0);

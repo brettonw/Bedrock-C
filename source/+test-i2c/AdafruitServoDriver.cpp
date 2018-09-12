@@ -23,7 +23,7 @@ TEST_CASE(TestAdafruitServoDriver) {
         ->expect (0x00, (byte) 0x80);
 
     PtrTo<AdafruitServoDriver<TestDevice> > driver = new AdafruitServoDriver<TestDevice> (device);
-    for (int i = ServoId::SERVO_00; i <= ServoId::SERVO_15; ++i) {
+    for (byte i = static_cast<byte> (ServoId::SERVO_00); i <= static_cast<byte> (ServoId::SERVO_15); ++i) {
         TEST_EQUALS(driver->getPulseDuration (static_cast<ServoId>(i)), 0);
     }
 

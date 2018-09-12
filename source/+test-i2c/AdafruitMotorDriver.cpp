@@ -77,7 +77,7 @@ TEST_CASE(TestAdafruitMotorDriverMotor) {
         ->expect (0x25, (byte) 0x10);
 
     PtrTo<AdafruitMotorDriver<TestDevice> > driver = new AdafruitMotorDriver<TestDevice> (device);
-    for (int i = 0; i < MOTOR_COUNT; ++i) {
+    for (byte i = 0; i < MOTOR_COUNT; ++i) {
         TEST_EQUALS(driver->getMotorSpeed (static_cast<MotorId>(i)), 0);
     }
 
@@ -208,7 +208,7 @@ TEST_CASE(TestAdafruitMotorDriverStepperMotor) {
         ->expect (0x25, (byte) 0x10);
 
     PtrTo<AdafruitMotorDriver<TestDevice> > driver = new AdafruitMotorDriver<TestDevice> (device);
-    for (int i = 0; i < MOTOR_COUNT; ++i) {
+    for (byte i = 0; i < MOTOR_COUNT; ++i) {
         TEST_EQUALS(driver->getMotorSpeed (static_cast<MotorId>(i)), 0);
     }
 

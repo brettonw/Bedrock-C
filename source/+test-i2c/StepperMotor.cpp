@@ -9,7 +9,7 @@ TEST_CASE(TestStepperMotor) {
 
     PtrToNullDevice device = new NullDevice ();
     PtrTo<AdafruitMotorDriver<NullDevice> > driver = new AdafruitMotorDriver<NullDevice> (device);
-    for (int i = 0; i < MOTOR_COUNT; ++i) {
+    for (byte i = 0; i < MOTOR_COUNT; ++i) {
         TEST_EQUALS(driver->getMotorSpeed (static_cast<MotorId>(i)), 0);
     }
 
