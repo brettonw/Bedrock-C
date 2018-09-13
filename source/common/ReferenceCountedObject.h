@@ -6,7 +6,7 @@ class ReferenceCountedObject {
     private:
         uint referenceCount;
 
-        #ifndef NDEBUG
+        #ifndef _NDEBUG_
         uint debugId;
         static uint nextDebugId;
         #endif
@@ -14,14 +14,14 @@ class ReferenceCountedObject {
     public:
         ReferenceCountedObject (void){
             referenceCount = 0;
-            #ifndef NDEBUG
+            #ifndef _NDEBUG_
             debugId = ++nextDebugId;
             #endif
         }
 
         ReferenceCountedObject (const ReferenceCountedObject& object){
             referenceCount = 0;
-            #ifndef NDEBUG
+            #ifndef _NDEBUG_
             debugId = ++nextDebugId;
             #endif
         }

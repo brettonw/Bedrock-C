@@ -1,6 +1,6 @@
 #include "ReferenceCountedObject.h"
 
-#ifndef NDEBUG
+#ifndef _NDEBUG_
 unsigned int ReferenceCountedObject::nextDebugId = 0;
 #endif
 

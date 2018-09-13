@@ -22,7 +22,7 @@ class AdafruitServoDriver : public PCA9685<DeviceType> {
         double pulseDurations[SERVO_COUNT];
 
         void init () {
-            for (int i = 0; i < SERVO_COUNT; ++i) {
+            for (byte i = 0; i < SERVO_COUNT; ++i) {
                 pulseDurations[i] = 0;
             }
         }

@@ -34,7 +34,7 @@ class AdafruitMotorDriver : public PCA9685<DeviceType> {
         double speeds[MOTOR_COUNT];
 
         void stopAllMotors () {
-            for (int i = 0; i < MOTOR_COUNT; ++i) {
+            for (byte i = 0; i < MOTOR_COUNT; ++i) {
                 runMotor (static_cast<MotorId>(i), 0.0);
             }
         }

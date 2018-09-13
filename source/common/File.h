@@ -1,11 +1,18 @@
 #pragma once
 
+#ifdef __APPLE__
+#include <libproc.h>
+// libproc pulls in something that defines these values
+#undef TRUE
+#undef FALSE
+#endif
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
 #include <fstream>
 #include <unistd.h>
-//#include <limits.h>
+
 
 #include "RuntimeError.h"
 #include "Buffer.h"
@@ -131,13 +138,14 @@ MAKE_PTR_TO(File) {
         }
 
         static PtrToFile getExecutable () {
-            #ifdef __linux
             char buffer[PATH_MAX];
+            #ifdef __linux
             ssize_t length = readlink("/proc/self/exe", buffer, PATH_MAX);
-            return (length != -1) ? new File (Text (buffer, length)) : PtrToFile ();
-            #else
-            return PtrToFile ();
             #endif
+            #ifdef __APPLE__
+            int length = proc_pidpath (getpid (), buffer, PATH_MAX);
+            #endif
+            return (length != -1) ? new File (Text (buffer, length)) : PtrToFile ();
         }
 
 
