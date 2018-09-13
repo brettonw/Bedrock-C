@@ -4,10 +4,10 @@
 TEST_CASE(BoundingBall) {
     //Log::Scope scope (Log::TRACE);
     Vector2 points[] = {Vector2 {0, 0}, Vector2 {1, 0}, Vector2 {0, 1}};
-    BoundingBall<f8, 2> ball (points, 3);
+    auto ball = BoundingBall<f8, 2>::fromPoints (points, 3);
 
     TEST_EQUALS(ball.getRadius(), sqrt (2) / 2);
-    TEST_EQUALS(ball.getCount (), 3);
+    TEST_FALSE(ball.isEmpty());
     TEST_TRUE(ball.contains(Vector2({0, 0})));
     TEST_TRUE(ball.contains(Vector2({1, 0})));
     TEST_TRUE(ball.contains(Vector2({0, 1})));
