@@ -128,6 +128,21 @@ class Json {
             return start;
         }
 
+        Text readStringStrict () {
+            // " chars " | <chars>
+            const byte* start;
+            const byte* stop;
+            if (require('"')) {
+                // digest the string, and eat the end quote
+                start = consumeUntilStop (quotedStringStopChars);
+                stop = decoder.getCurrent();
+                decoder.goNext ();
+            }
+            Text string ((const char*)(start), stop - start);
+            Log::debug () << "readString (" << string << ")" << endl;
+            return string;
+        }
+
         Text readString () {
             // " chars " | <chars>
             const byte* start;
@@ -192,7 +207,7 @@ class Json {
 
         bool readPair (PtrToBagObject bagObject) {
             // <Pair> ::= <String> : <Value>
-            Text key = readString ();
+            Text key = readStringStrict ();
             return key and (key.length () > 0) and require (':') and require (storeValue (bagObject, key), "Valid value");
         }
 
