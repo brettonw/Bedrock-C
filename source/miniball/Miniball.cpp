@@ -9,7 +9,7 @@ int main (int argc, char* argv[])
 {
     typedef double ScalarType;
 
-    int dimension = 5;
+    int dimension = 3;
     int n = 1000000;
 
     // initialize random number generator
@@ -68,7 +68,7 @@ int main (int argc, char* argv[])
     //                 tiny positive numbers come from roundoff and are ok
     cout << "Relative error:\n  ";
     ScalarType suboptimality;
-    cout << miniball.relative_error (suboptimality) <<  endl;
+    cout << miniball.getRelativeError (suboptimality) <<  endl;
 
     // suboptimality: by how much does the ball fail to be the smallest
     //                enclosing ball of its support points? should be 0

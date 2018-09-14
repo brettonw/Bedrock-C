@@ -48,10 +48,10 @@ class Miniball {
 
         // data members...
         const int dimension; // dimension
+        const int dimensionPlus1;
         PointIterator pointsBegin;
         PointIterator pointsEnd;
         CoordinateAccessor coordinateAccessor;
-        const ScalarType nt0; // ScalarType(0)
 
         //...for the algorithms
         std::list<PointIterator> supportPoints;
@@ -75,16 +75,241 @@ class Miniball {
         // by how much do we allow points outside?
         ScalarType defaultTolerance;
 
-        void mtf_mb (SupportIterator n);
-        void mtf_move_to_front (SupportIterator j);
-        void pivot_mb (PointIterator n);
-        void pivot_move_to_front (PointIterator j);
-        ScalarType excess (PointIterator pointIterator) const;
-        void pop ();
-        bool push (PointIterator pointIterator);
-        ScalarType suboptimality () const;
-        void create_arrays();
-        void delete_arrays();
+        void moveToFront (SupportIterator j){
+            if (supportPointsEnd == j) {
+                supportPointsEnd++;
+            }
+            supportPoints.splice (supportPoints.begin(), supportPoints, j);
+        }
+
+        void algorithmMoveToFront (SupportIterator n){
+            // Algorithm 1: mtf_mb (L_{n-1}, B), where L_{n-1} = [L.begin, n)
+            // B: the set of forced points, defining the current ball
+            // S: the superset of support points computed by the algorithm
+            // --------------------------------------------------------------
+            // from B. Gaertner, Fast and Robust Smallest Enclosing Balls, ESA 1999,
+            // http://www.inf.ethz.ch/personal/gaertner/texts/own_work/esa99_final.pdf
+
+            //   PRE: B = S
+            assert (fsize == ssize);
+
+            supportPointsEnd = supportPoints.begin();
+            if ((fsize) == dimensionPlus1) {
+                return;
+            }
+
+            // incremental construction
+            for (SupportIterator i = supportPoints.begin(); i != n;)
+            {
+                // INV: (supportPointsEnd - supportPoints.begin() == |S|-|B|)
+                assert (std::distance (supportPoints.begin(), supportPointsEnd) == ssize - fsize);
+
+                // let i move to the next point, and j holds a reference to the last one
+                SupportIterator j = i++;
+
+                // if the point j is outside the current circle
+                if ((excess(*j) > 0) and (push(*j))) {   // B := B + p_i
+                    algorithmMoveToFront (j);            // algorithmMoveToFront (L_{i-1}, B + p_i)
+                    pop();                               // B := B - p_i
+                    moveToFront(j);
+                }
+            }
+            // POST: the range [L.begin(), supportPointsEnd) stores the set S\B
+        }
+
+        void algorithmPivot (PointIterator n) {
+            // Algorithm 2: pivot_mb (L_{n-1}), where L_{n-1} = [L.begin, n)
+            // --------------------------------------------------------------
+            // from B. Gaertner, Fast and Robust Smallest Enclosing Balls, ESA 1999,
+            // http://www.inf.ethz.ch/personal/gaertner/texts/own_work/esa99_final.pdf
+            ScalarType old_sqr_r;
+            const ScalarType* c;
+            PointIterator pivot, k;
+            ScalarType e, max_e, squaredRadius;
+            CoordinateIterator p;
+            unsigned int loops_without_progress = 0;
+            do {
+                old_sqr_r = currentSquaredRadius;
+                squaredRadius = currentSquaredRadius;
+
+                pivot = pointsBegin;
+                max_e = 0;
+                for (k = pointsBegin; k != n; ++k) {
+                    p = coordinateAccessor(k);
+                    e = -squaredRadius;
+                    c = currentCenter;
+                    for (int j = 0; j < dimension; ++j) {
+                        e += square<ScalarType>(*p++ - *c++);
+                    }
+                    if (e > max_e) {
+                        max_e = e;
+                        pivot = k;
+                    }
+                }
+
+                if ((squaredRadius < 0) or (max_e > (squaredRadius * defaultTolerance))) {
+                    // check if the pivot is already contained in the support set
+                    if (std::find(supportPoints.begin(), supportPointsEnd, pivot) == supportPointsEnd) {
+                        assert (fsize == 0);
+                        if (push (pivot)) {
+                            algorithmMoveToFront(supportPointsEnd);
+                            pop();
+                            pivotMoveToFront(pivot);
+                        }
+                    }
+                }
+                if (old_sqr_r < currentSquaredRadius) {
+                    loops_without_progress = 0;
+                } else {
+                    ++loops_without_progress;
+                }
+            } while (loops_without_progress < 2);
+        }
+
+        void pivotMoveToFront (PointIterator j){
+            supportPoints.push_front(j);
+            if (std::distance(supportPoints.begin(), supportPointsEnd) == (dimension + 2)) {
+              supportPointsEnd--;
+            }
+        }
+
+        ScalarType excess (PointIterator pointIterator) const {
+            CoordinateIterator p = coordinateAccessor(pointIterator);
+            ScalarType e = -currentSquaredRadius;
+            ScalarType* c = currentCenter;
+            for (int k=0; k<dimension; ++k){
+              e += square<ScalarType>(*p++-*c++);
+            }
+            return e;
+        }
+
+        void pop () {
+            --fsize;
+        }
+
+        bool push (PointIterator pointIterator) {
+            int i, j;
+            ScalarType eps = square<ScalarType>(std::numeric_limits<ScalarType>::epsilon());
+
+            CoordinateIterator cit = coordinateAccessor(pointIterator);
+            CoordinateIterator p = cit;
+
+            if (fsize == 0) {
+                for (i = 0; i < dimension; ++i) {
+                    q0[i] = *p++;
+                }
+                for (i = 0; i < dimension; ++i) {
+                    c[0][i] = q0[i];
+                }
+                squaredRadius[0] = 0;
+            }
+            else {
+                // this looks like it might be a linear algebra solution to the system
+                // of equations that define a ball in dimensioned space
+
+                // set v_fsize to Q_fsize
+                for (i = 0; i < dimension; ++i) {
+                    v[fsize][i] = *p++ - q0[i];
+                }
+
+                // compute the a_{fsize,i}, i < fsize
+                for (i = 1; i < fsize; ++i) {
+                    a[fsize][i] = 0;
+                    for (j = 0; j < dimension; ++j) {
+                        a[fsize][i] += v[i][j] * v[fsize][j];
+                    }
+                    a[fsize][i] *= (2 / z[i]);
+                }
+
+                // update v_fsize to Q_fsize-\bar{Q}_fsize
+                for (i = 1; i < fsize; ++i) {
+                    for (j = 0; j < dimension; ++j) {
+                        v[fsize][j] -= a[fsize][i] * v[i][j];
+                    }
+                }
+
+                // compute z_fsize
+                z[fsize] = 0;
+                for (j = 0; j < dimension; ++j) {
+                    z[fsize] += square<ScalarType> (v[fsize][j]);
+                }
+                z[fsize] *= 2;
+
+                // reject push if z_fsize too small
+                if (z[fsize] < (eps * currentSquaredRadius)) {
+                    return false;
+                }
+
+                // update c, squaredRadius
+                p=cit;
+                ScalarType e = -squaredRadius[fsize-1];
+                for (i = 0; i < dimension; ++i) {
+                    e += square<ScalarType> (*p++ - c[fsize-1][i]);
+                }
+                f[fsize] = e / z[fsize];
+
+                for (i = 0; i < dimension; ++i) {
+                    c[fsize][i] = c[fsize-1][i] + (f[fsize] * v[fsize][i]);
+                }
+                squaredRadius[fsize] = squaredRadius[fsize-1] + (e * f[fsize] / 2);
+            }
+            currentCenter = c[fsize];
+            currentSquaredRadius = squaredRadius[fsize];
+            ssize = ++fsize;
+            return true;
+        }
+
+        ScalarType getSuboptimality () const {
+            ScalarType* l = new ScalarType[dimensionPlus1];
+            ScalarType min_l = 0;
+            l[0] = ScalarType(1);
+            for (int i=ssize-1; i>0; --i) {
+              l[i] = f[i];
+              for (int k=ssize-1; k>i; --k)
+            l[i]-=a[k][i]*l[k];
+              if (l[i] < min_l) min_l = l[i];
+              l[0] -= l[i];
+            }
+            if (l[0] < min_l) min_l = l[0];
+            delete[] l;
+            if (min_l < 0)
+              return -min_l;
+            return 0;
+        }
+
+        void createArrays(){
+            // preallocate a big block of memory, and split it up over everything - this will help
+            // with cache coherency
+            int dimdim = dimension * dimensionPlus1;
+            int scalarCount = (3 * dimdim) + (3 * dimensionPlus1) + dimension;
+            int pointerCount = 3 * dimensionPlus1;
+            int bufferSize = (scalarCount * sizeof (ScalarType)) + (pointerCount * sizeof (ScalarType*));
+            char* buffer = new char[bufferSize];
+
+            ScalarType** pointerBuffer = (ScalarType**) buffer;
+            c = pointerBuffer;
+            v = c + dimensionPlus1;
+            a = v + dimensionPlus1;
+
+            ScalarType* scalarBuffer = (ScalarType*) (a + dimensionPlus1);
+
+            c = new ScalarType*[dimensionPlus1]; c[0] = scalarBuffer;
+            v = new ScalarType*[dimensionPlus1]; v[0] = c[0] + dimdim;
+            a = new ScalarType*[dimensionPlus1]; a[0] = v[0] + dimdim;
+            for (int i = 1; i < dimensionPlus1; ++i) {
+                c[i] = c[0] + (i * dimension);
+                v[i] = v[0] + (i * dimension);
+                a[i] = a[0] + (i * dimension);
+            }
+            squaredRadius = a[0] + dimdim; //new ScalarType[dimensionPlus1];
+            q0 = squaredRadius + dimensionPlus1; //new ScalarType[dimension];
+            z = q0 + dimension; //new ScalarType[dimensionPlus1];
+            f = z + dimensionPlus1; //new ScalarType[dimensionPlus1];
+        }
+
+        void deleteArrays() {
+            delete[] c;
+        }
 
     public:
         // The iterator type to go through the support points
@@ -96,10 +321,10 @@ class Miniball {
         //       through the dimension coordinates of the point
         Miniball (int dimension_, PointIterator begin, PointIterator end, CoordinateAccessor coordinateAccessor_ = CoordinateAccessor()) :
                 dimension (dimension_),
+                dimensionPlus1 (dimension_ + 1),
                 pointsBegin (begin),
                 pointsEnd (end),
                 coordinateAccessor (coordinateAccessor_),
-                nt0 (ScalarType(0)),
                 supportPoints(),
                 supportPointsEnd (supportPoints.begin()),
                 fsize(0),
@@ -116,14 +341,16 @@ class Miniball {
                 defaultTolerance (ScalarType(10) * std::numeric_limits<ScalarType>::epsilon())
         {
             assert (pointsBegin != pointsEnd);
-            create_arrays();
+            createArrays();
 
             // set initial center
-            for (int j=0; j<dimension; ++j) c[0][j] = nt0;
+            for (int j=0; j<dimension; ++j) {
+                c[0][j] = 0;
+            }
             currentCenter = c[0];
 
             // compute miniball
-            pivot_mb (pointsEnd);
+            algorithmPivot (pointsEnd);
         }
 
         // POST: returns a pointer to the first element of an array that holds
@@ -165,277 +392,37 @@ class Miniball {
         //       coefficient in the affine combination of the support points that
         //       yields the center. Ideally, this is a convex combination, and there
         //       is no negative coefficient in which case subopt is set to 0.
-        ScalarType relative_error (ScalarType& subopt) const;
+        ScalarType getRelativeError (ScalarType& subopt) const{
+            ScalarType e, max_e = 0;
+            // compute maximum absolute excess of support points
+            for (SupportPointIterator it = getSupportPointsBegin(); it != getSupportPointsEnd(); ++it) {
+                e = excess (*it);
+                if (e < 0) e = -e;
+                if (e > max_e) {
+                    max_e = e;
+                }
+            }
+            // compute maximum excess of any point
+            for (PointIterator i = pointsBegin; i != pointsEnd; ++i)
+              if ((e = excess (i)) > max_e)
+            max_e = e;
+
+            subopt = getSuboptimality();
+            assert (currentSquaredRadius > 0 or max_e == 0);
+            return (currentSquaredRadius == 0 ? 0 : max_e / currentSquaredRadius);
+        }
+
 
         // POST: return true if the relative error is at most tol, and the
         //       suboptimality is 0; the default tolerance is 10 times the
         //       coordinate type's machine epsilon
         bool is_valid () const {
             ScalarType suboptimality;
-            return ((relative_error (suboptimality) <= defaultTolerance) and (suboptimality == 0));
+            return ((getRelativeError (suboptimality) <= defaultTolerance) and (suboptimality == 0));
         }
 
         // POST: deletes dynamically allocated arrays
         ~Miniball(){
-            delete_arrays();
+            deleteArrays();
         }
 };
-
-template <typename CoordinateAccessor>
-void Miniball<CoordinateAccessor>::create_arrays()
-{
-c = new ScalarType*[dimension+1];
-v = new ScalarType*[dimension+1];
-a = new ScalarType*[dimension+1];
-for (int i=0; i<dimension+1; ++i) {
-  c[i] = new ScalarType[dimension];
-  v[i] = new ScalarType[dimension];
-  a[i] = new ScalarType[dimension];
-}
-squaredRadius = new ScalarType[dimension+1];
-q0 = new ScalarType[dimension];
-z = new ScalarType[dimension+1];
-f = new ScalarType[dimension+1];
-}
-
-template <typename CoordinateAccessor>
-void Miniball<CoordinateAccessor>::delete_arrays()
-{
-delete[] f;
-delete[] z;
-delete[] q0;
-delete[] squaredRadius;
-for (int i=0; i<dimension+1; ++i) {
-  delete[] a[i];
-  delete[] v[i];
-  delete[] c[i];
-}
-delete[] a;
-delete[] v;
-delete[] c;
-}
-
-template <typename CoordinateAccessor>
-typename Miniball<CoordinateAccessor>::ScalarType
-Miniball<CoordinateAccessor>::relative_error (ScalarType& subopt) const
-{
-ScalarType e, max_e = nt0;
-// compute maximum absolute excess of support points
-for (SupportPointIterator it = getSupportPointsBegin(); it != getSupportPointsEnd(); ++it) {
-    e = excess (*it);
-    if (e < nt0) e = -e;
-    if (e > max_e) {
-        max_e = e;
-    }
-}
-// compute maximum excess of any point
-for (PointIterator i = pointsBegin; i != pointsEnd; ++i)
-  if ((e = excess (i)) > max_e)
-max_e = e;
-
-subopt = suboptimality();
-assert (currentSquaredRadius > nt0 or max_e == nt0);
-return (currentSquaredRadius == nt0 ? nt0 : max_e / currentSquaredRadius);
-}
-
-template <typename CoordinateAccessor>
-void Miniball<CoordinateAccessor>::mtf_mb (SupportIterator n)
-{
-// Algorithm 1: mtf_mb (L_{n-1}, B), where L_{n-1} = [L.begin, n)
-// B: the set of forced points, defining the current ball
-// S: the superset of support points computed by the algorithm
-// --------------------------------------------------------------
-// from B. Gaertner, Fast and Robust Smallest Enclosing Balls, ESA 1999,
-// http://www.inf.ethz.ch/personal/gaertner/texts/own_work/esa99_final.pdf
-
-//   PRE: B = S
-assert (fsize == ssize);
-
-supportPointsEnd = supportPoints.begin();
-if ((fsize) == dimension+1) return;
-
-// incremental construction
-for (SupportIterator i = supportPoints.begin(); i != n;)
-  {
-// INV: (supportPointsEnd - supportPoints.begin() == |S|-|B|)
-assert (std::distance (supportPoints.begin(), supportPointsEnd) == ssize - fsize);
-
-SupportIterator j = i++;
-if (excess(*j) > nt0)
-  if (push(*j)) {          // B := B + p_i
-    mtf_mb (j);            // mtf_mb (L_{i-1}, B + p_i)
-    pop();                 // B := B - p_i
-    mtf_move_to_front(j);
-  }
-  }
-// POST: the range [L.begin(), supportPointsEnd) stores the set S\B
-}
-
-template <typename CoordinateAccessor>
-void Miniball<CoordinateAccessor>::mtf_move_to_front (SupportIterator j)
-{
-if (supportPointsEnd == j)
-  supportPointsEnd++;
-supportPoints.splice (supportPoints.begin(), supportPoints, j);
-}
-
-template <typename CoordinateAccessor>
-void Miniball<CoordinateAccessor>::pivot_mb (PointIterator n)
-{
-// Algorithm 2: pivot_mb (L_{n-1}), where L_{n-1} = [L.begin, n)
-// --------------------------------------------------------------
-// from B. Gaertner, Fast and Robust Smallest Enclosing Balls, ESA 1999,
-// http://www.inf.ethz.ch/personal/gaertner/texts/own_work/esa99_final.pdf
-ScalarType          old_sqr_r;
-const ScalarType*   c;
-PointIterator         pivot, k;
-ScalarType          e, max_e, squaredRadius;
-CoordinateIterator p;
-unsigned int loops_without_progress = 0;
-do {
-  old_sqr_r = currentSquaredRadius;
-  squaredRadius = currentSquaredRadius;
-
-  pivot = pointsBegin;
-  max_e = nt0;
-  for (k = pointsBegin; k != n; ++k) {
-p = coordinateAccessor(k);
-e = -squaredRadius;
-c = currentCenter;
-for (int j=0; j<dimension; ++j)
-  e += square<ScalarType>(*p++-*c++);
-if (e > max_e) {
-  max_e = e;
-  pivot = k;
-}
-  }
-
-  if ((squaredRadius < 0) or (max_e > (squaredRadius * defaultTolerance))) {
-// check if the pivot is already contained in the support set
-if (std::find(supportPoints.begin(), supportPointsEnd, pivot) == supportPointsEnd) {
-  assert (fsize == 0);
-  if (push (pivot)) {
-    mtf_mb(supportPointsEnd);
-    pop();
-    pivot_move_to_front(pivot);
-  }
-}
-  }
-  if (old_sqr_r < currentSquaredRadius)
-loops_without_progress = 0;
-  else
-++loops_without_progress;
-} while (loops_without_progress < 2);
-}
-
-template <typename CoordinateAccessor>
-void Miniball<CoordinateAccessor>::pivot_move_to_front (PointIterator j)
-{
-supportPoints.push_front(j);
-if (std::distance(supportPoints.begin(), supportPointsEnd) == (dimension + 2))
-  supportPointsEnd--;
-}
-
-template <typename CoordinateAccessor>
-inline typename Miniball<CoordinateAccessor>::ScalarType
-Miniball<CoordinateAccessor>::excess (PointIterator pointIterator) const
-{
-CoordinateIterator p = coordinateAccessor(pointIterator);
-ScalarType e = -currentSquaredRadius;
-ScalarType* c = currentCenter;
-for (int k=0; k<dimension; ++k){
-  e += square<ScalarType>(*p++-*c++);
-}
-return e;
-}
-
-template <typename CoordinateAccessor>
-void Miniball<CoordinateAccessor>::pop ()
-{
---fsize;
-}
-
-template <typename CoordinateAccessor>
-bool Miniball<CoordinateAccessor>::push (PointIterator pointIterator)
-{
-int i, j;
-ScalarType eps = square<ScalarType>(std::numeric_limits<ScalarType>::epsilon());
-
-CoordinateIterator cit = coordinateAccessor(pointIterator);
-CoordinateIterator p = cit;
-
-if (fsize==0) {
-  for (i=0; i<dimension; ++i)
-q0[i] = *p++;
-  for (i=0; i<dimension; ++i)
-c[0][i] = q0[i];
-  squaredRadius[0] = nt0;
-}
-else {
-  // set v_fsize to Q_fsize
-  for (i=0; i<dimension; ++i)
-//v[fsize][i] = p[i]-q0[i];
-v[fsize][i] = *p++-q0[i];
-
-  // compute the a_{fsize,i}, i< fsize
-  for (i=1; i<fsize; ++i) {
-a[fsize][i] = nt0;
-for (j=0; j<dimension; ++j)
-  a[fsize][i] += v[i][j] * v[fsize][j];
-a[fsize][i]*=(2/z[i]);
-  }
-
-  // update v_fsize to Q_fsize-\bar{Q}_fsize
-  for (i=1; i<fsize; ++i) {
-for (j=0; j<dimension; ++j)
-  v[fsize][j] -= a[fsize][i]*v[i][j];
-  }
-
-  // compute z_fsize
-  z[fsize]=nt0;
-  for (j=0; j<dimension; ++j)
-z[fsize] += square<ScalarType>(v[fsize][j]);
-  z[fsize]*=2;
-
-  // reject push if z_fsize too small
-  if (z[fsize]<eps*currentSquaredRadius) {
-return false;
-  }
-
-  // update c, squaredRadius
-  p=cit;
-  ScalarType e = -squaredRadius[fsize-1];
-  for (i=0; i<dimension; ++i)
-e += square<ScalarType>(*p++-c[fsize-1][i]);
-  f[fsize]=e/z[fsize];
-
-  for (i=0; i<dimension; ++i)
-c[fsize][i] = c[fsize-1][i]+f[fsize]*v[fsize][i];
-  squaredRadius[fsize] = squaredRadius[fsize-1] + e*f[fsize]/2;
-}
-currentCenter = c[fsize];
-currentSquaredRadius = squaredRadius[fsize];
-ssize = ++fsize;
-return true;
-}
-
-template <typename CoordinateAccessor>
-typename Miniball<CoordinateAccessor>::ScalarType
-Miniball<CoordinateAccessor>::suboptimality () const
-{
-ScalarType* l = new ScalarType[dimension+1];
-ScalarType min_l = nt0;
-l[0] = ScalarType(1);
-for (int i=ssize-1; i>0; --i) {
-  l[i] = f[i];
-  for (int k=ssize-1; k>i; --k)
-l[i]-=a[k][i]*l[k];
-  if (l[i] < min_l) min_l = l[i];
-  l[0] -= l[i];
-}
-if (l[0] < min_l) min_l = l[0];
-delete[] l;
-if (min_l < nt0)
-  return -min_l;
-return nt0;
-}

@@ -22,6 +22,11 @@ NumberType saturate (NumberType value) {
     return (abs (value) > 0.5) ? NumberType (signum (value)) : 0;
 }
 
+template <typename NumberType>
+NumberType square (NumberType value) {
+    return value * value;
+}
+
 // floating point comparisons
 // references:
 //   https://en.wikipedia.org/wiki/Machine_epsilon
