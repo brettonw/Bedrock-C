@@ -3,6 +3,12 @@
 #include "Bag.h"
 #include "Utf8.h"
 
+// this Json reader is loosely modeled after a JSON parser grammar from http://www.json.org, and
+// implemented for the bedrock libraries in Java (https://github.com/brettonw/Bedrock). the main
+// difference is that we ignore differences between value types (all of them will be text in their
+// internal representation), and assume the input is a well formed string representation of a
+// BagObject or BagArray in JSON-ish format
+
 class Json {
     private:
         const Text& input;
@@ -128,39 +134,32 @@ class Json {
             return start;
         }
 
-        Text readStringStrict () {
-            // " chars " | <chars>
-            const byte* start;
-            const byte* stop;
+        Text readString () {
+            // " chars "
             if (require('"')) {
                 // digest the string, and eat the end quote
-                start = consumeUntilStop (quotedStringStopChars);
-                stop = decoder.getCurrent();
+                const byte* start = consumeUntilStop (quotedStringStopChars);
+                const byte* stop = decoder.getCurrent();
                 decoder.goNext ();
+                Text string ((const char*)(start), stop - start);
+                Log::debug () << "readString (" << string << ")" << endl;
+                return string;
             }
-            Text string ((const char*)(start), stop - start);
-            Log::debug () << "readString (" << string << ")" << endl;
-            return string;
+
+            // if require fails, it will throw an exception, so this won't happen
+            return Text ();
         }
 
-        Text readString () {
-            // " chars " | <chars>
-            const byte* start;
-            const byte* stop;
-            if (expect('"')) {
-                // digest the string, and eat the end quote
-                start = consumeUntilStop (quotedStringStopChars);
-                stop = decoder.getCurrent();
-                decoder.goNext ();
-            } else {
-                // technically, we're being sloppy allowing bare values where quoted strings are
-                // expected, but it's part of the simplified structure we support. This allows us to
-                // read valid JSON files without handling every single case.
-                start = consumeUntilStop (bareValueStopChars);
-                stop = decoder.getCurrent();
-            }
+        Text readBareString () {
+            // <allowed chars>
+
+            // technically, we're being sloppy allowing some bare values that would normally have
+            // to be quoted strings, but it's part of the simplified structure we support. this
+            // allows us to read valid JSON files without handling every single pedantic case.
+            const byte* start = consumeUntilStop (bareValueStopChars);
+            const byte* stop = decoder.getCurrent();
             Text string ((const char*)(start), stop - start);
-            Log::debug () << "readString (" << string << ")" << endl;
+            Log::debug () << "readBareString (" << string << ")" << endl;
             return string;
         }
 
@@ -171,18 +170,10 @@ class Json {
             PtrToBagThing value;
             if (check ()) {
                 switch (*decoder) {
-                    case '{':
-                        value = ptr_upcast<BagThing> (readBagObject ());
-                        break;
-
-                    case '[':
-                        value = ptr_upcast<BagThing> (readBagArray ());
-                        break;
-
-                    case '"':
-                    default:
-                        value = ptr_upcast<BagThing> (PtrToBagText (new BagText (readString ())));
-                        break;
+                    case '{': value = ptr_upcast<BagThing> (readBagObject ()); break;
+                    case '[': value = ptr_upcast<BagThing> (readBagArray ()); break;
+                    case '"': value = ptr_upcast<BagThing> (PtrToBagText (new BagText (readString ()))); break;
+                    default: value = ptr_upcast<BagThing> (PtrToBagText (new BagText (readBareString ()))); break;
                 }
             }
             return value;
@@ -207,7 +198,7 @@ class Json {
 
         bool readPair (PtrToBagObject bagObject) {
             // <Pair> ::= <String> : <Value>
-            Text key = readStringStrict ();
+            Text key = readString ();
             return key and (key.length () > 0) and require (':') and require (storeValue (bagObject, key), "Valid value");
         }
 
