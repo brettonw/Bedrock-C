@@ -8,7 +8,6 @@ class BoundingBall {
         Tuple<Scalar, dimension> center;
         Scalar squaredRadius;
 
-        BoundingBall (const Tuple<Scalar, dimension>& _center) : center (_center), squaredRadius (-1) {}
 
         BoundingBall& addPoints (const Tuple<Scalar, dimension>* points, uint pointCount) {
             squaredRadius = -1;
@@ -22,7 +21,11 @@ class BoundingBall {
         }
 
     public:
-        BoundingBall (const Tuple<Scalar, dimension>& _center, Scalar radius) : center (_center), squaredRadius (radius * radius) {}
+        BoundingBall () : squaredRadius (-1) {}
+
+        BoundingBall (const Tuple<Scalar, dimension>& _center) : center (_center), squaredRadius (0) {}
+
+        BoundingBall (const Tuple<Scalar, dimension>& _center, Scalar _squaredRadius) : center (_center), squaredRadius (_squaredRadius) {}
 
         static BoundingBall fromPoints (const Tuple<Scalar, dimension>& center, const Tuple<Scalar, dimension>* points, uint pointCount) {
             return BoundingBall (center).addPoints(points, pointCount);
@@ -46,10 +49,16 @@ class BoundingBall {
             return v;
         }
 
+        // primary references:
         // https://www.inf.ethz.ch/personal/emo/PublFiles/SmallEnclDisk_LNCS555_91.pdf
         // https://people.inf.ethz.ch/gaertner/subdir/texts/own_work/esa99_final.pdf
         // https://people.inf.ethz.ch/gaertner/subdir/software/miniball.html
         // https://people.inf.ethz.ch/gaertner/subdir/software/miniball/Miniball.hpp
+
+        // also see:
+        // https://www.geometrictools.com/GTEngine/Include/Mathematics/GteMinimumAreaCircle2.h
+        // http://www.cs.uu.nl/docs/vakken/ga/slides4b.pdf
+        // http://www.stsci.edu/~RAB/Backup%20Oct%2022%202011/f_3_CalculationForWFIRSTML/Bob1.pdf
 
         /*
         Algorithm 1.
@@ -66,69 +75,65 @@ class BoundingBall {
                 END
             END
             RETURN mb
-
-
-
         */
 
         typedef list<Tuple<Scalar, dimension>> PointList;
         typedef typename PointList::iterator PointListIterator;
+        typedef typename PointList::const_iterator constPointListIterator;
 
         static BoundingBall makeBall (const PointList& boundaryPoints) {
-            int i, j;
-            Tuple<Scalar, dimension> q0;
-            Tuple<Scalar, dimension> c[dimension + 1];
-            Tuple<Scalar, dimension> v[dimension + 1];
-            Tuple<Scalar, dimension> a[dimension + 1];
-            Scalar z[dimension + 1];
-            Scalar f[dimension + 1];
-            Scalar squaredRadius[dimension + 1];
-            int fsize = boundaryPoints.size ();
-            for (int fsize = 0; fsize < boundaryPoints.size(); ++fsize) {
-                if (fsize == 0) {
-                    c[0] = q0 = boundaryPoints[0];
-                    squaredRadius[0] = 0;
-                } else {
+            uint end = boundaryPoints.size();
+            if (end > 0) {
+                uint i, j;
+                Tuple<Scalar, dimension> q0;
+                Tuple<Scalar, dimension> c[dimension + 1];
+                Tuple<Scalar, dimension> v[dimension + 1];
+                Tuple<Scalar, dimension> a[dimension + 1];
+                Scalar z[dimension + 1];
+                Scalar f[dimension + 1];
+                Scalar squaredRadius[dimension + 1];
+                constPointListIterator iter = boundaryPoints.begin ();
+                c[0] = q0 = boundaryPoints.front ();
+                squaredRadius[0] = 0;
+                for (uint fsize = 1; fsize < end; ++fsize, ++iter) {
                     // set v_fsize to Q_fsize
-                    v[fsize] = boundaryPoints[i] - q0;
+                    v[fsize] = *iter - q0;
 
                     // compute the a_{fsize,i}, i < fsize
                     for (i = 1; i < fsize; ++i) {
-                        a[fsize][i] = 0;
+                        a[fsize][static_cast<Coordinate> (i)] = (v[i] DOT v[fsize]) * (2 / z[i]);
+                        /*
+                        a[fsize][static_cast<Coordinate> (i)] = 0;
                         for (j = 0; j < dimension; ++j) {
-                            a[fsize][i] += v[i][j] * v[fsize][j];
+                            a[fsize][static_cast<Coordinate> (i)] += v[i][static_cast<Coordinate> (j)] * v[fsize][static_cast<Coordinate> (j)];
+                        a[fsize][static_cast<Coordinate> (i)] *= (2 / z[i]);
                         }
-                        a[fsize][i] *= (2 / z[i]);
+                        */
                     }
 
                     // update v_fsize to Q_fsize-\bar{Q}_fsize
                     for (i = 1; i < fsize; ++i) {
+                        v[fsize] -= a[fsize][static_cast<Coordinate> (i)] * v[i];
+                        /*
                         for (j = 0; j < dimension; ++j) {
-                            v[fsize][j] -= a[fsize][i] * v[i][j];
+                            v[fsize][static_cast<Coordinate> (j)] -= a[fsize][static_cast<Coordinate> (i)] * v[i][static_cast<Coordinate> (j)];
                         }
+                        */
                     }
 
                     // compute z_fsize
                     z[fsize] =  2 * (v[fsize].normL2Sq ());
 
-                    // reject push if z_fsize too small
-                    /*
-                    if (z[fsize] < (eps * currentSquaredRadius)) {
-                        return false;
-                    }
-                    */
-
                     // update c, squaredRadius
-                    //p=cit;
-                    Scalar e = -squaredRadius[fsize-1] + (boundaryPoints[fsize] - c[fsize - 1]).normL2Sq ();
-                    f[fsize] = e / z[fsize];
+                    Scalar excess = (*iter - c[fsize - 1]).normL2Sq () - squaredRadius[fsize-1];
+                    f[fsize] = excess / z[fsize];
 
                     c[fsize] = c[fsize-1] + (f[fsize] * v[fsize]);
-                    squaredRadius[fsize] = squaredRadius[fsize-1] + (e * f[fsize] / 2);
+                    squaredRadius[fsize] = squaredRadius[fsize-1] + (excess * f[fsize] / 2);
                 }
-                return BoundingBall (c[fsize], sqrt (squaredRadius[fsize]));
+                return BoundingBall (c[end - 1], sqrt (squaredRadius[end - 1]));
             }
-            return BoundingBall (boundaryPoints[0], 0);
+            return BoundingBall ();
         }
 
         static BoundingBall algorithmMoveToFront (PointList& points, PointListIterator stop, PointList& boundaryPoints) {
@@ -167,45 +172,6 @@ class BoundingBall {
             return algorithmMoveToFront (points, points.end(), &boundaryPoints);
         }
 
-        // also see:
-        // https://www.geometrictools.com/GTEngine/Include/Mathematics/GteMinimumAreaCircle2.h
-        // http://www.cs.uu.nl/docs/vakken/ga/slides4b.pdf
-        // http://www.stsci.edu/~RAB/Backup%20Oct%2022%202011/f_3_CalculationForWFIRSTML/Bob1.pdf
-        /*
-        static BoundingBall welzl (vector<Tuple<Scalar, dimension>>& p, vector<Tuple<Scalar, dimension>>& r) {
-            // this is a recursive function on the number of points, but maybe that could be converted to a tail recursion
-            // p is a candidate set, assumed pre-shuffled
-            // r is the set of points that are on the boundary of the current circle
-
-            // termination step
-            if ((p.size() == 0) or (r.size () >= 3)) {
-                uint rSize = r.size ();
-                if (rSize == 1) {
-                    return BoundingBall (r[0], 0);
-                }
-                if (rSize == 2) {
-                    Tuple<Scalar, dimension> delta = r[0] - r[1];
-                    return BoundingBall ((r[0] + r[1]) * 0.5, (r[0] - r[1]).length ());
-                }
-
-                // shortcut
-                Tuple<Scalar, dimension> mean = (r[0] + r[1] + r[2]) / 3;
-                return BoundingBall (mean, (r[0] - mean).length ());
-            }
-
-            // recursion step
-            Tuple<Scalar, dimension> rho = popBack(p);
-            BoundingBall bb = welzl (p, r);
-            return (bb.contains(rho)) ? bb : welzl (p, pushBack (r, rho));
-        }
-
-        static BoundingBall fromPointsWelzl (const Tuple<Scalar, dimension>* points, uint pointCount) {
-            // make the pointer into a vector
-            vector<Tuple<Scalar, dimension>> p (points, points + pointCount);
-            vector<Tuple<Scalar, dimension>> r;
-            return welzl (p, r);
-        }
-        */
 
         bool contains (const Tuple<Scalar, dimension>&point) const {
             return (point - center).normL2Sq () <= squaredRadius;
@@ -217,6 +183,10 @@ class BoundingBall {
 
         const Tuple<Scalar, dimension>& getCenter () const {
             return center;
+        }
+
+        Scalar getSquaredRadius () const {
+            return  squaredRadius;
         }
 
         Scalar getRadius () const {

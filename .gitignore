@@ -38,3 +38,7 @@
 target
 .idea
 
+# Eclipse
+.project
+.settings
+.cproject

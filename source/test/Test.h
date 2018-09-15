@@ -118,7 +118,7 @@ class UnitTest {
 						    Text module (File (__FILE__).getBasename ());                                       \
 						    int logLevel = getLogLevel (module, #name);                                         \
 						    if (logLevel >= 0) {                                                                \
-                                Log::info () << "TESTING: (" << module << ") " << #name << endl;                \
+                                Log::info () << "TEST: (" << module << ") " << #name << endl;                \
                                 {                                                                               \
                                     Log::Scope scope (static_cast<uint> (logLevel));                            \
                                     test ();				                                                    \
@@ -130,7 +130,7 @@ class UnitTest {
                                     exit (EXIT_FAILURE);                                                        \
                                 }                                                                               \
 						    } else {                                                                            \
-                                Log::info () << "SKIPPING: (" << module << ") " << #name << endl;               \
+                                Log::info () << "SKIP: (" << module << ") " << #name << endl;               \
 						    }                                                                                   \
                         } catch (RuntimeError& runtimeError) {                                                  \
                             Log::exception (runtimeError);                                                      \

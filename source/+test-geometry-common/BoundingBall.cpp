@@ -19,3 +19,13 @@ TEST_CASE(BoundingBall) {
     TEST_FALSE(ball.contains(Vector2({-2, 0})));
     TEST_EQUALS(ball.getCenter(), Vector2({0.5, 0.5}));
 }
+
+TEST_CASE(FromBoundaryPoints) {
+    Log::Scope scope (Log::TRACE);
+    BoundingBall<f8, 2>::PointList points = { Vector2 {1, 0}, Vector2 {-1, 0} };
+    Log::debug () << "Points size: " << points.size () << endl;
+    auto ball = BoundingBall<f8, 2>::makeBall (points);
+    Log::debug () << "center: " << ball.getCenter () << endl;
+    TEST_FALSE(ball.isEmpty());
+    TEST_EQUALS(ball.getRadius(), 1);
+}
