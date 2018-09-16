@@ -113,7 +113,7 @@ class Json {
         }
 
         bool require(uint c) {
-            return require (expect (c), Text ("'") << c << "'");
+            return require (expect (c), Text ("'") << char (c) << "'");
         }
 
         bool notIn (const set<uint>& stopChars, uint c) {
@@ -136,7 +136,7 @@ class Json {
 
         Text readString () {
             // " chars "
-            if (require('"')) {
+            if (expect('"')) {
                 // digest the string, and eat the end quote
                 const byte* start = consumeUntilStop (quotedStringStopChars);
                 const byte* stop = decoder.getCurrent();
@@ -207,7 +207,7 @@ class Json {
             bool result = true;
             if (readPair (bagObject)) {
                 while (expect (',')) {
-                    result = require (readPair (bagObject), "Valid pair");
+                    result = require (readPair (bagObject), "Valid pair (<String>:<Value>)");
                 }
             }
             return result;
@@ -216,7 +216,7 @@ class Json {
         PtrToBagObject readBagObject () {
             // <Object> ::= { } | { <Members> }
             PtrToBagObject bagObject = new BagObject ();
-            return (expect('{') and readMembers (bagObject) and require('}')) ? bagObject : PtrToBagObject ();
+            return (expect('{') and readMembers (bagObject) and require(expect ('}'), "Valid pair (<String>:<Value>) or '}'")) ? bagObject : PtrToBagObject ();
         }
 
         bool storeValue (PtrToBagArray bagArray) {
