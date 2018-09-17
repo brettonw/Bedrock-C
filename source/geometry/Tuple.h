@@ -10,6 +10,8 @@ enum Coordinate {
 #define DOT |
 #define CROSS ^
 
+#define ENABLE_DIMENSION(ddd) template <int dim = dimension, typename std::enable_if<dim == ddd, void>::type* = nullptr>
+
 template<typename Scalar, uint dimension>
 class Tuple {
     protected:
@@ -27,13 +29,18 @@ class Tuple {
             TupleHelper<Scalar, dimension>::fill(value, fillValue);
         }
 
-        template <int dim = dimension, typename std::enable_if<dim == 2, void>::type* = nullptr>
+        ENABLE_DIMENSION(2)
         Tuple (Scalar x, Scalar y) {
             TupleHelper<Scalar, dimension>::rcopy (value, &x);
         }
 
-        template <int dim = dimension, typename std::enable_if<dim == 3, void>::type* = nullptr>
+        ENABLE_DIMENSION(3)
         Tuple (Scalar x, Scalar y, Scalar z) {
+            TupleHelper<Scalar, dimension>::rcopy (value, &x);
+        }
+
+        ENABLE_DIMENSION(4)
+        Tuple (Scalar x, Scalar y, Scalar z, Scalar w) {
             TupleHelper<Scalar, dimension>::rcopy (value, &x);
         }
 
@@ -73,7 +80,7 @@ class Tuple {
         }
 
         // 2 dimensional tuples have a perpendicular component...
-        template <int dim = dimension, typename std::enable_if<dim == 2, void>::type* = nullptr>
+        ENABLE_DIMENSION(2)
         Tuple<Scalar, dimension> perpendicular () {
             return Tuple<Scalar, dimension> { value[Y], -(value[X]) };
         }
@@ -144,6 +151,10 @@ class Tuple {
             return static_cast<Tuple&> (multiply (*this, -1, result));
         }
 
+        Scalar operator DOT (const Tuple& right) const {
+            return TupleHelper<Scalar, dimension>::sumMult (value, right.value);
+        }
+
         // norms, measures, lengths
         // norm L-1, a.k.a. Manhattan distance
         Scalar normL1 () const {
@@ -163,9 +174,18 @@ class Tuple {
 
         // the L2 norm is what most people think of when they use a norm as a unit of measure, so
         // we define the expected names to return the L2 norm
+        Scalar normSq () const {
+            return normL2Sq ();
+        }
+
         Scalar norm () const {
             return normL2 ();
         }
+
+        Scalar lengthSq () const {
+            return normL2Sq ();
+        }
+
         Scalar length () const {
             return normL2 ();
         }
@@ -229,7 +249,6 @@ class Tuple {
         // catastrophic cancellation errors when comparing numbers that are "near" 0. see the
         // discussion of ULP-based floating point comparisons in Math.h.
 
-
 #ifndef TUPLE_COMPARISON_TYPE
 #define TUPLE_COMPARISON_TYPE 3
 #endif
@@ -281,12 +300,6 @@ class Tuple {
                     Tuple::setEpsilon (oldEpsilon);
                  }
         };
-
-
-        // dot
-        Scalar operator DOT (const Tuple& right) const {
-            return TupleHelper<Scalar, dimension>::sumMult (value, right.value);
-        }
 
         Coordinate maxCoordinate () const {
             uint maxCoordinate = 0;
@@ -352,6 +365,10 @@ Tuple<Scalar, 3> operator CROSS (const Tuple<Scalar, 3>& left, const Tuple<Scala
                               (left[Z] * right[X]) - (left[X] * right[Z]),
                               (left[X] * right[Y]) - (left[Y] * right[X]) };
 }
+
+typedef Tuple<f8, 2> Point2;
+typedef Tuple<f8, 3> Point3;
+typedef Tuple<f8, 4> Point4;
 
 typedef Tuple<f8, 2> Vector2;
 typedef Tuple<f8, 3> Vector3;

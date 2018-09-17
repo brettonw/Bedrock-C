@@ -16,7 +16,7 @@ class BoundingBall {
         BoundingBall& addPoints (const Point* points, uint pointCount) {
             squaredRadius = -1;
             for (uint i = 0; i < pointCount; ++i) {
-                Scalar squaredDelta = (points[i] - center).normL2Sq ();
+                Scalar squaredDelta = (points[i] - center).lengthSq ();
                 if (squaredDelta > squaredRadius) {
                     squaredRadius = squaredDelta;
                 }
@@ -34,8 +34,8 @@ class BoundingBall {
         static BoundingBall fromTwoPoints (const Point& a, const Point& b) {
             // in any n-dimension space, 2 points always define a ball with the center at the
             // middle of the line segment between them.
-            Point center = (a + b) * Scalar (0.5);
-            return BoundingBall (center, (a - center).normL2Sq ());
+            Point center = (a + b) / 2;
+            return BoundingBall (center, (a - center).lengthSq ());
         }
 
         static BoundingBall fromPoints (const Point& center, const Point* points, uint pointCount) {
@@ -169,7 +169,7 @@ class BoundingBall {
 
 
         bool contains (const Point&point) const {
-            return (point - center).normL2Sq () <= squaredRadius;
+            return (point - center).lengthSq () <= squaredRadius;
         }
 
         bool isEmpty () const {

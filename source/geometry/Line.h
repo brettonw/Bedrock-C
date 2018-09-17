@@ -20,13 +20,13 @@ class Line {
         }
 
         // return the shortest scalar distance from a point to the line (along a perpendicular vector)
-        template <int dim = dimension, typename std::enable_if<dim == 2, void>::type* = nullptr>
+        ENABLE_DIMENSION(2)
         Scalar distance (const Point& point) const {
             return direction CROSS (origin - point);
         }
 
         // return the shortest scalar distance from a point to the line (along a perpendicular vector)
-        template <int dim = dimension, typename std::enable_if<dim == 3, void>::type* = nullptr>
+        ENABLE_DIMENSION(3)
         Scalar distance (const Point& point) const {
             return (direction CROSS (origin - point)).norm ();
         }

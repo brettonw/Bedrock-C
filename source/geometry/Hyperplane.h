@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Tuple.h"
+#include "Line.h"
 
 template<typename Scalar, uint dimension>
 class Hyperplane {
@@ -20,13 +20,13 @@ class Hyperplane {
             return Hyperplane<Scalar, dimension> (normal, C);
         }
 
-        template <int dim = dimension, typename std::enable_if<dim == 2, void>::type* = nullptr>
+        ENABLE_DIMENSION(2)
         static Hyperplane<Scalar, dimension> fromPoints (const Point& a, const Point& b) {
             Vector normal =  (b - a).normalized ().perpendicular ();
             return fromPointNormal (a, normal);
         }
 
-        template <int dim = dimension, typename std::enable_if<dim == 3, void>::type* = nullptr>
+        ENABLE_DIMENSION(3)
         static Hyperplane<Scalar, dimension> fromPoints (const Point& a, const Point& b, const Point& c) {
             Vector normal = ((b - a) CROSS (c - a)).normalized ();
             return fromPointNormal (a, normal);
@@ -62,10 +62,16 @@ class Hyperplane {
             return Tuple<Scalar, dimension + 1> (normal, C);
         }
 
-        // return the intersection of two hyperplanes
-        Point intersect (const Hyperplane<Scalar, dimension>& line) {
-            return Point ();
+        // return the time, t, along the line, when it will intersect the hyperplane
+        Scalar intersect (const Line<Scalar, dimension>& line) const {
+            // compute the cosine of the angle between the line and the hyperplane, then check to
+            // see if that angle is ever going to reach the hyperplane (i.e. it's not effectively
+            // parallel to the hyperplane). a parallel line get's an infinite time. otherwise,
+            // compute the time along the line where the intersection will occur.
+            Scalar cosTheta = -(line.getDirection () DOT normal);
+            return (abs (cosTheta) < Vector::getEpsilon ()) ? numeric_limits<Scalar>::infinity () : distance (line.getOrigin ()) / cosTheta;
         }
 };
 
 typedef Hyperplane<f8, 2> Hyperplane2;
+typedef Hyperplane<f8, 3> Hyperplane3;

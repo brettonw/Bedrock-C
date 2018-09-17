@@ -20,15 +20,13 @@ TEST_CASE(Hyperplane2) {
     TEST_EQUALS_EPS(hyperplane.distance (Vector2 ()), sqrt (2), 1e-6);
 }
 
-/*
 TEST_CASE(Hyperplane3) {
     //Log::Scope scope (Log::TRACE);
 
-    Vector3 a;
-    Vector3 b (1, 1, 1);
-    Vector3 c (0, 0, 1);
-
-    auto   line = Line<f8, 3>::fromTwoPoints (a, b);
-    TEST_EQUALS_EPS(line.distance (c), 0.816497, 1e-6);
+    auto plane = Hyperplane3::fromPoints (Vector3 (0, 1, 0), Vector3 (1, 1, 0), Vector3 (0, 1, -1));
+    TEST_EQUALS (plane.getNormal (), Vector3 (0, 1, 0));
+    TEST_EQUALS_EPS(plane.getC (), -1, 1e-9);
+    TEST_EQUALS(plane.getHyperplane (), Vector4 (0, 1, 0, -1));
+    TEST_EQUALS_EPS (plane.distance (Vector3 ()), -1, 1e-9);
+    TEST_EQUALS_EPS (plane.intersect (Line3::fromTwoPoints(Point3 (), Point3 (1, 1, 0))), sqrt (2), 1e-9);
 }
-*/

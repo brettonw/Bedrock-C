@@ -1,6 +1,0 @@
-{
-    "values": {
-        "type": "noLink",
-        "dependencies": ["geometry-common"]
-    }
-}
