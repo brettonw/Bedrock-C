@@ -4,42 +4,50 @@
 
 template<typename Scalar, unsigned int dimension>
 class Line {
+    public:
+        typedef Tuple<Scalar, dimension> Point;
+        typedef Tuple<Scalar, dimension> Vector;
+
     private:
-        Tuple<Scalar, dimension> origin;
+        Point origin;
         Tuple<Scalar, dimension> direction;
 
     public:
-        Line (const Tuple<Scalar, dimension>& _origin, const Tuple<Scalar, dimension>& _direction) : origin (_origin), direction (_direction) {}
+        Line (const Point& _origin, const Tuple<Scalar, dimension>& _direction) : origin (_origin), direction (_direction) {}
 
-        static Line fromTwoPoints (const Tuple<Scalar, dimension>& a, const Tuple<Scalar, dimension>& b) {
+        static Line fromTwoPoints (const Point& a, const Point& b) {
             return Line<Scalar, dimension> (a, (b - a).normalized ());
         }
 
         // return the shortest scalar distance from a point to the line (along a perpendicular vector)
         template <int dim = dimension, typename std::enable_if<dim == 2, void>::type* = nullptr>
-        Scalar distance (const Tuple<Scalar, dimension>& point) const {
+        Scalar distance (const Point& point) const {
             return direction CROSS (origin - point);
         }
 
         // return the shortest scalar distance from a point to the line (along a perpendicular vector)
         template <int dim = dimension, typename std::enable_if<dim == 3, void>::type* = nullptr>
-        Scalar distance (const Tuple<Scalar, dimension>& point) const {
+        Scalar distance (const Point& point) const {
             return (direction CROSS (origin - point)).norm ();
         }
 
-        bool isOnLine (const Tuple<Scalar, dimension>& point) const {
-            return distance (point) <= Tuple<Scalar, dimension>::getEpsilon ();
+        bool isOnLine (const Point& point) const {
+            return distance (point) <= Point::getEpsilon ();
         }
 
-        Tuple<Scalar, dimension>& getOrigin () const {
+        const Point& getOrigin () const {
             return origin;
         }
 
-        Tuple<Scalar, dimension>& getDirection () const {
+        const Vector& getDirection () const {
             return direction;
         }
 
-        Tuple<Scalar, dimension> getPoint (Scalar t) {
+        Point getPoint (Scalar t) {
             return origin + (direction * t);
         }
 };
+
+typedef Line<f8, 2> Line2;
+typedef Line<f8, 3> Line3;
+

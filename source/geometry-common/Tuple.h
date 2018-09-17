@@ -10,7 +10,7 @@ enum Coordinate {
 #define DOT |
 #define CROSS ^
 
-template<typename Scalar, unsigned int dimension>
+template<typename Scalar, uint dimension>
 class Tuple {
     protected:
         Scalar  value[dimension];
@@ -27,16 +27,16 @@ class Tuple {
             TupleHelper<Scalar, dimension>::fill(value, fillValue);
         }
 
-        Tuple (const initializer_list<Scalar>& initializers) {
-            TupleHelper<Scalar, dimension>::copy (value, initializers.begin ());
-        }
-
-/*
-        Tuple (Scalar x, Scalar y, ...) {
-            Log::debug () << "Variadic constructor" << endl;
+        template <int dim = dimension, typename std::enable_if<dim == 2, void>::type* = nullptr>
+        Tuple (Scalar x, Scalar y) {
             TupleHelper<Scalar, dimension>::rcopy (value, &x);
         }
-*/
+
+        template <int dim = dimension, typename std::enable_if<dim == 3, void>::type* = nullptr>
+        Tuple (Scalar x, Scalar y, Scalar z) {
+            TupleHelper<Scalar, dimension>::rcopy (value, &x);
+        }
+
         Tuple (Scalar* source) {
             TupleHelper<Scalar, dimension>::copy (value, source);
         }
@@ -72,6 +72,12 @@ class Tuple {
             return value;
         }
 
+        // 2 dimensional tuples have a perpendicular component...
+        template <int dim = dimension, typename std::enable_if<dim == 2, void>::type* = nullptr>
+        Tuple<Scalar, dimension> perpendicular () {
+            return Tuple<Scalar, dimension> { value[Y], -(value[X]) };
+        }
+
         // add/subtract, multiply/divide by scalar, negate
         static Tuple& add (const Tuple& left, const Tuple& right, Tuple& result) {
             TupleHelper<Scalar, dimension>::add (left.value, right.value, result.value);
@@ -89,8 +95,7 @@ class Tuple {
         }
 
         static Tuple& divide (const Tuple& left, Scalar right, Tuple& result) {
-            TupleHelper<Scalar, dimension>::divide (left.value, right, result.value);
-            return result;
+            return multiply (left, 1 / right, result);;
         }
 
         static Tuple& negate (const Tuple& left, Tuple& result) {
@@ -111,7 +116,7 @@ class Tuple {
         }
 
         Tuple& operator /= (Scalar right) {
-            return static_cast<Tuple&> (divide (*this, right, *this));
+            return static_cast<Tuple&> (multiply (*this, 1 / right, *this));
         }
 
         Tuple operator + (const Tuple& right) const {
@@ -131,7 +136,7 @@ class Tuple {
 
         Tuple operator / (Scalar right) const {
             Tuple result;
-            return static_cast<Tuple&> (divide (*this, right, result));
+            return static_cast<Tuple&> (multiply (*this, 1 / right, result));
         }
 
         Tuple operator - () const {
@@ -284,9 +289,9 @@ class Tuple {
         }
 
         Coordinate maxCoordinate () const {
-            unsigned int maxCoordinate = 0;
+            uint maxCoordinate = 0;
             Scalar maxValue = abs (value[maxCoordinate]);
-            for (unsigned int coordinate = 1; coordinate < dimension; ++coordinate) {
+            for (uint coordinate = 1; coordinate < dimension; ++coordinate) {
                 Scalar newValue = abs (value[coordinate]);
                 if (newValue > maxValue) {
                     maxCoordinate = coordinate;
@@ -297,35 +302,37 @@ class Tuple {
         }
 };
 
-template<typename Scalar, unsigned int dimension>
+template<typename Scalar, uint dimension>
 Scalar Tuple<Scalar, dimension>::epsilon = 1e-6;
 
-template<typename Scalar, unsigned int dimension>
+template<typename Scalar, uint dimension>
 const Tuple<Scalar, dimension> Tuple<Scalar, dimension>::ZERO (0.0);
 
 // tuple multiplication is commutative, so we implement (left * right) by calling (right * left)
-template<typename LeftType, typename Scalar, unsigned int dimension>
+template<typename LeftType, typename Scalar, uint dimension>
 Tuple<Scalar, dimension> operator * (LeftType left, const Tuple<Scalar, dimension>& right) {
     return right * Scalar (left);
 }
 
 // ostream writer...
-template<typename Scalar, unsigned int dimension>
+template<typename Scalar, uint dimension>
 ostream& operator << (ostream& stream, const Tuple<Scalar, dimension>& tuple) {
     const char* spacer = "(";
-    for (unsigned int i = 0; i < dimension; ++i) {
+    for (uint i = 0; i < dimension; ++i) {
         stream << spacer << tuple[static_cast<Coordinate> (i)];
         spacer = ", ";
     }
     return stream << ")";
 }
 
+/*
 // 2 dimensional tuples have a perpendicular component...
 template<typename Scalar>
 static inline
 Tuple<Scalar, 2> perpendicular (const Tuple<Scalar, 2>& tuple) {
     return Tuple<Scalar, 2> { tuple[Y], -(tuple[X]) };
 }
+*/
 
 // some tuples add a cross product, in 2D it's the magnitude of the vertical vector that would
 // result from a 3D operation if the Z components were 0. In 3D, it's a vector that is

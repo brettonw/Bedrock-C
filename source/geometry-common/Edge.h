@@ -1,13 +1,23 @@
 #pragma once
 
-#include "Tuple.h"
+#include "Line.h"
 
-template<typename Scalar, unsigned int dimension>
-struct Edge {
-    Tuple<Scalar, dimension> a;
-    Tuple<Scalar, dimension> b;
+template<typename Scalar, uint dimension>
+class Edge {
+    public:
+        typedef Tuple<Scalar, dimension> Point;
 
-    Edge (void) {}
-    Edge (const Tuple<Scalar, dimension>& _a, const Tuple<Scalar, dimension>& _b) : a (_a), b (_b) {}
+        Point a;
+        Point b;
+
+        Edge (void) {}
+        Edge (const Point& _a, const Point& _b) : a (_a), b (_b) {}
+
+        Line<Scalar, dimension> getLine () const {
+            return Line<Scalar, dimension>::fromTwoPoints(a, b);
+        }
 };
+
+typedef Edge<f8, 2> Edge2;
+typedef Edge<f8, 3> Edge3;
 

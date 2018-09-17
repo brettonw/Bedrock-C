@@ -1,15 +1,19 @@
 #pragma once
 
 #include "BoundingBox.h"
+#include "Hyperplane.h"
 
 template<typename Scalar, uint dimension>
 class BoundingBall {
+    public:
+        typedef Tuple<Scalar, dimension> Point;
+        typedef Tuple<Scalar, dimension> Vector;
+
     private:
-        Tuple<Scalar, dimension> center;
+        Point center;
         Scalar squaredRadius;
 
-
-        BoundingBall& addPoints (const Tuple<Scalar, dimension>* points, uint pointCount) {
+        BoundingBall& addPoints (const Point* points, uint pointCount) {
             squaredRadius = -1;
             for (uint i = 0; i < pointCount; ++i) {
                 Scalar squaredDelta = (points[i] - center).normL2Sq ();
@@ -23,30 +27,37 @@ class BoundingBall {
     public:
         BoundingBall () : squaredRadius (-1) {}
 
-        BoundingBall (const Tuple<Scalar, dimension>& _center) : center (_center), squaredRadius (0) {}
+        BoundingBall (const Point& _center) : center (_center), squaredRadius (0) {}
 
-        BoundingBall (const Tuple<Scalar, dimension>& _center, Scalar _squaredRadius) : center (_center), squaredRadius (_squaredRadius) {}
+        BoundingBall (const Point& _center, Scalar _squaredRadius) : center (_center), squaredRadius (_squaredRadius) {}
 
-        static BoundingBall fromPoints (const Tuple<Scalar, dimension>& center, const Tuple<Scalar, dimension>* points, uint pointCount) {
+        static BoundingBall fromTwoPoints (const Point& a, const Point& b) {
+            // in any n-dimension space, 2 points always define a ball with the center at the
+            // middle of the line segment between them.
+            Point center = (a + b) * Scalar (0.5);
+            return BoundingBall (center, (a - center).normL2Sq ());
+        }
+
+        static BoundingBall fromPoints (const Point& center, const Point* points, uint pointCount) {
             return BoundingBall (center).addPoints(points, pointCount);
         }
 
-        static BoundingBall fromPoints (const Tuple<Scalar, dimension>* points, uint pointCount) {
+        static BoundingBall fromPoints (const Point* points, uint pointCount) {
             // compute the center as the middle of a bounding box (median)
             BoundingBox<Scalar, dimension> box (points, pointCount);
-            Tuple<Scalar, dimension> center = (box.getLow() + box.getHigh()) / 2;
+            Point center = (box.getLow() + box.getHigh()) / 2;
             return BoundingBall (center).addPoints(points, pointCount);
         }
 
-        static inline Tuple<Scalar, dimension> popBack (vector<Tuple<Scalar, dimension>>& v) {
-            Tuple<Scalar, dimension> t = v.back ();
-            v.pop_back();
-            return v;
+        static inline Point popBack (vector<Point>& vec) {
+            Point point = vec.back ();
+            vec.pop_back();
+            return point;
         }
 
-        static inline vector<Tuple<Scalar, dimension>>& pushBack (vector<Tuple<Scalar, dimension>>& v, Tuple<Scalar, dimension>& t) {
-            v.push_back(t);
-            return v;
+        static inline vector<Point>& pushBack (vector<Point>& vec, Point& point) {
+            vec.push_back(point);
+            return vec;
         }
 
         // primary references:
@@ -60,78 +71,62 @@ class BoundingBall {
         // http://www.cs.uu.nl/docs/vakken/ga/slides4b.pdf
         // http://www.stsci.edu/~RAB/Backup%20Oct%2022%202011/f_3_CalculationForWFIRSTML/Bob1.pdf
 
-        /*
-        Algorithm 1.
-        mtf mb(Ln, B):
-            (* returns mb(Ln, B) *)
-            mb := mb(B)
-            IF |B| = d + 1 THEN
-                RETURN mb
-            END
-            FOR i = 1 TO n DO
-                IF p[i] not in mb THEN
-                    mb := mtf mb(L[i - 1], B ∪ {p[i]})
-                    update L by moving p[i] to the front
-                END
-            END
-            RETURN mb
-        */
-
-        typedef list<Tuple<Scalar, dimension>> PointList;
+        typedef list<Point> PointList;
         typedef typename PointList::iterator PointListIterator;
         typedef typename PointList::const_iterator constPointListIterator;
 
         static BoundingBall makeBall (const PointList& boundaryPoints) {
-            uint end = boundaryPoints.size();
-            if (end > 0) {
-                uint i, j;
-                Tuple<Scalar, dimension> q0;
-                Tuple<Scalar, dimension> c[dimension + 1];
-                Tuple<Scalar, dimension> v[dimension + 1];
-                Tuple<Scalar, dimension> a[dimension + 1];
-                Scalar z[dimension + 1];
-                Scalar f[dimension + 1];
-                Scalar squaredRadius[dimension + 1];
-                constPointListIterator iter = boundaryPoints.begin ();
-                c[0] = q0 = boundaryPoints.front ();
-                squaredRadius[0] = 0;
-                for (uint fsize = 1; fsize < end; ++fsize, ++iter) {
-                    // set v_fsize to Q_fsize
-                    v[fsize] = *iter - q0;
+            // get the number of points
+            uint n = boundaryPoints.size ();
 
-                    // compute the a_{fsize,i}, i < fsize
-                    for (i = 1; i < fsize; ++i) {
-                        a[fsize][static_cast<Coordinate> (i)] = (v[i] DOT v[fsize]) * (2 / z[i]);
-                        /*
-                        a[fsize][static_cast<Coordinate> (i)] = 0;
-                        for (j = 0; j < dimension; ++j) {
-                            a[fsize][static_cast<Coordinate> (i)] += v[i][static_cast<Coordinate> (j)] * v[fsize][static_cast<Coordinate> (j)];
-                        a[fsize][static_cast<Coordinate> (i)] *= (2 / z[i]);
-                        }
-                        */
-                    }
+            // if there are no points, or too many points to distinctly define a ball, so we return
+            // an empty ball
+            if ((n == 0) or (n > (dimension + 1))) {
+                return BoundingBall ();
+            }
 
-                    // update v_fsize to Q_fsize-\bar{Q}_fsize
-                    for (i = 1; i < fsize; ++i) {
-                        v[fsize] -= a[fsize][static_cast<Coordinate> (i)] * v[i];
-                        /*
-                        for (j = 0; j < dimension; ++j) {
-                            v[fsize][static_cast<Coordinate> (j)] -= a[fsize][static_cast<Coordinate> (i)] * v[i][static_cast<Coordinate> (j)];
-                        }
-                        */
-                    }
+            // there are some points, we'll want to iterate over them, at least the first one
+            constPointListIterator iter = boundaryPoints.begin ();
+            const Point& a = *iter++;
 
-                    // compute z_fsize
-                    z[fsize] =  2 * (v[fsize].normL2Sq ());
+            // if it's only one point, return a ball with that one
+            if (n == 1) {
+                return BoundingBall (a, 0);
+            }
 
-                    // update c, squaredRadius
-                    Scalar excess = (*iter - c[fsize - 1]).normL2Sq () - squaredRadius[fsize-1];
-                    f[fsize] = excess / z[fsize];
+            // in any n-dimension space, 2 points always define a ball with the center at the
+            // middle of the line segment between them.
+            const Point& b = *iter++;
+            if (n == 2) {
+                return fromTwoPoints (a, b);
+            }
 
-                    c[fsize] = c[fsize-1] + (f[fsize] * v[fsize]);
-                    squaredRadius[fsize] = squaredRadius[fsize-1] + (excess * f[fsize] / 2);
+            // in any n-dimension space, any m = 2..n+1 points may be boundary points on a ball.
+            // (more than n+1 is obviously possible...)
+            // typical solvers create a set of linear equations using the unknown center of the
+            // ball as a component that has to be solved for.
+            // our general approach is based on the observation that n points define a hyperplane,
+            // and the center of the ball must reside on a line perpendicular to that hyperplane,
+            // with a known point at the median point of the boundary points that define the
+            // hyperplane. given two set of n points, we can solve for the intersection of two
+            // lines, or use trigonometry...
+            const Point& c = *iter++;
+            switch (dimension) {
+                case 2: {
+                    // we got here, n must be 3 - two midpoints
+                    Vector ab = (b - a).normalized ();
+                    Vector bc = (c - b).normalized ();
+                    Point abMid = (a + b) * 0.5;
+                    Point bcMid = (b + c) * 0.5;
+
+                    // define a hyperplane from the first midpoint and a perpendicular vector
+                    //Scalar C =
+                    break;
                 }
-                return BoundingBall (c[end - 1], sqrt (squaredRadius[end - 1]));
+
+                case 3:
+
+                    break;
             }
             return BoundingBall ();
         }
@@ -165,7 +160,7 @@ class BoundingBall {
             return ball;
         }
 
-        static BoundingBall makeFromAlgorithm1 (const Tuple<Scalar, dimension>* _points, uint pointCount) {
+        static BoundingBall makeFromAlgorithm1 (const Point* _points, uint pointCount) {
             // XXX TODO - randomly permute the points list
             PointList points (_points, _points + pointCount);
             PointList boundaryPoints;
@@ -173,7 +168,7 @@ class BoundingBall {
         }
 
 
-        bool contains (const Tuple<Scalar, dimension>&point) const {
+        bool contains (const Point&point) const {
             return (point - center).normL2Sq () <= squaredRadius;
         }
 
@@ -181,7 +176,7 @@ class BoundingBall {
             return squaredRadius < 0;
         }
 
-        const Tuple<Scalar, dimension>& getCenter () const {
+        const Point& getCenter () const {
             return center;
         }
 
@@ -193,3 +188,6 @@ class BoundingBall {
             return  (squaredRadius >= 0) ? sqrt (squaredRadius) : -1;
         }
 };
+
+typedef BoundingBall<f8, 2> BoundingBall2;
+typedef BoundingBall<f8, 3> BoundingBall3;
