@@ -39,32 +39,18 @@ class BoundingBall {
             return BoundingBall (center, squaredRadius);
         }
 
+        // in any n-dimension space, 2 points always define a ball with the center at the middle of
+        // the line segment between them.
         static BoundingBall fromTwoPoints (const Point& a, const Point& b) {
-            // in any n-dimension space, 2 points always define a ball with the center at the
-            // middle of the line segment between them.
             Point center = (a + b) / 2;
             return BoundingBall (center, (a - center).lengthSq ());
         }
 
-        static BoundingBall fromPoints (const Point& center, const Point* points, uint pointCount) {
+        // sometimes, you want to fix the center and then just add all the points - for instance
+        // when bounding a physical object whose center of gravity is know, but which would not be
+        // the same center as a geometric center
+        static BoundingBall fromCenterPoints (const Point& center, const Point* points, uint pointCount) {
             return BoundingBall (center).addPoints(points, pointCount);
-        }
-
-        static BoundingBall fromPoints (const Point* points, uint pointCount) {
-            // compute the center as the middle of a bounding box (median)
-            BoundingBox<Scalar, dimension> box (points, pointCount);
-            return BoundingBall (box.getCenter()).addPoints(points, pointCount);
-        }
-
-        static inline Point popBack (vector<Point>& vec) {
-            Point point = vec.back ();
-            vec.pop_back();
-            return point;
-        }
-
-        static inline vector<Point>& pushBack (vector<Point>& vec, Point& point) {
-            vec.push_back(point);
-            return vec;
         }
 
         // primary references:
@@ -83,9 +69,8 @@ class BoundingBall {
         typedef typename PointList::const_iterator constPointListIterator;
 
         ENABLE_DIMENSION(2)
-        static BoundingBall makeBall (const PointList& boundaryPoints) {
-            constPointListIterator iter = boundaryPoints.begin ();
-            switch (boundaryPoints.size ()) {
+        static BoundingBall fromBoundaryPoints (const Point* boundaryPoints, uint boundaryPointCount) {
+            switch (boundaryPointCount) {
                 case 0:
                 default: {
                     // no points, or the ball is over-specified - return an empty ball
@@ -93,21 +78,19 @@ class BoundingBall {
                 }
                 case 1: {
                     // only one point is a zero-sized ball at that point
-                    return BoundingBall (*iter);
+                    return BoundingBall (boundaryPoints[0]);
                 }
                 case 2: {
                     // 2 points always define a ball with the center at the middle of the line
                     // segment between them
-                    const Point& a = *iter++;
-                    const Point& b = *iter;
-                    return fromTwoPoints (a, b);
+                    return fromTwoPoints (boundaryPoints[0], boundaryPoints[1]);
                 }
                 case 3: {
                     // define a hyperplane using the midpoint and direction of a-b, and a line using
                     // the midpoint of b-c and it's perpendicular direction
-                    const Point& a = *iter++;
-                    const Point& b = *iter++;
-                    const Point& c = *iter;
+                    const Point& a = boundaryPoints[0];
+                    const Point& b = boundaryPoints[1];
+                    const Point& c = boundaryPoints[2];
                     auto hyperplane = Hyperplane2::fromPointNormal ((a + b) / 2, b - a);
                     Line2 line ((b + c) / 2, (c - b).perpendicular ());
 
@@ -117,6 +100,7 @@ class BoundingBall {
                         Point center = line.pointAt (t);
                         return BoundingBall (center, (a - center).lengthSq ());
                     } else {
+                        // the points are collinear, or two of the points are equivalent
                         // XXX do some work to figure out which point is collinear and exlude it
                     }
                 }
@@ -125,9 +109,8 @@ class BoundingBall {
         }
 
         ENABLE_DIMENSION(3)
-        static BoundingBall makeBall (const PointList& boundaryPoints) {
-            constPointListIterator iter = boundaryPoints.begin ();
-            switch (boundaryPoints.size ()) {
+        static BoundingBall fromBoundaryPoints (const Point* boundaryPoints, uint boundaryPointCount) {
+            switch (boundaryPointCount) {
                 case 0:
                 default: {
                     // no points, or the ball is over-specified - return an empty ball
@@ -135,14 +118,12 @@ class BoundingBall {
                 }
                 case 1: {
                     // only one point is a zero-sized ball at that point
-                    return BoundingBall (*iter);
+                    return BoundingBall (boundaryPoints[0]);
                 }
                 case 2: {
                     // 2 points always define a ball with the center at the middle of the line
                     // segment between them
-                    const Point& a = *iter++;
-                    const Point& b = *iter;
-                    return fromTwoPoints (a, b);
+                    return fromTwoPoints (boundaryPoints[0], boundaryPoints[1]);
                 }
                 case 3: {
                     return BoundingBall ();
@@ -153,8 +134,9 @@ class BoundingBall {
             }
         }
 
-        static BoundingBall algorithmMoveToFront (PointList& points, PointListIterator stop, PointList& boundaryPoints) {
-            BoundingBall ball = makeBall (boundaryPoints);
+        static BoundingBall algorithmMoveToFront (PointList& points, PointListIterator stop, vector<Point>& boundaryPoints) {
+            BoundingBall ball = fromBoundaryPoints (boundaryPoints.data(), boundaryPoints.size());
+
             // see the paper for a proof that this is the limit of recursion
             if (boundaryPoints.size() != (dimension + 1)) {
                 for (PointListIterator iter = points.begin (); iter != stop;) {
@@ -182,10 +164,11 @@ class BoundingBall {
             return ball;
         }
 
-        static BoundingBall makeFromAlgorithm1 (const Point* _points, uint pointCount) {
+        static BoundingBall fromPoints (const Point* _points, uint pointCount) {
+            // make a copy of the points that we can shuffle
             // XXX TODO - randomly permute the points list
             PointList points (_points, _points + pointCount);
-            PointList boundaryPoints;
+            vector<Point> boundaryPoints;
             return algorithmMoveToFront (points, points.end(), boundaryPoints);
         }
 

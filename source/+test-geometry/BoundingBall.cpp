@@ -22,9 +22,7 @@ TEST_CASE(BoundingBall) {
 
 TEST_CASE(From2BoundaryPoints) {
     //Log::Scope scope (Log::TRACE);
-    BoundingBall2::PointList points = { Vector2 (1, 0), Vector2 (-1, 0) };
-    Log::debug () << "Points size: " << points.size () << endl;
-    auto ball = BoundingBall2::makeBall (points);
+    auto ball = BoundingBall2::fromTwoPoints(Vector2 (1, 0), Vector2 (-1, 0));
     Log::debug () << "center: " << ball.getCenter () << endl;
     TEST_FALSE(ball.isEmpty());
     TEST_EQUALS(ball.getRadius(), 1);
@@ -32,9 +30,9 @@ TEST_CASE(From2BoundaryPoints) {
 
 TEST_CASE(From3BoundaryPoints) {
     //Log::Scope scope (Log::TRACE);
-    BoundingBall2::PointList points = { Vector2 (-3, 4), Vector2 (4, 5), Vector2(1, -4) };
+    vector<Point2> points = { Vector2 (-3, 4), Vector2 (4, 5), Vector2(1, -4) };
     Log::debug () << "Points size: " << points.size () << endl;
-    auto ball = BoundingBall2::makeBall (points);
+    auto ball = BoundingBall2::fromBoundaryPoints (points.data (), points.size ());
     Log::debug () << "center: " << ball.getCenter () << endl;
     TEST_FALSE(ball.isEmpty());
     TEST_EQUALS(ball.getCenter(), Vector2 (1, 1));
@@ -63,8 +61,8 @@ TEST_CASE(From3BoundaryPointsRandom) {
         Point2 c = (Point2 (cos (alpha), sin (alpha)) * radius) + center;
 
         // now compute the bounding ball
-        BoundingBall2::PointList points = {a, b, c };
-        auto ball = BoundingBall2::makeBall (points);
+        vector<Point2> points = {a, b, c };
+        auto ball = BoundingBall2::fromBoundaryPoints(points.data (), points.size ());
 
         // and confirm our result matches the setup
         TEST_FALSE(ball.isEmpty());
@@ -95,10 +93,10 @@ TEST_CASE(Algorithm1) {
         Point2 b = (Point2 (cos (alpha), sin (alpha)) * radius) + center;
         alpha = dist (twister) * M_PI * 2;
         Point2 c = (Point2 (cos (alpha), sin (alpha)) * radius) + center;
-        BoundingBall2::PointList points = {a, b, c};
+        vector<Point2> points = {a, b, c};
 
         // make a ball from these three points - to be sure we aren't dealing with numerical error
-        auto generator = BoundingBall2::makeBall(points);
+        auto generator = BoundingBall2::fromBoundaryPoints(points.data(), points.size());
         if (generator.getRadius () >= 0) {
             Log::debug () << "Generator: " << generator << endl;
 
@@ -108,12 +106,11 @@ TEST_CASE(Algorithm1) {
             for (int j = 0; j < 7; ++j) {
                 alpha = dist (twister) * M_PI * 2;
                 Point2 d = (Vector2 (cos (alpha), sin (alpha)) * (generator.getRadius() * (dist (twister) * 0.99))) + generator.getCenter();
-                points.push_front (d);
+                points.push_back(d);
             }
 
             // compute the bounding ball
-            BoundingBall2::PointList boundaryPoints;
-            auto ball = BoundingBall2::algorithmMoveToFront (points, points.end(), boundaryPoints);
+            auto ball = BoundingBall2::fromPoints (points.data (), points.size ());
 
             // and confirm our result is the same or better than the setup
             TEST_FALSE(ball.isEmpty());
@@ -123,18 +120,10 @@ TEST_CASE(Algorithm1) {
             Log::debug () << ball << endl;
             Log::debug () << "a: " << a << ", b: " << b << ", c: " << c << endl;
             Log::debug () << "Points (in important order):" << endl;
-            for (BoundingBall2::PointListIterator iter = points.begin (); iter != points.end (); ++iter) {
+            for (vector<Point2>::iterator iter = points.begin (); iter != points.end (); ++iter) {
                 Log::debug () << "  Point: " << *iter << ", Delta: " << (*iter - ball.getCenter ()).length () << endl;
                 TEST_TRUE (ball.contains(*iter));
             }
-
-            // compare the center to one generated from a bounding box approach
-            vector<Point2> ptsvec (points.begin (), points.end ());
-            auto boxBall = BoundingBall2::fromPoints(ptsvec.data(), ptsvec.size());
-            Log::debug () << "Compared to bounding box approach, delta center: " <<
-                    (ball.getCenter () - boxBall.getCenter ()).length () <<
-                    ", delta radius: " << (100 * (ball.getRadius () - boxBall.getRadius ()) / boxBall.getRadius ()) <<
-                    "%" << endl;
 
             Log::debug () << endl;
         } else {
