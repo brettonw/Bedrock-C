@@ -338,15 +338,6 @@ ostream& operator << (ostream& stream, const Tuple<Scalar, dimension>& tuple) {
     return stream << ")";
 }
 
-/*
-// 2 dimensional tuples have a perpendicular component...
-template<typename Scalar>
-static inline
-Tuple<Scalar, 2> perpendicular (const Tuple<Scalar, 2>& tuple) {
-    return Tuple<Scalar, 2> { tuple[Y], -(tuple[X]) };
-}
-*/
-
 // some tuples add a cross product, in 2D it's the magnitude of the vertical vector that would
 // result from a 3D operation if the Z components were 0. In 3D, it's a vector that is
 // perpendicular to the two provided vectors, whose magnitude is the area of the parallelogram

@@ -13,6 +13,8 @@ class BoundingBall {
         Point center;
         Scalar squaredRadius;
 
+        BoundingBall (const Point& _center, Scalar _squaredRadius) : center (_center), squaredRadius (_squaredRadius) {}
+
         BoundingBall& addPoints (const Point* points, uint pointCount) {
             squaredRadius = -1;
             for (uint i = 0; i < pointCount; ++i) {
@@ -29,7 +31,13 @@ class BoundingBall {
 
         BoundingBall (const Point& _center) : center (_center), squaredRadius (0) {}
 
-        BoundingBall (const Point& _center, Scalar _squaredRadius) : center (_center), squaredRadius (_squaredRadius) {}
+        static BoundingBall fromCenterRadius (const Point& center, Scalar radius) {
+            return BoundingBall (center, radius * radius);
+        }
+
+        static BoundingBall fromCenterSquaredRadius (const Point& center, Scalar squaredRadius) {
+            return BoundingBall (center, squaredRadius);
+        }
 
         static BoundingBall fromTwoPoints (const Point& a, const Point& b) {
             // in any n-dimension space, 2 points always define a ball with the center at the
@@ -45,8 +53,7 @@ class BoundingBall {
         static BoundingBall fromPoints (const Point* points, uint pointCount) {
             // compute the center as the middle of a bounding box (median)
             BoundingBox<Scalar, dimension> box (points, pointCount);
-            Point center = (box.getLow() + box.getHigh()) / 2;
-            return BoundingBall (center).addPoints(points, pointCount);
+            return BoundingBall (box.getCenter()).addPoints(points, pointCount);
         }
 
         static inline Point popBack (vector<Point>& vec) {
@@ -106,7 +113,7 @@ class BoundingBall {
 
                     // compute the intersection of the line with the plane, and Bob's your uncle
                     f8 t = hyperplane.intersect (line);
-                    if (not isinf (t)) {
+                    if (not std::isinf (t)) {
                         Point center = line.pointAt (t);
                         return BoundingBall (center, (a - center).lengthSq ());
                     } else {
@@ -114,6 +121,7 @@ class BoundingBall {
                     }
                 }
             }
+            return BoundingBall ();
         }
 
         ENABLE_DIMENSION(3)
@@ -183,7 +191,7 @@ class BoundingBall {
 
 
         bool contains (const Point&point) const {
-            return (point - center).lengthSq () <= squaredRadius;
+            return (point - center).lengthSq () <= (squaredRadius + Point::getEpsilon());
         }
 
         bool isEmpty () const {
@@ -202,6 +210,12 @@ class BoundingBall {
             return  (squaredRadius >= 0) ? sqrt (squaredRadius) : -1;
         }
 };
+
+// ostream writer...
+template<typename Scalar, uint dimension>
+ostream& operator << (ostream& stream, const BoundingBall<Scalar, dimension>& ball) {
+    return stream << "center: " << ball.getCenter() << ", radius: " << ball.getRadius();
+}
 
 typedef BoundingBall<f8, 2> BoundingBall2;
 typedef BoundingBall<f8, 3> BoundingBall3;

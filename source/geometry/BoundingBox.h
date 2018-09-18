@@ -55,7 +55,17 @@ class BoundingBox {
         const Point& getHigh () const {
             return high;
         }
+
+        Point getCenter () const {
+            return (low + high) / 2;
+        }
 };
+
+// ostream writer...
+template<typename Scalar, uint dimension>
+ostream& operator << (ostream& stream, const BoundingBox<Scalar, dimension>& box) {
+    return stream << "low: " << box.getLow() << ", high: " <<box.getHigh();
+}
 
 typedef BoundingBox<f8, 2> BoundingBox2;
 typedef BoundingBox<f8, 3> BoundingBox3;

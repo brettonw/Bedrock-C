@@ -284,4 +284,19 @@ class Json {
             }
             return PtrToBagArray ();
         }
+
+        static PtrToBagThing readBagThing (const Text& text) {
+            try {
+                Json json (text);
+                try {
+                    return json.readValue();
+                } catch (RuntimeError& runtimeError) {
+                    json.onReadError (runtimeError.getMessage());
+                }
+            } catch (RuntimeError& runtimeError) {
+                // this indicates a UTF read failure in the first code
+                Log::exception(runtimeError);
+            }
+            return PtrToBagThing ();
+        }
 };
