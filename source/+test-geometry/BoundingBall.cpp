@@ -21,7 +21,7 @@ TEST_CASE(BoundingBall) {
 }
 
 TEST_CASE(From2BoundaryPoints) {
-    Log::Scope scope (Log::TRACE);
+    //Log::Scope scope (Log::TRACE);
     BoundingBall2::PointList points = { Vector2 (1, 0), Vector2 (-1, 0) };
     Log::debug () << "Points size: " << points.size () << endl;
     auto ball = BoundingBall2::makeBall (points);
@@ -31,7 +31,7 @@ TEST_CASE(From2BoundaryPoints) {
 }
 
 TEST_CASE(From3BoundaryPoints) {
-    Log::Scope scope (Log::TRACE);
+    //Log::Scope scope (Log::TRACE);
     BoundingBall2::PointList points = { Vector2 (-3, 4), Vector2 (4, 5), Vector2(1, -4) };
     Log::debug () << "Points size: " << points.size () << endl;
     auto ball = BoundingBall2::makeBall (points);
@@ -39,4 +39,36 @@ TEST_CASE(From3BoundaryPoints) {
     TEST_FALSE(ball.isEmpty());
     TEST_EQUALS(ball.getCenter(), Vector2 (1, 1));
     TEST_EQUALS(ball.getRadius(), 5);
+}
+
+TEST_CASE(From3BoundaryPointsRandom) {
+    Log::Scope scope (Log::TRACE);
+
+    random_device randomDevice;
+    mt19937 twister (randomDevice ());
+    std::uniform_real_distribution<f8> dist(1.0, nextafter(10.0, numeric_limits<f8>::max ()));
+
+    for (int i = 0; i < 100; ++i) {
+        // generate a random circle
+        f8 radius = dist (twister);
+        Point2 center (dist (twister), dist (twister));
+
+        // generate three points on the circle at random
+        f8 alpha;
+        alpha = ((dist (twister) - 1.0) / 9.0) * M_PI * 2;
+        Point2 a = (Point2 (cos (alpha), sin (alpha)) * radius) + center;
+        alpha = ((dist (twister) - 1.0) / 9.0) * M_PI * 2;
+        Point2 b = (Point2 (cos (alpha), sin (alpha)) * radius) + center;
+        alpha = ((dist (twister) - 1.0) / 9.0) * M_PI * 2;
+        Point2 c = (Point2 (cos (alpha), sin (alpha)) * radius) + center;
+
+        // now compute the bounding ball
+        BoundingBall2::PointList points = {a, b, c };
+        auto ball = BoundingBall2::makeBall (points);
+
+        // and confirm our result matches the setup
+        TEST_FALSE(ball.isEmpty());
+        TEST_EQUALS(ball.getCenter(), center);
+        TEST_EQUALS_EPS(ball.getRadius(), radius, Point2::getEpsilon ());
+    }
 }

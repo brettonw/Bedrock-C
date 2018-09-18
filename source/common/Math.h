@@ -60,3 +60,4 @@ static inline
 bool ulpEquals (f4 left, f4 right, s4 bitsOfprecision = 4) {
     return ulpDifference<f4, s4> (left, right) <= ((s4 (1) << bitsOfprecision) - 1);
 }
+
