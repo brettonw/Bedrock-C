@@ -1,1 +1,1 @@
-{"BoundingBall":{"FromBoundaryPoints":"DEBUG"} }
+{"BoundingBall":{"FromPoints":"SKIP", "BoundingBall":"TRACE"} }

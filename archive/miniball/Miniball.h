@@ -204,9 +204,6 @@ class Miniball {
                 squaredRadius[0] = 0;
             }
             else {
-                // this looks like it might be a linear algebra solution to the system
-                // of equations that define a ball in dimensioned space
-
                 // set v_fsize to Q_fsize
                 for (i = 0; i < dimension; ++i) {
                     v[fsize][i] = *p++ - q0[i];

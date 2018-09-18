@@ -26,17 +26,16 @@ TEST_CASE(From2BoundaryPoints) {
     Log::debug () << "center: " << ball.getCenter () << endl;
     TEST_FALSE(ball.isEmpty());
     TEST_EQUALS(ball.getRadius(), 1);
+    TEST_EQUALS(ball.getCenter(), Point2 ());
 }
 
 TEST_CASE(From3BoundaryPoints) {
     //Log::Scope scope (Log::TRACE);
-    vector<Point2> points = { Vector2 (-3, 4), Vector2 (4, 5), Vector2(1, -4) };
-    Log::debug () << "Points size: " << points.size () << endl;
-    auto ball = BoundingBall2::fromBoundaryPoints (points.data (), points.size ());
+    auto ball = BoundingBall2::fromThreePoints (Vector2 (-3, 4), Vector2 (4, 5), Vector2(1, -4));
     Log::debug () << "center: " << ball.getCenter () << endl;
     TEST_FALSE(ball.isEmpty());
-    TEST_EQUALS(ball.getCenter(), Vector2 (1, 1));
     TEST_EQUALS(ball.getRadius(), 5);
+    TEST_EQUALS(ball.getCenter(), Vector2 (1, 1));
 }
 
 TEST_CASE(From3BoundaryPointsRandom) {
@@ -61,8 +60,7 @@ TEST_CASE(From3BoundaryPointsRandom) {
         Point2 c = (Point2 (cos (alpha), sin (alpha)) * radius) + center;
 
         // now compute the bounding ball
-        vector<Point2> points = {a, b, c };
-        auto ball = BoundingBall2::fromBoundaryPoints(points.data (), points.size ());
+        auto ball = BoundingBall2::fromThreePoints(a, b, c);
 
         // and confirm our result matches the setup
         TEST_FALSE(ball.isEmpty());
@@ -71,9 +69,8 @@ TEST_CASE(From3BoundaryPointsRandom) {
     }
 }
 
-TEST_CASE(Algorithm1) {
-    Log::Scope scope (Log::TRACE);
-    Log::debug () << "Algorithm1" << endl;
+TEST_CASE(FromPoints) {
+    //Log::Scope scope (Log::DEBUG);
 
     random_device randomDevice;
     mt19937 twister (randomDevice ());
@@ -96,7 +93,7 @@ TEST_CASE(Algorithm1) {
         vector<Point2> points = {a, b, c};
 
         // make a ball from these three points - to be sure we aren't dealing with numerical error
-        auto generator = BoundingBall2::fromBoundaryPoints(points.data(), points.size());
+        auto generator = BoundingBall2::fromThreePoints(a, b, c);
         if (generator.getRadius () >= 0) {
             Log::debug () << "Generator: " << generator << endl;
 
