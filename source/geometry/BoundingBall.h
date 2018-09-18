@@ -68,6 +68,7 @@ class BoundingBall {
         #define CD(x) static_cast<Coordinate> (x)
         static BoundingBall fromBoundaryPoints (const Point* boundaryPoints, uint boundaryPointCount) {
             Scalar epsilon = square<Scalar>(Point::getEpsilon());
+            if (boundaryPointCount > 0) {
             bool success = true;
 
             Vector q0;
@@ -77,88 +78,74 @@ class BoundingBall {
             Scalar z[dimension + 1];
             Scalar f[dimension + 1];
             Scalar r[dimension + 1];
-            Scalar currentSquaredRadius;
-            Point  currentCenter;
 
-            for (uint fsize = 0; success and (fsize < boundaryPointCount); ++fsize) {
-                if (fsize == 0) {
-                    q0 = boundaryPoints[fsize];
-                    /*
-                    for (i = 0; i < dimension; ++i) {
-                        q0[i] = *p++;
-                    }
-                    */
-                    c[0] = q0;
-                    /*
-                    for (i = 0; i < dimension; ++i) {
-                        c[0][i] = q0[i];
-                    }
-                    */
-                    r[0] = 0;
+            Scalar currentSquaredRadius = r[0] = 0;
+            Point  currentCenter = c[0] = q0 = boundaryPoints[0];
+
+            for (uint fsize = 1; success and (fsize < boundaryPointCount); ++fsize) {
+                // set v_fsize to Q_fsize
+                v[fsize] = boundaryPoints[fsize] - q0;
+                /*
+                for (i = 0; i < dimension; ++i) {
+                    v[fsize][i] = *p++ - q0[i];
                 }
-                else {
-                    // set v_fsize to Q_fsize
-                    v[fsize] = boundaryPoints[fsize] - q0;
+                */
+
+                // compute the a_{fsize,i}, i < fsize, equation 9
+                for (uint i = 1; i < fsize; ++i) {
+                    a[fsize][CD (i)] = (v[CD (i)] DOT v[CD (fsize)]) * (2 / z[i]);
                     /*
-                    for (i = 0; i < dimension; ++i) {
-                        v[fsize][i] = *p++ - q0[i];
-                    }
-                    */
-
-                    // compute the a_{fsize,i}, i < fsize, equation 9
-                    for (uint i = 1; i < fsize; ++i) {
-                        a[fsize][CD (i)] = (v[CD (i)] DOT v[CD (fsize)]) * (2 / z[i]);
-                        /*
-                        a[fsize][i] = 0;
-                        for (j = 0; j < dimension; ++j) {
-                            a[fsize][i] += v[i][j] * v[fsize][j];
-                        }
-                        a[fsize][i] *= (2 / z[i]);
-                        */
-                    }
-
-                    // update v_fsize to Q_fsize-\bar{Q}_fsize
-                    for (uint i = 1; i < fsize; ++i) {
-                        for (uint j = 0; j < dimension; ++j) {
-                            v[fsize][CD (j)] -= a[fsize][CD (i)] * v[i][CD (j)];
-                        }
-                    }
-
-                    // compute z_fsize, lemma 1 (iii)
-                    z[fsize] = v[fsize].lengthSq () * 2;
-                    /*
-                    z[fsize] = 0;
+                    a[fsize][i] = 0;
                     for (j = 0; j < dimension; ++j) {
-                        z[fsize] += square<Scalar> (v[fsize][j]);
+                        a[fsize][i] += v[i][j] * v[fsize][j];
                     }
-                    z[fsize] *= 2;
+                    a[fsize][i] *= (2 / z[i]);
                     */
+                }
 
-                    // reject push if z_fsize too small
-                    if (z[fsize] < (epsilon * currentSquaredRadius)) {
-                        success = false;
-                        break;
-                    }
-
-                    // update c, squaredRadius
-                    Scalar e = -r[fsize-1];
-                    for (uint i = 0; i < dimension; ++i) {
-                        e += square<Scalar> (boundaryPoints[fsize][CD(i)] - c[fsize-1][CD(i)]);
-                    }
-
-                    // equation 10
-                    f[fsize] = e / z[fsize];
-                    r[fsize] = r[fsize-1] + (e * f[fsize] / 2);
-
-                    for (uint i = 0; i < dimension; ++i) {
-                        c[fsize][CD(i)] = c[fsize-1][CD(i)] + (f[fsize] * v[fsize][CD(i)]);
+                // update v_fsize to Q_fsize-\bar{Q}_fsize
+                for (uint i = 1; i < fsize; ++i) {
+                    for (uint j = 0; j < dimension; ++j) {
+                        v[fsize][CD (j)] -= a[fsize][CD (i)] * v[i][CD (j)];
                     }
                 }
+
+                // compute z_fsize, lemma 1 (iii)
+                z[fsize] = v[fsize].lengthSq () * 2;
+                /*
+                z[fsize] = 0;
+                for (j = 0; j < dimension; ++j) {
+                    z[fsize] += square<Scalar> (v[fsize][j]);
+                }
+                z[fsize] *= 2;
+                */
+
+                // reject push if z_fsize too small
+                if (z[fsize] < (epsilon * currentSquaredRadius)) {
+                    success = false;
+                    break;
+                }
+
+                // update c, squaredRadius
+                Scalar e = -r[fsize-1];
+                for (uint i = 0; i < dimension; ++i) {
+                    e += square<Scalar> (boundaryPoints[fsize][CD(i)] - c[fsize-1][CD(i)]);
+                }
+
+                // equation 10
+                f[fsize] = e / z[fsize];
+                r[fsize] = r[fsize-1] + (e * f[fsize] / 2);
+
+                for (uint i = 0; i < dimension; ++i) {
+                    c[fsize][CD(i)] = c[fsize-1][CD(i)] + (f[fsize] * v[fsize][CD(i)]);
+                }
+
                 currentCenter = c[fsize];
                 currentSquaredRadius = r[fsize];
             }
             if (success) {
                 return BoundingBall (currentCenter, currentSquaredRadius);
+            }
             }
             return BoundingBall ();
         }
