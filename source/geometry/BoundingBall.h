@@ -106,8 +106,12 @@ class BoundingBall {
 
                     // compute the intersection of the line with the plane, and Bob's your uncle
                     f8 t = hyperplane.intersect (line);
-                    Point center = line.pointAt (t);
-                    return BoundingBall (center, (a - center).lengthSq ());
+                    if (not isinf (t)) {
+                        Point center = line.pointAt (t);
+                        return BoundingBall (center, (a - center).lengthSq ());
+                    } else {
+                        // XXX do some work to figure out which point is collinear and exlude it
+                    }
                 }
             }
         }
@@ -157,7 +161,7 @@ class BoundingBall {
                         // that will contain it. add the current point to the boundary set, recur,
                         // and then remove the current point from the boundary set.
                         boundaryPoints.push_back(*current);
-                        ball = algorithmMoveToFront (begin, current, boundaryPoints);
+                        ball = algorithmMoveToFront (points, current, boundaryPoints);
                         boundaryPoints.pop_back();
 
                         // move "current" to the front, so subsequent iterations over the points
@@ -174,7 +178,7 @@ class BoundingBall {
             // XXX TODO - randomly permute the points list
             PointList points (_points, _points + pointCount);
             PointList boundaryPoints;
-            return algorithmMoveToFront (points, points.end(), &boundaryPoints);
+            return algorithmMoveToFront (points, points.end(), boundaryPoints);
         }
 
 

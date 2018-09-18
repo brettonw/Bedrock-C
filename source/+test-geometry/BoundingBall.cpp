@@ -42,7 +42,7 @@ TEST_CASE(From3BoundaryPoints) {
 }
 
 TEST_CASE(From3BoundaryPointsRandom) {
-    Log::Scope scope (Log::TRACE);
+    //Log::Scope scope (Log::TRACE);
 
     random_device randomDevice;
     mt19937 twister (randomDevice ());
@@ -65,6 +65,46 @@ TEST_CASE(From3BoundaryPointsRandom) {
         // now compute the bounding ball
         BoundingBall2::PointList points = {a, b, c };
         auto ball = BoundingBall2::makeBall (points);
+
+        // and confirm our result matches the setup
+        TEST_FALSE(ball.isEmpty());
+        TEST_EQUALS(ball.getCenter(), center);
+        TEST_EQUALS_EPS(ball.getRadius(), radius, Point2::getEpsilon ());
+    }
+}
+
+TEST_CASE(Algorithm1) {
+    //Log::Scope scope (Log::TRACE);
+
+    random_device randomDevice;
+    mt19937 twister (randomDevice ());
+    std::uniform_real_distribution<f8> dist(1.0, nextafter(10.0, numeric_limits<f8>::max ()));
+
+    for (int i = 0; i < 1; ++i) {
+        // generate a random circle
+        f8 radius = dist (twister);
+        Point2 center (dist (twister), dist (twister));
+
+        // generate three points on the circle at random
+        f8 alpha;
+        alpha = ((dist (twister) - 1.0) / 9.0) * M_PI * 2;
+        Point2 a = (Point2 (cos (alpha), sin (alpha)) * radius) + center;
+        alpha = ((dist (twister) - 1.0) / 9.0) * M_PI * 2;
+        Point2 b = (Point2 (cos (alpha), sin (alpha)) * radius) + center;
+        alpha = ((dist (twister) - 1.0) / 9.0) * M_PI * 2;
+        Point2 c = (Point2 (cos (alpha), sin (alpha)) * radius) + center;
+        BoundingBall2::PointList points = {a, b, c };
+
+        // now fill the circle with a bunch of random points
+        for (int j = 0; j < 10; ++j) {
+            alpha = ((dist (twister) - 1.0) / 9.0) * M_PI * 2;
+            Point2 d = (Point2 (cos (alpha), sin (alpha)) * (radius * ((dist (twister) - 1) / 10.0))) + center;
+            points.push_front (d);
+        }
+
+        // now compute the bounding ball
+        BoundingBall2::PointList boundaryPoints;
+        auto ball = BoundingBall2::algorithmMoveToFront (points, points.end(), boundaryPoints);
 
         // and confirm our result matches the setup
         TEST_FALSE(ball.isEmpty());
