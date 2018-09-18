@@ -43,7 +43,7 @@ class Line {
             return direction;
         }
 
-        Point getPoint (Scalar t) {
+        Point pointAt (Scalar t) {
             return origin + (direction * t);
         }
 };

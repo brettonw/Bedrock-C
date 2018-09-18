@@ -8,10 +8,7 @@ TEST_CASE(Line2) {
     Vector2 b (1, 1);
 
     auto line = Line<f8, 2>::fromTwoPoints (a, b);
-    //Vector2 normal = line.getNormal ();
-    Vector2 pt = line.getPoint (2);
-
-    //TEST_XY(normal, (Vector2 (-1, -1)).normalized ());
+    Vector2 pt = line.pointAt (2);
 
     TEST_TRUE(line.isOnLine (a));
     TEST_TRUE(line.isOnLine (b));

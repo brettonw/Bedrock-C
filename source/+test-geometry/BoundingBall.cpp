@@ -20,7 +20,7 @@ TEST_CASE(BoundingBall) {
     TEST_EQUALS(ball.getCenter(), Vector2(0.5, 0.5));
 }
 
-TEST_CASE(FromBoundaryPoints) {
+TEST_CASE(From2BoundaryPoints) {
     Log::Scope scope (Log::TRACE);
     BoundingBall2::PointList points = { Vector2 (1, 0), Vector2 (-1, 0) };
     Log::debug () << "Points size: " << points.size () << endl;
@@ -28,4 +28,15 @@ TEST_CASE(FromBoundaryPoints) {
     Log::debug () << "center: " << ball.getCenter () << endl;
     TEST_FALSE(ball.isEmpty());
     TEST_EQUALS(ball.getRadius(), 1);
+}
+
+TEST_CASE(From3BoundaryPoints) {
+    Log::Scope scope (Log::TRACE);
+    BoundingBall2::PointList points = { Vector2 (-3, 4), Vector2 (4, 5), Vector2(1, -4) };
+    Log::debug () << "Points size: " << points.size () << endl;
+    auto ball = BoundingBall2::makeBall (points);
+    Log::debug () << "center: " << ball.getCenter () << endl;
+    TEST_FALSE(ball.isEmpty());
+    TEST_EQUALS(ball.getCenter(), Vector2 (1, 1));
+    TEST_EQUALS(ball.getRadius(), 5);
 }

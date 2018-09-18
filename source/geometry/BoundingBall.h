@@ -75,60 +75,70 @@ class BoundingBall {
         typedef typename PointList::iterator PointListIterator;
         typedef typename PointList::const_iterator constPointListIterator;
 
+        ENABLE_DIMENSION(2)
         static BoundingBall makeBall (const PointList& boundaryPoints) {
-            // get the number of points
-            uint n = boundaryPoints.size ();
-
-            // if there are no points, or too many points to distinctly define a ball, so we return
-            // an empty ball
-            if ((n == 0) or (n > (dimension + 1))) {
-                return BoundingBall ();
-            }
-
-            // there are some points, we'll want to iterate over them, at least the first one
             constPointListIterator iter = boundaryPoints.begin ();
-            const Point& a = *iter++;
-
-            // if it's only one point, return a ball with that one
-            if (n == 1) {
-                return BoundingBall (a, 0);
-            }
-
-            // in any n-dimension space, 2 points always define a ball with the center at the
-            // middle of the line segment between them.
-            const Point& b = *iter++;
-            if (n == 2) {
-                return fromTwoPoints (a, b);
-            }
-
-            // in any n-dimension space, any m = 2..n+1 points may be boundary points on a ball.
-            // (more than n+1 is obviously possible...)
-            // typical solvers create a set of linear equations using the unknown center of the
-            // ball as a component that has to be solved for.
-            // our general approach is based on the observation that n points define a hyperplane,
-            // and the center of the ball must reside on a line perpendicular to that hyperplane,
-            // with a known point at the median point of the boundary points that define the
-            // hyperplane. given two set of n points, we can solve for the intersection of two
-            // lines, or use trigonometry...
-            const Point& c = *iter++;
-            switch (dimension) {
-                case 2: {
-                    // we got here, n must be 3 - two midpoints
-                    Vector ab = (b - a).normalized ();
-                    Vector bc = (c - b).normalized ();
-                    Point abMid = (a + b) * 0.5;
-                    Point bcMid = (b + c) * 0.5;
-
-                    // define a hyperplane from the first midpoint and a perpendicular vector
-                    //Scalar C =
-                    break;
+            switch (boundaryPoints.size ()) {
+                case 0:
+                default: {
+                    // no points, or the ball is over-specified - return an empty ball
+                    return BoundingBall ();
                 }
+                case 1: {
+                    // only one point is a zero-sized ball at that point
+                    return BoundingBall (*iter);
+                }
+                case 2: {
+                    // 2 points always define a ball with the center at the middle of the line
+                    // segment between them
+                    const Point& a = *iter++;
+                    const Point& b = *iter;
+                    return fromTwoPoints (a, b);
+                }
+                case 3: {
+                    // define a hyperplane using the midpoint and direction of a-b, and a line using
+                    // the midpoint of b-c and it's perpendicular direction
+                    const Point& a = *iter++;
+                    const Point& b = *iter++;
+                    const Point& c = *iter;
+                    auto hyperplane = Hyperplane2::fromPointNormal ((a + b) / 2, b - a);
+                    Line2 line ((b + c) / 2, (c - b).perpendicular ());
 
-                case 3:
-
-                    break;
+                    // compute the intersection of the line with the plane, and Bob's your uncle
+                    f8 t = hyperplane.intersect (line);
+                    Point center = line.pointAt (t);
+                    return BoundingBall (center, (a - center).lengthSq ());
+                }
             }
-            return BoundingBall ();
+        }
+
+        ENABLE_DIMENSION(3)
+        static BoundingBall makeBall (const PointList& boundaryPoints) {
+            constPointListIterator iter = boundaryPoints.begin ();
+            switch (boundaryPoints.size ()) {
+                case 0:
+                default: {
+                    // no points, or the ball is over-specified - return an empty ball
+                    return BoundingBall ();
+                }
+                case 1: {
+                    // only one point is a zero-sized ball at that point
+                    return BoundingBall (*iter);
+                }
+                case 2: {
+                    // 2 points always define a ball with the center at the middle of the line
+                    // segment between them
+                    const Point& a = *iter++;
+                    const Point& b = *iter;
+                    return fromTwoPoints (a, b);
+                }
+                case 3: {
+                    return BoundingBall ();
+                }
+                case 4: {
+                    return BoundingBall ();
+                }
+            }
         }
 
         static BoundingBall algorithmMoveToFront (PointList& points, PointListIterator stop, PointList& boundaryPoints) {
