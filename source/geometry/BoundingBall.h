@@ -13,6 +13,93 @@ class BoundingBall {
         Point center;
         Scalar squaredRadius;
 
+        class BuilderState {
+            public:
+                Point  b;   // boundary point
+                Point  c;   // center point of updated ball
+                Scalar r;   // squared radius of updated ball
+
+                Vector v;
+                Vector a;
+                Scalar z;
+                Scalar f;
+
+                bool   valid;
+        };
+
+        class Builder {
+            private:
+                BuilderState states[dimension + 1];
+                uint stateCount;
+
+            public:
+                Builder () : stateCount = 0;
+
+                Builder&  addBoundaryPoint (const Point& point) {
+                    BuilderState& current = states[stateCount];
+                    current.valid = false;
+                    current.b = current.c = point;
+                    current.r = 0;
+
+                    if (++stateCount > 1) {
+                        // set v_fsize to Q_fsize
+                        current.v = point - states[0].b;
+
+                        // compute the a_{fsize,i}, i < fsize, equation 9
+                        for (uint i = 1; i < fsize; ++i) {
+                            a[fsize][i] = (v[i] DOT v[fsize]) * (2 / z[i]);
+                        }
+
+                        // update v_fsize to Q_fsize-\bar{Q}_fsize
+                        for (uint i = 1; i < fsize; ++i) {
+                            for (uint j = 0; j < dimension; ++j) {
+                                v[fsize][j] -= a[fsize][i] * v[i][j];
+                            }
+                        }
+
+                        // compute z_fsize, lemma 1 (iii)
+                        z[fsize] = v[fsize].lengthSq () * 2;
+
+                        // reject push if z_fsize too small
+                        if (z[fsize] >= (epsilon * currentSquaredRadius)) {
+                            // update c, squaredRadius
+                            Scalar e = -r[fsize-1];
+                            for (uint i = 0; i < dimension; ++i) {
+                                e += square<Scalar> (boundaryPoints[fsize][i] - c[fsize-1][i]);
+                            }
+
+                            // equation 10
+                            f[fsize] = e / z[fsize];
+                            r[fsize] = r[fsize-1] + (e * f[fsize] / 2);
+
+                            for (uint i = 0; i < dimension; ++i) {
+                                c[fsize][i] = c[fsize-1][i] + (f[fsize] * v[fsize][i]);
+                            }
+                            current.valid = true;
+                        } else {
+                        }
+                    }
+                    return *this;
+                }
+
+                BoundingBall getBoundingBall () const {
+                    return ((stateCount > 0) && (states[stateCount - 1].valid)) ? BoundingBox (states[stateCount - 1].c, states[stateCount - 1].r) : BoundingBox ();
+                }
+
+                Point& getCurrentCenter () const {
+                    return ((stateCount > 0) && (states[stateCount - 1].valid)) ? states[stateCount - 1].c : Point ();
+                }
+
+                Scalar getCurrentRadius () const {
+                    return ((stateCount > 0) && (states[stateCount - 1].valid)) ? states[stateCount - 1].r : -1;
+                }
+
+                Builder& pop () {
+                    --stateCount;
+                    return *this;
+                }
+        };
+
         BoundingBall (const Point& _center, Scalar _squaredRadius) : center (_center), squaredRadius (_squaredRadius) {}
 
         BoundingBall& addPoints (const Point* points, uint pointCount) {
