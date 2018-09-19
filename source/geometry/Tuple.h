@@ -63,11 +63,13 @@ class Tuple {
         }
 
         // accessors
-        Scalar& operator [] (Coordinate index) {
+        template<typename IndexType>
+        Scalar& operator [] (IndexType index) {
             return value[index];
         }
 
-        const Scalar& operator [] (Coordinate index) const {
+        template<typename IndexType>
+        const Scalar& operator [] (IndexType index) const {
             return value[index];
         }
 
