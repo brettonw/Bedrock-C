@@ -1,6 +1,7 @@
 #pragma once
 
 #include "TupleHelper.h"
+#include "Log.h"
 
 enum Coordinate {
     X = 0, Y = 1, Z = 2, W = 3,
@@ -316,9 +317,6 @@ class Tuple {
             return static_cast<Coordinate> (maxCoordinate);
         }
 };
-
-template<typename Scalar, uint dimension>
-Scalar Tuple<Scalar, dimension>::epsilon = 1e-6;
 
 template<typename Scalar, uint dimension>
 const Tuple<Scalar, dimension> Tuple<Scalar, dimension>::ZERO (0.0);

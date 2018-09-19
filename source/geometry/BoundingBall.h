@@ -31,16 +31,18 @@ class BoundingBall {
                 uint stateCount;
 
             public:
-                Builder () : stateCount = 0;
+                Builder () : stateCount (0) {};
 
-                Builder&  addBoundaryPoint (const Point& point) {
+                bool  addBoundaryPoint (const Point& point) {
                     BuilderState& current = states[stateCount];
+
+                    // this is really just for bookkeeping
                     current.b = point;
 
                     // if this is the first boundary point to be added
                     if (stateCount == 0) {
-                        // just use the point we added as the center, with squared radius 0
-                        current.c = current.b;
+                        // use the point we just added as the center, with squared radius 0
+                        current.c = point;
                         current.r = 0;
 
                         // the add is valid, keep it
@@ -49,17 +51,17 @@ class BoundingBall {
                         BuilderState& previous = states[stateCount - 1];
 
                         // set v_fsize to Q_fsize
-                        current.v = point - states[0].b;
+                        current.v = point - states[0].c;
 
-                        // compute the a_{fsize,i}, i < fsize, equation 9
+                        // compute the a_{current,i}, i < current, equation 9
                         for (uint i = 1; i < stateCount; ++i) {
-                            current.a[i] = (v[i] DOT current.v) * (2 / z[i]);
+                            current.a[i] = (states[i].v DOT current.v) * (2 / states[i].z);
                         }
 
                         // update v_fsize to Q_fsize-\bar{Q}_fsize
                         for (uint i = 1; i < stateCount; ++i) {
                             for (uint j = 0; j < dimension; ++j) {
-                                current.v[j] -= current.a[i] * v[i][j];
+                                current.v[j] -= current.a[i] * states[i].v[j];
                             }
                         }
 
@@ -67,7 +69,7 @@ class BoundingBall {
                         current.z = current.v.lengthSq () * 2;
 
                         // reject push if z_fsize too small
-                        if (current.z >= (epsilon * currentSquaredRadius)) {
+                        if (current.z >= (Point::getEpsilon () * previous.r)) {
                             // update c, squaredRadius
                             Scalar e = -previous.r;
                             for (uint i = 0; i < dimension; ++i) {
@@ -90,7 +92,7 @@ class BoundingBall {
                 }
 
                 BoundingBall getBoundingBall () const {
-                    return ((stateCount > 0) && (states[stateCount - 1].valid)) ? BoundingBox (states[stateCount - 1].c, states[stateCount - 1].r) : BoundingBox ();
+                    return ((stateCount > 0) && (states[stateCount - 1].valid)) ? BoundingBall (states[stateCount - 1].c, states[stateCount - 1].r) : BoundingBall ();
                 }
 
                 Point& getCurrentCenter () const {
@@ -159,67 +161,66 @@ class BoundingBall {
         // Gaertner papers. The best discussion is Section 4 "The implementation" in Gaertner's
         // "Fast and Robust Smallest Enclosing Balls", which is available at:
         //   https://people.inf.ethz.ch/gaertner/subdir/texts/own_work/esa99_final.pdf
-        static BoundingBall fromBoundaryPoints (const Point* boundaryPoints, uint boundaryPointCount) {
+        static bool fromBoundaryPoints (const Point* boundaryPoints, uint boundaryPointCount, BoundingBall& ball) {
             Scalar epsilon = square<Scalar>(Point::getEpsilon());
             if (boundaryPointCount > 0) {
-                bool success = true;
 
                 Point  c[dimension + 1];
-                Vector v[dimension + 1];
-                Vector a[dimension + 1];
-                Scalar z[dimension + 1];
-                Scalar f[dimension + 1];
                 Scalar r[dimension + 1];
 
-                Scalar currentSquaredRadius = r[0] = 0;
-                Point  currentCenter = c[0] = boundaryPoints[0];
+                Vector v[dimension + 1];
+                Scalar z[dimension + 1];
 
-                for (uint fsize = 1; success and (fsize < boundaryPointCount); ++fsize) {
-                    // set v_fsize to Q_fsize
-                    v[fsize] = boundaryPoints[fsize] - boundaryPoints[0];
+                Scalar squaredRadius = r[0] = 0;
+                Point  center = c[0] = boundaryPoints[0];
 
-                    // compute the a_{fsize,i}, i < fsize, equation 9
-                    for (uint i = 1; i < fsize; ++i) {
-                        a[fsize][i] = (v[i] DOT v[fsize]) * (2 / z[i]);
+                for (uint current = 1; current < boundaryPointCount; ++current) {
+                    uint previous = current - 1;
+
+                    // set v_current to Q_current
+                    v[current] = boundaryPoints[current] - boundaryPoints[0];
+
+                    // compute the a_current[i], i < current, equation 9
+                    Vector a;
+                    for (uint i = 1; i < current; ++i) {
+                        a[i] = (v[i] DOT v[current]) * (2 / z[i]);
                     }
 
-                    // update v_fsize to Q_fsize-\bar{Q}_fsize
-                    for (uint i = 1; i < fsize; ++i) {
+                    // update v_current to Q_current - Qbar_current
+                    for (uint i = 1; i < current; ++i) {
                         for (uint j = 0; j < dimension; ++j) {
-                            v[fsize][j] -= a[fsize][i] * v[i][j];
+                            v[current][j] -= a[i] * v[i][j];
                         }
                     }
 
-                    // compute z_fsize, lemma 1 (iii)
-                    z[fsize] = v[fsize].lengthSq () * 2;
-
-                    // reject push if z_fsize too small
-                    if (z[fsize] >= (epsilon * currentSquaredRadius)) {
-                        // update c, squaredRadius
-                        Scalar e = -r[fsize-1];
-                        for (uint i = 0; i < dimension; ++i) {
-                            e += square<Scalar> (boundaryPoints[fsize][i] - c[fsize-1][i]);
-                        }
-
-                        // equation 10
-                        f[fsize] = e / z[fsize];
-                        r[fsize] = r[fsize-1] + (e * f[fsize] / 2);
-
-                        for (uint i = 0; i < dimension; ++i) {
-                            c[fsize][i] = c[fsize-1][i] + (f[fsize] * v[fsize][i]);
-                        }
-
-                        currentCenter = c[fsize];
-                        currentSquaredRadius = r[fsize];
+                    // compute z_current, lemma 1 (iii), twice the distance from Qm to its
+                    // projection, and check if it is not too small
+                    z[current] = v[current].lengthSq () * 2;
+                    if (z[current] < (epsilon * r[previous])) {
+                        // skip if z is too small, because in the next step, we divide by z. if z
+                        // is a very small value, that will result in numeric instability. this
+                        // could happen if two points on the boundary are very close to each other
+                        // (or the same point repeated). we effectively treat the new point as if
+                        // it is inside the ball we have, and accept the possible error.
+                        Log::warn () << "z < epsilon" << endl;
+                        return false;
                     } else {
-                        success = false;
+                        // equation 9/10
+                        Scalar e = -r[previous] + (boundaryPoints[current] - c[previous]).lengthSq ();
+                        center = c[current] = c[previous] + ((e * v[current]) / z[current]);
+                        squaredRadius = r[current] = r[previous] + ((e * e) / (2 * z[current]));
                     }
                 }
-                if (success) {
-                    return BoundingBall (currentCenter, currentSquaredRadius);
-                }
+                ball = BoundingBall (center, squaredRadius);
+            /*
+            } else {
+                // reset the ball
+                // XXX this might not be necessary?
+                Log::trace () << "ON RESET, ball = " << ball << endl;
+                ball = BoundingBall ();
+            */
             }
-            return BoundingBall ();
+            return true;
         }
 
         // algorithm first described by Emo Welzl, in his paper "Smallest enclosing disks", which
@@ -234,48 +235,50 @@ class BoundingBall {
         //   https://people.inf.ethz.ch/gaertner/subdir/software/miniball.html
         // a visual depiction of computing Ball[i] from Ball[i-1] + p is at:
         //   http://www.cs.uu.nl/docs/vakken/ga/slides4b.pdf
-        static BoundingBall algorithmMoveToFront (PointList& points, PointListIterator stop, vector<Point>& boundaryPoints) {
+        static BoundingBall algorithmMoveToFront (PointList& points, PointListIterator stop, vector<Point>& boundaryPoints, BoundingBall& ball) {
             uint depth = boundaryPoints.size ();
-
-            BoundingBall ball = fromBoundaryPoints (boundaryPoints.data(), boundaryPoints.size());
             TRC << "algorithmMoveToFront (with " << boundaryPoints.size () << " point" << ((boundaryPoints.size () == 1) ? "" : "s") << " on boundary) - " << endl;
             for (typename vector<Point>::iterator iter = boundaryPoints.begin (); iter != boundaryPoints.end (); ++ iter) {
                 TRC1 << "Boundary Point: " << *iter << endl;
             }
-            TRC1 << "Ball = " << ball << endl;
 
-            // see the paper for a proof that this is the limit of recursion
-            if (boundaryPoints.size() != (dimension + 1)) {
-                TRC << "Testing points" << endl;
-                for (PointListIterator iter = points.begin (); iter != stop;) {
-                    // let the iterator go on to the next element, but keep the reference to our
-                    // current position. we do this because we may modify the list, and this will
-                    // allow the iterator to finish traversing the rest of the list without impact.
-                    PointListIterator current = iter++;
+            // try to create a new bounding ball from the boundary points, and check if it succeeds
+            if (fromBoundaryPoints (boundaryPoints.data(), boundaryPoints.size(), ball)) {
+                TRC1 << "Ball = " << ball << endl;
 
-                    // check to see if the ball we have contains the current point
-                    Log& trc1 = TRC1 << "Point - " << *current;
-                    if (not ball.contains(*current)) {
-                        trc1 << " - NOT CONTAINED" << endl;
-                        // the current point is outside the ball, so we want to build a new ball
-                        // that will contain it. add the current point to the boundary set, recur,
-                        // and then remove the current point from the boundary set.
-                        boundaryPoints.push_back(*current);
-                        ball = algorithmMoveToFront (points, current, boundaryPoints);
-                        TRC1 << "  Ball = " << ball << endl;
-                        boundaryPoints.pop_back();
+                // see the paper for a proof that this is the limit of recursion
+                if (boundaryPoints.size() != (dimension + 1)) {
+                    TRC << "Testing points" << endl;
+                    for (PointListIterator iter = points.begin (); iter != stop;) {
+                        // let the iterator go on to the next element, but keep the reference to our
+                        // current position. we do this because we may modify the list, and this will
+                        // allow the iterator to finish traversing the rest of the list without impact.
+                        PointListIterator current = iter++;
 
-                        // move "current" to the front, so subsequent iterations over the points
-                        // will encounter it early. on an intuitive level, this process sorts the
-                        // point list by decreasing distance to the center of the optimal ball.
-                        points.splice (points.begin(), points, current);
-                    } else {
-                        trc1 << " - contained" << endl;
+                        // check to see if the ball we have contains the current point
+                        Log& trc1 = TRC1 << "Point - " << *current;
+                        if (not ball.contains(*current)) {
+                            trc1 << " - NOT CONTAINED" << endl;
+                            // the current point is outside the ball, so we want to build a new ball
+                            // that will contain it. add the current point to the boundary set, recur,
+                            // and then remove the current point from the boundary set.
+                            boundaryPoints.push_back(*current);
+                            ball = algorithmMoveToFront (points, current, boundaryPoints, ball);
+                            TRC1 << "  Ball = " << ball << endl;
+                            boundaryPoints.pop_back();
+
+                            // move "current" to the front, so subsequent iterations over the points
+                            // will encounter it early. on an intuitive level, this process sorts the
+                            // point list by decreasing distance to the center of the optimal ball.
+                            points.splice (points.begin(), points, current);
+                        } else {
+                            trc1 << " - contained" << endl;
+                        }
                     }
+                    TRC << "Finished testing points" << endl;
+                } else {
+                    TRC << "Skipping points" << endl;
                 }
-                TRC << "Finished testing points" << endl;
-            } else {
-                TRC << "Skipping points" << endl;
             }
             return ball;
         }
@@ -336,7 +339,8 @@ class BoundingBall {
             // put the points into a list to make splicing to front fast, and then start
             PointList pointList (shuffledPoints.begin (), shuffledPoints.end ());
             vector<Point> boundaryPoints;
-            return algorithmMoveToFront (pointList, pointList.end(), boundaryPoints);
+            BoundingBall ball;
+            return algorithmMoveToFront (pointList, pointList.end(), boundaryPoints, ball);
         }
 
 
