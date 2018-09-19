@@ -58,7 +58,9 @@ class UnitTest {
                 if (configurationFile.getExists ()) {
                     Text configurationText = configurationFile.readText();
                     ptrToConfigurationObject = Json::readBagObject(configurationText).getPtr();
-                } else {
+                }
+
+                if (not ptrToConfigurationObject) {
                     ptrToConfigurationObject = new BagObject ();
                 }
 
