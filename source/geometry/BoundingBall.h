@@ -164,29 +164,23 @@ class BoundingBall {
         static bool fromBoundaryPoints (const Point* boundaryPoints, uint boundaryPointCount, BoundingBall& ball) {
             Scalar epsilon = square<Scalar>(Point::getEpsilon());
             if (boundaryPointCount > 0) {
-
-                Point  c[dimension + 1];
-                Scalar r[dimension + 1];
-
                 Vector v[dimension + 1];
                 Scalar z[dimension + 1];
 
-                Scalar squaredRadius = r[0] = 0;
-                Point  center = c[0] = boundaryPoints[0];
+                Scalar squaredRadius = 0;
+                Point  center = boundaryPoints[0];
 
                 for (uint current = 1; current < boundaryPointCount; ++current) {
-                    uint previous = current - 1;
-
-                    // set v_current to Q_current
+                    // v_current is the vector delta between the current point and the first point
                     v[current] = boundaryPoints[current] - boundaryPoints[0];
 
-                    // compute the a_current[i], i < current, equation 9
+                    // setup for the second half of equation 11
                     Vector a;
                     for (uint i = 1; i < current; ++i) {
                         a[i] = (v[i] DOT v[current]) * (2 / z[i]);
                     }
 
-                    // update v_current to Q_current - Qbar_current
+                    // update v_current to Q_current - Qbar_current, see discussion of equation 9
                     for (uint i = 1; i < current; ++i) {
                         for (uint j = 0; j < dimension; ++j) {
                             v[current][j] -= a[i] * v[i][j];
@@ -196,29 +190,23 @@ class BoundingBall {
                     // compute z_current, lemma 1 (iii), twice the distance from Qm to its
                     // projection, and check if it is not too small
                     z[current] = v[current].lengthSq () * 2;
-                    if (z[current] < (epsilon * r[previous])) {
-                        // skip if z is too small, because in the next step, we divide by z. if z
-                        // is a very small value, that will result in numeric instability. this
-                        // could happen if two points on the boundary are very close to each other
-                        // (or the same point repeated). we effectively treat the new point as if
-                        // it is inside the ball we have, and accept the possible error.
+                    if (z[current] < (epsilon * squaredRadius)) {
+                        // see discussion around equation 12. skip if z is too small, because in
+                        // the next step, we divide by z. if z is a very small value, that will
+                        // result in numeric instability. this could happen if two points on the
+                        // boundary are very close to each other (or the same point repeated). we
+                        // effectively treat the new point as if it is inside the ball we have,
+                        // and accept the possible error.
                         Log::warn () << "z < epsilon" << endl;
                         return false;
                     } else {
                         // equation 9/10
-                        Scalar e = -r[previous] + (boundaryPoints[current] - c[previous]).lengthSq ();
-                        center = c[current] = c[previous] + ((e * v[current]) / z[current]);
-                        squaredRadius = r[current] = r[previous] + ((e * e) / (2 * z[current]));
+                        Scalar e = (boundaryPoints[current] - center).lengthSq () - squaredRadius;
+                        center += (e * v[current]) / z[current];
+                        squaredRadius += (e * e) / (2 * z[current]);
                     }
                 }
                 ball = BoundingBall (center, squaredRadius);
-            /*
-            } else {
-                // reset the ball
-                // XXX this might not be necessary?
-                Log::trace () << "ON RESET, ball = " << ball << endl;
-                ball = BoundingBall ();
-            */
             }
             return true;
         }
