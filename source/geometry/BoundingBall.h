@@ -23,8 +23,6 @@ class BoundingBall {
                 Vector a;
                 Scalar z;
                 Scalar f;
-
-                bool   valid;
         };
 
         class Builder {
@@ -37,46 +35,55 @@ class BoundingBall {
 
                 Builder&  addBoundaryPoint (const Point& point) {
                     BuilderState& current = states[stateCount];
-                    current.valid = false;
-                    current.b = current.c = point;
-                    current.r = 0;
+                    current.b = point;
 
-                    if (++stateCount > 1) {
+                    // if this is the first boundary point to be added
+                    if (stateCount == 0) {
+                        // just use the point we added as the center, with squared radius 0
+                        current.c = current.b;
+                        current.r = 0;
+
+                        // the add is valid, keep it
+                        ++stateCount;
+                    } else {
+                        BuilderState& previous = states[stateCount - 1];
+
                         // set v_fsize to Q_fsize
                         current.v = point - states[0].b;
 
                         // compute the a_{fsize,i}, i < fsize, equation 9
-                        for (uint i = 1; i < fsize; ++i) {
-                            a[fsize][i] = (v[i] DOT v[fsize]) * (2 / z[i]);
+                        for (uint i = 1; i < stateCount; ++i) {
+                            current.a[i] = (v[i] DOT current.v) * (2 / z[i]);
                         }
 
                         // update v_fsize to Q_fsize-\bar{Q}_fsize
-                        for (uint i = 1; i < fsize; ++i) {
+                        for (uint i = 1; i < stateCount; ++i) {
                             for (uint j = 0; j < dimension; ++j) {
-                                v[fsize][j] -= a[fsize][i] * v[i][j];
+                                current.v[j] -= current.a[i] * v[i][j];
                             }
                         }
 
                         // compute z_fsize, lemma 1 (iii)
-                        z[fsize] = v[fsize].lengthSq () * 2;
+                        current.z = current.v.lengthSq () * 2;
 
                         // reject push if z_fsize too small
-                        if (z[fsize] >= (epsilon * currentSquaredRadius)) {
+                        if (current.z >= (epsilon * currentSquaredRadius)) {
                             // update c, squaredRadius
-                            Scalar e = -r[fsize-1];
+                            Scalar e = -previous.r;
                             for (uint i = 0; i < dimension; ++i) {
-                                e += square<Scalar> (boundaryPoints[fsize][i] - c[fsize-1][i]);
+                                e += square<Scalar> (states[i].b - previous.c[i]);
                             }
 
                             // equation 10
-                            f[fsize] = e / z[fsize];
-                            r[fsize] = r[fsize-1] + (e * f[fsize] / 2);
+                            current.f = e / current.z;
+                            current.r = previous.r + (e * current.f / 2);
 
                             for (uint i = 0; i < dimension; ++i) {
-                                c[fsize][i] = c[fsize-1][i] + (f[fsize] * v[fsize][i]);
+                                current.c[i] = previous.c[i] + (current.f * current.v[i]);
                             }
-                            current.valid = true;
-                        } else {
+
+                            // the add is valid, keep it
+                            ++stateCount;
                         }
                     }
                     return *this;
