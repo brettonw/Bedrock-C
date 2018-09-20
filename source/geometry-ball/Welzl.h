@@ -7,15 +7,6 @@
 
 template<typename Scalar, uint dimension>
 class Welzl {
-    private:
-        static Log& trace (uint depth) {
-            Log& log = Log::trace ();
-            for (uint i = 0; i < depth; ++i) {
-                log << "  ";
-            }
-            return log;
-        }
-
     public:
         typedef Tuple<Scalar, dimension> Point;
         typedef Tuple<Scalar, dimension> Vector;
@@ -37,69 +28,14 @@ class Welzl {
         State states[dimension + 1];
         uint stateCount;
 
-        Vector v[dimension + 1];
-        Scalar z[dimension + 1];
-
-        // algorithm first described by Emo Welzl, in his paper "Smallest enclosing disks", which
-        // is available (with figures) at:
-        //   http://www.stsci.edu/~RAB/Backup%20Oct%2022%202011/f_3_CalculationForWFIRSTML/Bob1.pdf
-        // and a slightly different version is available from the author directly, at:
-        //   https://www.inf.ethz.ch/personal/emo/PublFiles/SmallEnclDisk_LNCS555_91.pdf
-        // an extension to this algorithm is presented by Bernd Gaertner, with a better description
-        // of the iterative ball construction, available at:
-        //   https://people.inf.ethz.ch/gaertner/subdir/texts/own_work/esa99_final.pdf
-        // and Gaertner provides a functional if not obfuscated implementation of "miniball" at:
-        //   https://people.inf.ethz.ch/gaertner/subdir/software/miniball.html
-        // a visual depiction of computing Ball[i] from Ball[i-1] + p is at:
-        //   http://www.cs.uu.nl/docs/vakken/ga/slides4b.pdf
-        /*
-        bool algorithmMoveToFront (PointListIterator stop) {
-            uint depth = stateCount;
-            TRC << "algorithmMoveToFront (with " << stateCount << " point" << ((stateCount == 1) ? "" : "s") << " on boundary) - " << endl;
-
-            // try to create a new bounding ball from the boundary points, and check if it succeeds
-            if (Ball::fromBoundaryPoints (boundaryPoints.data(), boundaryPoints.size(), ball)) {
-                TRC1 << "Ball = " << ball << endl;
-
-                // see the paper for a proof that this is the limit of recursion
-                if (boundaryPoints.size() != (dimension + 1)) {
-                    TRC << "Testing points" << endl;
-                    for (PointListIterator iter = points.begin (); iter != stop;) {
-                        // let the iterator go on to the next element, but keep the reference to our
-                        // current position. we do this because we may modify the list, and this will
-                        // allow the iterator to finish traversing the rest of the list without impact.
-                        PointListIterator current = iter++;
-
-                        // check to see if the ball we have contains the current point
-                        Log& trc1 = TRC1 << "Point - " << *current;
-                        if (not ball.contains(*current)) {
-                            trc1 << " - NOT CONTAINED" << endl;
-                            // the current point is outside the ball, so we want to build a new ball
-                            // that will contain it. add the current point to the boundary set, recur,
-                            // and then remove the current point from the boundary set.
-                            boundaryPoints.push_back(*current);
-                            ball = algorithmMoveToFront (points, current, boundaryPoints, ball);
-                            TRC1 << "  Ball = " << ball << endl;
-                            boundaryPoints.pop_back();
-
-                            // move "current" to the front, so subsequent iterations over the points
-                            // will encounter it early. on an intuitive level, this process sorts the
-                            // point list by decreasing distance to the center of the optimal ball.
-                            points.splice (points.begin(), points, current);
-                        } else {
-                            trc1 << " - contained" << endl;
-                        }
-                    }
-                    TRC << "Finished testing points" << endl;
-                } else {
-                    TRC << "Skipping points" << endl;
-                }
+        static Log& trace (uint depth) {
+            Log& log = Log::trace ();
+            for (uint i = 0; i < depth; ++i) {
+                log << "  ";
             }
-            return ball;
+            return log;
         }
-        */
 
-    public:
         Welzl (const Point* points, uint pointCount) : stateCount (0) {
             vector<Point> shuffledPoints (points, points + pointCount);
             random_device randomNumberGenerator;
@@ -126,13 +62,10 @@ class Welzl {
                 // use the point we just added as the center, with squared radius 0
                 current.c = point;
                 current.r = 0;
-
-                // the add is valid, keep it
-                ++stateCount;
             } else {
                 State& previous = states[stateCount - 1];
 
-                // v_current is the vector delta between the current point and the first point
+                // v_current is the vector delta between the current point and the first center
                 current.v = point - states[0].c;
 
                 // setup for the second half of equation 11
@@ -161,34 +94,80 @@ class Welzl {
                 } else {
                     // equation 9/10
                     Scalar e = (point - previous.c).lengthSq () - previous.r;
-                    current.c = previous.c + ((e * v[current]) / z[current]);
-                    current.r = previous.r + ((e * e) / (2 * z[current]));
-
-                    // the add is valid, keep it
-                    ++stateCount;
+                    current.c = previous.c + ((e * current.v) / current.z);
+                    current.r = previous.r + ((e * e) / (2 * current.z));
                 }
             }
+
+            // the add is valid, keep it
+            ++stateCount;
             return true;
+        }
+
+        void popBoundaryPoint () {
+            --stateCount;
         }
 
         Ball getBoundingBall () const {
             return ((stateCount > 0) && (states[stateCount - 1].valid)) ? Ball::fromCenterSquaredRadius(states[stateCount - 1].c, states[stateCount - 1].r) : Ball ();
         }
 
-        Point& getCurrentCenter () const {
-            return ((stateCount > 0) && (states[stateCount - 1].valid)) ? states[stateCount - 1].c : Point ();
+        // algorithm first described by Emo Welzl, in his paper "Smallest enclosing disks", which
+        // is available (with figures) at:
+        //   http://www.stsci.edu/~RAB/Backup%20Oct%2022%202011/f_3_CalculationForWFIRSTML/Bob1.pdf
+        // and a slightly different version is available from the author directly, at:
+        //   https://www.inf.ethz.ch/personal/emo/PublFiles/SmallEnclDisk_LNCS555_91.pdf
+        // an extension to this algorithm is presented by Bernd Gaertner, with a better description
+        // of the iterative ball construction, available at:
+        //   https://people.inf.ethz.ch/gaertner/subdir/texts/own_work/esa99_final.pdf
+        // and Gaertner provides a functional if not obfuscated implementation of "miniball" at:
+        //   https://people.inf.ethz.ch/gaertner/subdir/software/miniball.html
+        // a visual depiction of computing Ball[i] from Ball[i-1] + p is at:
+        //   http://www.cs.uu.nl/docs/vakken/ga/slides4b.pdf
+        Ball algorithmMoveToFront (PointListIterator stop) {
+            uint depth = stateCount;
+            TRC << "algorithmMoveToFront (with " << stateCount << " point" << ((stateCount == 1) ? "" : "s") << " on boundary) - " << endl;
+
+            // get the current bounding ball
+            Ball ball = getBoundingBall ();
+            TRC1 << "Ball = " << ball << endl;
+
+            // see the paper for a proof that this is the limit of recursion
+            if (stateCount != (dimension + 1)) {
+                TRC << "Testing points" << endl;
+                for (PointListIterator iter = pointList.begin (); iter != stop;) {
+                    // let the iterator go on to the next element, but keep the reference to our
+                    // current position. we do this because we may modify the list, and this will
+                    // allow the iterator to finish traversing the rest of the list without impact.
+                    PointListIterator current = iter++;
+
+                    // check to see if the ball we have contains the current point
+                    Log& trc1 = TRC1 << "Point - " << *current;
+                    if ((not ball.contains(*current)) and addBoundaryPoint (*iter)) {
+                        trc1 << " - NOT CONTAINED" << endl;
+                        // the current point is outside the ball, so we want to build a new ball
+                        // that will contain it. add the current point to the boundary set, recur,
+                        // and then remove the current point from the boundary set.
+                        ball = algorithmMoveToFront (current);
+                        popBoundaryPoint ();
+                        TRC1 << "  Ball = " << ball << endl;
+
+                        // move "current" to the front, so subsequent iterations over the points
+                        // will encounter it early. on an intuitive level, this process sorts the
+                        // point list by decreasing distance to the center of the optimal ball.
+                        pointList.splice (pointList.begin(), pointList, current);
+                    } else {
+                        trc1 << " - contained" << endl;
+                    }
+                }
+                TRC << "Finished testing points" << endl;
+            } else {
+                TRC << "Skipping points" << endl;
+            }
+            return ball;
         }
 
-        Scalar getCurrentSquaredRadius () const {
-            return ((stateCount > 0) && (states[stateCount - 1].valid)) ? states[stateCount - 1].r : -1;
-        }
-
-        Welzl& pop () {
-            --stateCount;
-            return *this;
-        }
-
-    private:
+        // STATIC VERSION
         // algorithm first described by Emo Welzl, in his paper "Smallest enclosing disks", which
         // is available (with figures) at:
         //   http://www.stsci.edu/~RAB/Backup%20Oct%2022%202011/f_3_CalculationForWFIRSTML/Bob1.pdf
@@ -249,7 +228,15 @@ class Welzl {
             return ball;
         }
 
+        Ball fromPoints () {
+            return algorithmMoveToFront (pointList.end ());
+        }
+
     public:
+        static Ball fromPointsB (const Point* points, uint pointCount) {
+            return Welzl (points, pointCount).fromPoints();
+        }
+
         static Ball fromPoints (const Point* points, uint pointCount) {
             // make a shuffled copy of the points
             vector<Point> shuffledPoints (points, points + pointCount);

@@ -44,7 +44,7 @@ most are two-pass, and involve some sort of geometric operations:
 
 - Fischer documented a combinatorial algorithm that starts with a too large bound, and
   shrinks it. it maintains a QR decomposition, and handles many error conditions more
-  graceully than the alternatives (I need to prove that). it can be retrieved from:
+  gracefully than the alternatives (I need to prove that). it can be retrieved from:
     http://hbf.github.io/miniball/seb.pdf
 
 we observe that the Welzl algorithm is generally efficient for 2 and 3 dimensions, but

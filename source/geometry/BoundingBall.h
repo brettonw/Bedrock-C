@@ -54,9 +54,9 @@ class BoundingBall {
         }
 
         // this is an implementation of the incremental solution to the k-dimensional minimum ball
-        // with points on the boundary described in the Welzl and Gaertner papers. The best
-        // discussion is Section 4 "The implementation" in Gaertner's "Fast and Robust Smallest
-        // Enclosing Balls", which is available at:
+        // with points on the boundary described in the Welzl and Gaertner papers, but we drive it
+        // non-iteratively. the best discussion is Section 4 "The implementation" in Gaertner's
+        // "Fast and Robust Smallest Enclosing Balls", which is available at:
         //   https://people.inf.ethz.ch/gaertner/subdir/texts/own_work/esa99_final.pdf
         static bool fromBoundaryPoints (const Point* boundaryPoints, uint boundaryPointCount, BoundingBall& ball) {
             Scalar epsilon = square<Scalar>(Point::getEpsilon());
@@ -68,7 +68,7 @@ class BoundingBall {
                 Point  center = boundaryPoints[0];
 
                 for (uint current = 1; current < boundaryPointCount; ++current) {
-                    // v_current is the vector delta between the current point and the first point
+                    // v_current is the vector delta between the current point and the first center
                     v[current] = boundaryPoints[current] - boundaryPoints[0];
 
                     // setup for the second half of equation 11
