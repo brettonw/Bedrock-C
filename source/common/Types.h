@@ -2,8 +2,12 @@
 
 // a few basic types, somewhat pedantic...
 typedef unsigned char   byte;
-typedef unsigned int    sint;
+typedef          int    sint;
+
+typedef unsigned char   uchar;
+typedef unsigned short  ushort;
 typedef unsigned int    uint;
+typedef unsigned long   ulong;
 
 // if you want to care about the actual size of a storage type in use, these are guaranteed
 typedef int8_t          s1;
