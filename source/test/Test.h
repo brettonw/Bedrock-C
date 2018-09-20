@@ -102,6 +102,7 @@ class UnitTest {
 #define     TEST_NOT_EQUALS(_x, _y) TEST_XYOP(_x, _y, !=)
 #define     TEST_TRUE(_x) TEST_XYOP(bool (_x), true, ==)
 #define     TEST_FALSE(_x) TEST_XYOP(bool (_x), false, ==)
+#define     TEST_NYI Log::debug () << "Not Yet Implemented" << endl; UnitTest::test (true)
 #define     EXPECT_FAIL(_x)                                                                                     \
             {                                                                                                   \
                 try {                                                                                           \

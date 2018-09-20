@@ -15,10 +15,10 @@ TEST_CASE(MisbByteStreamReadGeneric) {
     const char* testString1 = "Hello World! ";
     const char* testString2 = "No Sugar! ";
     const char* testString3 = "No Calories! ";
-    int testString1Length = strlen (testString1);
-    int testString2Length = strlen (testString2);
-    int testString3Length = strlen (testString3);
-    int totalLength = testString1Length + testString2Length + testString3Length;
+    uint testString1Length = strlen (testString1);
+    uint testString2Length = strlen (testString2);
+    uint testString3Length = strlen (testString3);
+    uint totalLength = testString1Length + testString2Length + testString3Length;
 
     // fill the stream with some test data
     MISB_BYTE_STREAM_WRITER_X mbsw (buffer, 128);
@@ -63,11 +63,11 @@ TEST_CASE(MisbByteStreamRead) {
 
     // check that the memory contains what we expect
     byte compare[] = { 0xef, 0xbe, 0xef, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef };
-    int compareLength = sizeof(compare) / sizeof(compare[0]);
+    uint compareLength = sizeof(compare) / sizeof(compare[0]);
     TEST_EQUALS(bytesWritten, compareLength);
     TEST_EQUALS(memcmp (&buffer[0], &compare[0], compareLength), 0);
     Log::debug () << "Check all individual values..." << endl;
-    for (int i = 0; i < compareLength; ++i) {
+    for (uint i = 0; i < compareLength; ++i) {
         TEST_EQUALS((int ) buffer[i], (int ) compare[i]);
     }
 
@@ -123,11 +123,11 @@ TEST_CASE(MisbByteStreamRead2) {
 
     // check that the memory contains what we expect
     byte compare[] = { 0xef, 0xbe, 0xef, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef };
-    int compareLength = sizeof(compare) / sizeof(compare[0]);
+    uint compareLength = sizeof(compare) / sizeof(compare[0]);
     TEST_EQUALS(bytesWritten, compareLength);
     TEST_EQUALS(memcmp (&buffer[0], &compare[0], compareLength), 0);
     Log::debug () << "Check all individual values..." << endl;
-    for (int i = 0; i < compareLength; ++i) {
+    for (uint i = 0; i < compareLength; ++i) {
         TEST_EQUALS((int ) buffer[i], (int ) compare[i]);
     }
 
@@ -176,11 +176,11 @@ TEST_CASE(MisbByteStreamReadX) {
 
     // check that the memory contains what we expect
     byte compare[] = { 0xef, 0xbe, 0xef, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef };
-    int compareLength = sizeof(compare) / sizeof(compare[0]);
+    uint compareLength = sizeof(compare) / sizeof(compare[0]);
     TEST_EQUALS(bytesWritten, compareLength);
     TEST_EQUALS(memcmp (&buffer[0], &compare[0], compareLength), 0);
     Log::debug () << "Check all individual values..." << endl;
-    for (int i = 0; i < compareLength; ++i) {
+    for (uint i = 0; i < compareLength; ++i) {
         TEST_EQUALS((int ) buffer[i], (int ) compare[i]);
     }
 
@@ -240,11 +240,11 @@ TEST_CASE(MisbByteStreamGet) {
 
     // check that the memory contains what we expect
     byte compare[] = { 0xef, 0xbe, 0xef, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef };
-    int compareLength = sizeof(compare) / sizeof(compare[0]);
+    uint compareLength = sizeof(compare) / sizeof(compare[0]);
     TEST_EQUALS(bytesWritten, compareLength);
     TEST_EQUALS(memcmp (&buffer[0], &compare[0], compareLength), 0);
     Log::debug () << "Check all individual values..." << endl;;
-    for (int i = 0; i < compareLength; ++i) {
+    for (uint i = 0; i < compareLength; ++i) {
         TEST_EQUALS((int ) buffer[i], (int ) compare[i]);
     }
 
@@ -293,7 +293,7 @@ TEST_CASE(MisbByteStreamReadBerA) {
     ulong bytesWritten = mbsw.writeUV (200).finish ();
 
     byte compare[] = { 0x01, 0xc8 };
-    int compareLength = sizeof(compare) / sizeof(compare[0]);
+    uint compareLength = sizeof(compare) / sizeof(compare[0]);
     TEST_EQUALS(bytesWritten, compareLength);
     TEST_EQUALS(memcmp (&buffer[0], &compare[0], compareLength), 0);
 
@@ -308,7 +308,7 @@ TEST_CASE(MisbByteStreamReadBerB) {
     ulong bytesWritten = mbsw.writeUV (123456).finish ();
 
     byte compare[] = { 0x03, 0x01, 0xe2, 0x40 };
-    int compareLength = sizeof(compare) / sizeof(compare[0]);
+    uint compareLength = sizeof(compare) / sizeof(compare[0]);
     TEST_EQUALS(bytesWritten, compareLength);
     TEST_EQUALS(memcmp (&buffer[0], &compare[0], compareLength), 0);
 
@@ -327,7 +327,7 @@ TEST_CASE(MisbByteStreamReadBerOID) {
     ulong bytesWritten = mbsw.finish ();
 
     byte compare[] = { 0x62, 0x81, 0x10, 0x81, 0xb6, 0x02 };
-    int compareLength = sizeof(compare) / sizeof(compare[0]);
+    uint compareLength = sizeof(compare) / sizeof(compare[0]);
     TEST_EQUALS(bytesWritten, compareLength);
     TEST_EQUALS(memcmp (&buffer[0], &compare[0], compareLength), 0);
 
@@ -342,5 +342,6 @@ TEST_CASE(MisbByteStreamReadBerOID) {
 }
 
 TEST_CASE(MisbByteStreamReadChecksum) {
+    TEST_NYI;
 }
 
