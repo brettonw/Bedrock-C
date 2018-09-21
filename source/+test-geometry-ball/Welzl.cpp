@@ -5,6 +5,42 @@
 TEST_CASE(FromPoints) {
     //Log::Scope scope (Log::TRACE);
 
+    // setup some points
+    f8 generatorRadius = 0.770121;
+
+    vector<Point2> points = {
+            Point2(0.27433, -0.602891),
+            Point2(0.646139, 0.0726192),
+            Point2(0.655708, 0.0600477),
+            Point2(0.665593, 0.0271438),
+            Point2(0.590471, -0.0601303),
+            Point2(0.809876, -0.709982),
+            Point2(0.602286, 0.0600833),
+            Point2 (0.141805, -0.497938),
+            Point2(0.500477, 0.557479),
+            Point2(0.684984, 0.711969)
+    };
+
+    // compute the bounding ball
+    auto ball = Welzl2::fromPoints (points.data (), points.size ());
+
+    // and confirm our result is the same or better than the setup
+    TEST_FALSE(ball.isEmpty());
+    TEST_XYOP(ball.getRadius(), generatorRadius + Point2::getEpsilon(), <=);
+
+    // run through all the points and be sure they are contained
+    Log::debug () << ball << endl;
+    Log::debug () << "Points (in important order):" << endl;
+    for (vector<Point2>::iterator iter = points.begin (); iter != points.end (); ++iter) {
+        Log::debug () << "  Point: " << *iter << ", Delta: " << (*iter - ball.getCenter ()).length () << endl;
+        TEST_TRUE (ball.contains(*iter));
+    }
+}
+
+
+TEST_CASE(FromRandomPoints) {
+    //Log::Scope scope (Log::TRACE);
+
     random_device randomDevice;
     mt19937 twister (randomDevice ());
     std::uniform_real_distribution<f8> dist(0.0, nextafter(1.0, numeric_limits<f8>::max ()));

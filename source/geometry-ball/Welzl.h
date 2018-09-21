@@ -4,6 +4,7 @@
 
 #define TRC trace (depth * 2)
 #define TRC1 trace ((depth * 2) + 1)
+#define USE_SHUFFLE
 
 template<typename Scalar, uint dimension>
 class Welzl {
@@ -38,9 +39,11 @@ class Welzl {
 
         Welzl (const Point* points, uint pointCount) : stateCount (0) {
             vector<Point> shuffledPoints (points, points + pointCount);
+            #ifdef USE_SHUFFLE
             random_device randomNumberGenerator;
             mt19937 twister(randomNumberGenerator ());
             shuffle(shuffledPoints.begin(), shuffledPoints.end(), twister);
+            #endif
 
             // put the points into our list to make splicing to front fast, and then start
             copy(shuffledPoints.begin(), shuffledPoints.end(), back_inserter(pointList));
@@ -109,7 +112,7 @@ class Welzl {
         }
 
         Ball getBoundingBall () const {
-            return ((stateCount > 0) && (states[stateCount - 1].valid)) ? Ball::fromCenterSquaredRadius(states[stateCount - 1].c, states[stateCount - 1].r) : Ball ();
+            return (stateCount > 0) ? Ball::fromCenterSquaredRadius(states[stateCount - 1].c, states[stateCount - 1].r) : Ball ();
         }
 
         // algorithm first described by Emo Welzl, in his paper "Smallest enclosing disks", which
@@ -143,19 +146,27 @@ class Welzl {
 
                     // check to see if the ball we have contains the current point
                     Log& trc1 = TRC1 << "Point - " << *current;
-                    if ((not ball.contains(*current)) and addBoundaryPoint (*iter)) {
+                    if (not ball.contains(*current)) {
+                        // the current point is outside the ball, so we want to try to build a new
+                        // ball with this one on its boundary. that might not succeed in some
+                        // circumstances, like co-located points...
                         trc1 << " - NOT CONTAINED" << endl;
-                        // the current point is outside the ball, so we want to build a new ball
-                        // that will contain it. add the current point to the boundary set, recur,
-                        // and then remove the current point from the boundary set.
-                        ball = algorithmMoveToFront (current);
-                        popBoundaryPoint ();
-                        TRC1 << "  Ball = " << ball << endl;
+                        if (addBoundaryPoint (*current)) {
+                            // we successfully built a new ball with the current point on its
+                            // border, so now we have to recur, to revisit the important points we
+                            // previously identified.
+                            ball = algorithmMoveToFront (current);
+                            TRC1 << "  Ball = " << ball << endl;
 
-                        // move "current" to the front, so subsequent iterations over the points
-                        // will encounter it early. on an intuitive level, this process sorts the
-                        // point list by decreasing distance to the center of the optimal ball.
-                        pointList.splice (pointList.begin(), pointList, current);
+                            // and then remove the current point from the boundary set.
+                            popBoundaryPoint ();
+
+                            // move "current" to the front, so subsequent iterations over the
+                            // points will encounter it early. on an intuitive level, this process
+                            // sorts the point list by decreasing distance to the center of the
+                            // optimal ball.
+                            pointList.splice (pointList.begin(), pointList, current);
+                        }
                     } else {
                         trc1 << " - contained" << endl;
                     }
@@ -233,16 +244,20 @@ class Welzl {
         }
 
     public:
-        static Ball fromPointsB (const Point* points, uint pointCount) {
+#define ITERATIVE_METHOD 1
+#if ITERATIVE_METHOD == 1
+        static Ball fromPoints (const Point* points, uint pointCount) {
             return Welzl (points, pointCount).fromPoints();
         }
-
+#else
         static Ball fromPoints (const Point* points, uint pointCount) {
             // make a shuffled copy of the points
             vector<Point> shuffledPoints (points, points + pointCount);
+            #ifdef USE_SHUFFLE
             random_device randomNumberGenerator;
             mt19937 twister(randomNumberGenerator ());
             shuffle(shuffledPoints.begin(), shuffledPoints.end(), twister);
+            #endif
 
             // put the points into a list to make splicing to front fast, and then start
             PointList pointList (shuffledPoints.begin (), shuffledPoints.end ());
@@ -250,6 +265,7 @@ class Welzl {
             Ball ball;
             return algorithmMoveToFront (pointList, pointList.end(), boundaryPoints, ball);
         }
+#endif
 };
 
 #undef TRC
