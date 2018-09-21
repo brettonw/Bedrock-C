@@ -43,7 +43,7 @@ TEST_CASE(FromRandomPoints) {
 
     random_device randomDevice;
     mt19937 twister (randomDevice ());
-    std::uniform_real_distribution<f8> dist(0.0, nextafter(1.0, numeric_limits<f8>::max ()));
+    std::uniform_real_distribution<f8> dist(0.0, 1.0);
 
     for (int i = 0; i < 100; ++i) {
         // generate a random circle
