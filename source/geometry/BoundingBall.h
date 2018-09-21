@@ -27,9 +27,9 @@ class BoundingBall {
 
     public:
         BoundingBall () : squaredRadius (-1) {}
-
         BoundingBall (const Point& _center) : center (_center), squaredRadius (0) {}
 
+        // these are here to differentiate the constructors from a point and scalar
         static BoundingBall fromCenterRadius (const Point& center, Scalar radius) {
             return BoundingBall (center, radius * radius);
         }
@@ -97,7 +97,7 @@ class BoundingBall {
                     } else {
                         // equation 9/10
                         Scalar e = (boundaryPoints[current] - center).lengthSq () - squaredRadius;
-                        center += (e * v[current]) / z[current];
+                        center += (e / z[current]) * v[current];
                         squaredRadius += (e * e) / (2 * z[current]);
                     }
                 }
