@@ -9,7 +9,7 @@
 // this test checks that the mechanism for indexing a 2 dimensional array is largely irrelevant,
 // from a performance point of view. we use this finding to justify a non-storage based approach to
 // indexing (just math)
-TEST_CASE(MatrixAccessTimes) {
+TEST_CASE(AccessTimes) {
     //Log::Scope scope (Log::TRACE);
 
     f8* nm[TEST_ARRAY_SIZE];

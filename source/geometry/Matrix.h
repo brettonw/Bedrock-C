@@ -2,28 +2,34 @@
 
 #include "MatrixHelper.h"
 
-template<typename Scalar, uint m, uint n>
+template<typename Scalar, uint rows, uint cols>
 class Matrix {
     public:
-        typedef Matrix<Scalar, m, n> Mat;
+        typedef Matrix<Scalar, rows, cols> Mat;
 
     private:
-        Scalar  nm[m * n];
+        Scalar  nm[cols * rows];
 
     public:
         Matrix () {}
         Matrix (const Mat& matrix) {
-            TupleHelper<Scalar, m * n>::copy(nm, matrix.nm);
+            TupleHelper<Scalar, cols * rows>::copy(nm, matrix.nm);
         }
 
         Scalar& operator () (uint row, uint column) {
-            return nm[column + (row * m)];
+            return nm[column + (cols * row)];
         }
 
-        template <int dim = m, typename std::enable_if<dim == n, void>::type* = nullptr>
+        template <typename enable_if<cols == rows, void>::type* = nullptr>
         Matrix& identity () {
-            IdentityHelper<Scalar, m, m, m>::identity(nm);
+            MatrixIdentityHelper<Scalar, rows, rows, rows>::identity(nm);
             return *this;
+        }
+
+        template<uint otherCols>
+        static Matrix<Scalar, rows, otherCols>& multiply (const Matrix<Scalar, rows, cols>& left, const Matrix<Scalar, cols, otherCols>& right, Matrix<Scalar, rows, otherCols>& result) {
+            //MatrixMultiplyHelper<Scalar, ...>
+            return result;
         }
 
         // fill

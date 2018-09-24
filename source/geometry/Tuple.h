@@ -11,7 +11,7 @@ enum Coordinate {
 #define DOT |
 #define CROSS ^
 
-#define ENABLE_DIMENSION(ddd) template <int dim = dimension, typename std::enable_if<dim == ddd, void>::type* = nullptr>
+#define ENABLE_DIMENSION(ddd) template <uint dim = dimension, typename enable_if<dim == ddd, void>::type* = nullptr>
 
 template<typename Scalar, uint dimension>
 class Tuple {
