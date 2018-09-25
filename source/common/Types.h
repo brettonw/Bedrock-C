@@ -27,3 +27,7 @@ typedef double          f8;
 #define bit_and         &
 #define bit_or          |
 #define complement      ~
+
+// https://www.cocoawithlove.com/2008/04/using-pointers-to-recast-in-c-is-bad.html
+#define union_cast(value, CastToType) (((union {__typeof__(value) a; CastToType b;})value).b)
+
