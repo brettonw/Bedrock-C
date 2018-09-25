@@ -2,6 +2,7 @@
 
 #include "Bag.h"
 #include "Utf8.h"
+#include "File.h"
 
 // this Json reader is loosely modeled after a JSON parser grammar from http://www.json.org, and
 // implemented for the bedrock libraries in Java (https://github.com/brettonw/Bedrock). the main
@@ -296,6 +297,15 @@ class Json {
             } catch (RuntimeError& runtimeError) {
                 // this indicates a UTF read failure in the first code
                 Log::exception(runtimeError);
+            }
+            return PtrToBagThing ();
+        }
+
+        static PtrToBagThing readFile (const Text& filename) {
+            File file (filename);
+            if (file.getExists ()) {
+                Text text = file.readText();
+                return readBagThing(text);
             }
             return PtrToBagThing ();
         }

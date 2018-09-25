@@ -20,13 +20,6 @@ MAKE_PTR_TO_SUB(BagContainer, BagThing) {
 
         virtual const PtrToBagThing get (const Text& path) const = 0;
 
-        Text getBagTextX (const Text& path) const {
-            PtrToBagThing bagThing = get (path);
-            PtrToBagText bagText = ptr_downcast<BagText> (bagThing);
-            Text text = bagText->get ();
-            return text;
-        }
-
         #define GET_TYPE(bagType, bagTypeType, baseType)                                            \
             baseType get ## bagType (const Text& path) const  {                                     \
                 PtrToBagThing bagThing = convert (get (path), BagType::bagTypeType);                \
