@@ -28,6 +28,16 @@ typedef double          f8;
 #define bit_or          |
 #define complement      ~
 
-// https://www.cocoawithlove.com/2008/04/using-pointers-to-recast-in-c-is-bad.html
-#define union_cast(value, CastToType) (((union {__typeof__(value) a; CastToType b;})value).b)
-
+// c++ doesn't provide a general ability to change how you view a block of memory in a fundamental
+// type, especially when optimizing code that assumes dependence or independence of access to
+// variables. but sometimes, that is what we need to do. unfortunately, the compiler will complain
+// about "punning" if we do something like "if ((*(ulong*) &aFloat) == (*(ulong*) &anotherFloat))".
+//
+// this casting operator allows us to explicitly say that we want to change how the compiler treats
+// a value in memory. note that it creates a temporary, a copy of the original to accomplish this,
+// so avoids the punning problem.
+template<typename CastToType, typename CastFromType>
+CastToType union_cast (CastFromType& fromValue) {
+    union {CastFromType fromValue; CastToType toValue;} unionValue = { .fromValue = fromValue };
+    return unionValue.toValue;
+}

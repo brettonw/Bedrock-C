@@ -214,37 +214,37 @@ TEST_CASE(MisbSpecialValues) {
     encodedValue = Misb::encode (testValue, min, max, byteCount);
     TEST_EQUALS(encodedValue, Misb::SPECIAL_POSITIVE_INFINITY << ((byteCount - 1) * 8));
     decodedValue = Misb::decode (encodedValue, min, max, byteCount);
-    TEST_EQUALS(*(unsigned long* )&decodedValue, *(unsigned long* )&testValue);
+    TEST_EQUALS(union_cast<ulong> (decodedValue), union_cast<ulong> (testValue));
 
     testValue = -numeric_limits<double>::infinity ();
     encodedValue = Misb::encode (testValue, min, max, byteCount);
     TEST_EQUALS(encodedValue, Misb::SPECIAL_NEGATIVE_INFINITY << ((byteCount - 1) * 8));
     decodedValue = Misb::decode (encodedValue, min, max, byteCount);
-    TEST_EQUALS(*(unsigned long* )&decodedValue, *(unsigned long* )&testValue);
+    TEST_EQUALS(union_cast<ulong> (decodedValue), union_cast<ulong> (testValue));
 
     testValue = numeric_limits<double>::quiet_NaN ();
     encodedValue = Misb::encode (testValue, min, max, byteCount);
     TEST_EQUALS(encodedValue, Misb::SPECIAL_POSITIVE_QNAN << ((byteCount - 1) * 8));
     decodedValue = Misb::decode (encodedValue, min, max, byteCount);
-    TEST_EQUALS(*(unsigned long* )&decodedValue, *(unsigned long* )&testValue);
+    TEST_EQUALS(union_cast<ulong> (decodedValue), union_cast<ulong> (testValue));
 
     testValue = -numeric_limits<double>::quiet_NaN ();
     encodedValue = Misb::encode (testValue, min, max, byteCount);
     TEST_EQUALS(encodedValue, Misb::SPECIAL_NEGATIVE_QNAN << ((byteCount - 1) * 8));
     decodedValue = Misb::decode (encodedValue, min, max, byteCount);
-    TEST_EQUALS(*(unsigned long* )&decodedValue, *(unsigned long* )&testValue);
+    TEST_EQUALS(union_cast<ulong> (decodedValue), union_cast<ulong> (testValue));
 
     testValue = numeric_limits<double>::signaling_NaN ();
     encodedValue = Misb::encode (testValue, min, max, byteCount);
     TEST_EQUALS(encodedValue, Misb::SPECIAL_POSITIVE_SNAN << ((byteCount - 1) * 8));
     decodedValue = Misb::decode (encodedValue, min, max, byteCount);
-    TEST_EQUALS(*(unsigned long* )&decodedValue, *(unsigned long* )&testValue);
+    TEST_EQUALS(union_cast<ulong> (decodedValue), union_cast<ulong> (testValue));
 
     testValue = -numeric_limits<double>::signaling_NaN ();
     encodedValue = Misb::encode (testValue, min, max, byteCount);
     TEST_EQUALS(encodedValue, Misb::SPECIAL_NEGATIVE_SNAN << ((byteCount - 1) * 8));
     decodedValue = Misb::decode (encodedValue, min, max, byteCount);
-    TEST_EQUALS(*(unsigned long* )&decodedValue, *(unsigned long* )&testValue);
+    TEST_EQUALS(union_cast<ulong> (decodedValue), union_cast<ulong> (testValue));
 }
 
 TEST_CASE(MisbChecksum) {
