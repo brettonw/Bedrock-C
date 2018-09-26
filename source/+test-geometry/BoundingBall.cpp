@@ -32,7 +32,7 @@ TEST_CASE(From2BoundaryPoints) {
 }
 
 TEST_CASE(From3BoundaryPoints) {
-    //Log::Scope scope (Log::TRACE);
+    Log::Scope scope (Log::TRACE);
     Vector2 points[] = {Vector2 (-3, 4), Vector2 (4, 5), Vector2(1, -4)};
     auto ball = BoundingBall2::fromBoundaryPoints (points, 3);
     Log::debug () << "center: " << ball.getCenter () << endl;

@@ -13,6 +13,7 @@
         }
     },
     "tools": {
-        "cloc": "echo 'SOURCES'; wc -l `find $sourcePath -name '*.[hc]*' | grep -v '+test'` | sort; echo 'TEST'; wc -l `find $sourcePath -name '*.[hc]*' | grep '+test'` | sort"
+        "cloc": "echo 'SOURCES'; wc -l `find $sourcePath -name '*.[hc]*' | grep -v '+test'` | sort; echo 'TEST'; wc -l `find $sourcePath -name '*.[hc]*' | grep '+test'` | sort",
+        "status": "git status"
     }
 }
