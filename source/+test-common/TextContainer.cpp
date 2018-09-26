@@ -1,6 +1,8 @@
 #include "Test.h"
 #include "TextContainer.h"
 
+TEST_MODULE_DEPENDENCIES (TextContainer, "Text")
+
 TEST_CASE (TextLess) {
     Text    a ("hello");
     Text    b ("there");

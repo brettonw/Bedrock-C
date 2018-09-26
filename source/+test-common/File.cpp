@@ -1,7 +1,9 @@
 #include "Test.h"
 #include "File.h"
 
-TEST_CASE(FileExists) {
+TEST_MODULE_DEPENDENCIES (File, "Text")
+
+TEST_CASE (Exists) {
     File file ("test.txt");
     TEST_TRUE(file.getExists ());
 
@@ -12,7 +14,7 @@ TEST_CASE(FileExists) {
     TEST_FALSE(junk.getExists ());
 }
 
-TEST_CASE(FileBasename) {
+TEST_CASE(Basename) {
     File file ("./test.txt");
     TEST_EQUALS(file.getPath (), "./test.txt");
     TEST_EQUALS(file.getBasename (), "test");
@@ -32,7 +34,7 @@ TEST_CASE(FileBasename) {
     TEST_EQUALS(file3.getExtension (), "txt");
 }
 
-TEST_CASE(FileIsDirectory) {
+TEST_CASE(IsDirectory) {
     //Log::Scope scope (Log::DEBUG);
 
     File file ("test.txt");
@@ -51,7 +53,7 @@ TEST_CASE(FileIsDirectory) {
     Log::debug () << files.size () << " files in directory (" << directory.getPath () << ")" << endl;
 }
 
-TEST_CASE(FileDirname) {
+TEST_CASE(Dirname) {
     //Log::Scope scope (Log::DEBUG);
 
     PtrToFile executable = File::getExecutable();
@@ -63,7 +65,7 @@ TEST_CASE(FileDirname) {
     Log::debug() << "Executable Path: " << directory->getPath() << endl;
 }
 
-TEST_CASE(FileRead) {
+TEST_CASE(Read) {
     File    file ("test.txt");
     PtrToBuffer buffer = file.read ();
     byte compare[] = { 'T', 'e', 's', 't', '\n' };
@@ -71,7 +73,7 @@ TEST_CASE(FileRead) {
     TEST_EQUALS(buffer->compare (compare, 5), 0);
 }
 
-TEST_CASE(FileReadText) {
+TEST_CASE(ReadText) {
     File file ("test.txt");
     Text text = file.readText ();
     TEST_EQUALS(text, "Test\n");

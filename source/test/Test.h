@@ -70,14 +70,17 @@
 #define TEST_CASE_WITH_DEPENDENCIES(name, dependencies)                                         \
             class TEST_CASE_##name : public UnitTest {                                          \
                 public:                                                                         \
-                    TEST_CASE_##name () : UnitTest (#name, __FILE__) {                          \
-                        callTest ();                                                            \
-                    }                                                                           \
+                    TEST_CASE_##name () : UnitTest (#name, __FILE__) {}                         \
                     virtual void test ();                                                       \
                     virtual Text getDependencies () const { return dependencies; }              \
-                    static TEST_CASE_##name test##name;                                         \
+                    static TEST_CASE_##name object;                                             \
             };                                                                                  \
-            TEST_CASE_##name TEST_CASE_##name::test##name;                                      \
+            TEST_CASE_##name TEST_CASE_##name::object;                                          \
             void TEST_CASE_##name::test ()
+
+#define TEST_MODULE_DEPENDENCIES(module, dependencies)                                          \
+            TEST_CASE_WITH_DEPENDENCIES(module##Dependencies, dependencies) {                   \
+                ++assertionsCount;                                                              \
+            }
 
 #define TEST_CASE(name) TEST_CASE_WITH_DEPENDENCIES(name, "")

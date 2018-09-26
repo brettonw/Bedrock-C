@@ -2,4 +2,4 @@
 
 UnitTest* UnitTest::currentUnitTest = 0;
 BagObject* UnitTest::configurationObject;
-TextMap<UnitTest*>* UnitTest::registry;
+TextMap<TextMap<UnitTest*>>* UnitTest::registry;

@@ -1,6 +1,8 @@
 #include "Test.h"
 #include "Text.h"
 
+TEST_MODULE_DEPENDENCIES (Text, "RawText")
+
 TEST_CASE (Text0) {
     TEST_EQUALS(sizeof(Text), sizeof(void*));
 }

@@ -1,6 +1,8 @@
 #include "Test.h"
 #include "BoundingBox.h"
 
+TEST_MODULE_DEPENDENCIES (BoundingBox, "Tuple")
+
 TEST_CASE(BoundingBox) {
     //Log::Scope scope (Log::TRACE);
     BoundingBox<f8, 2> box;

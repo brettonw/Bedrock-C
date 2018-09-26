@@ -1,6 +1,8 @@
 #include "Test.h"
 #include "Hyperplane.h"
 
+TEST_MODULE_DEPENDENCIES (Hyperplane2, "Tuple")
+
 TEST_CASE(Hyperplane2) {
     //Log::Scope scope (Log::TRACE);
 

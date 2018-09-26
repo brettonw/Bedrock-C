@@ -1,6 +1,8 @@
 #include "Test.h"
 #include "PtrTo.h"
 
+TEST_MODULE_DEPENDENCIES (PtrTo, "ReferenceCountedObject")
+
 MAKE_PTR_TO(TestClass) {
     private:
         static set<void*> ptrs;

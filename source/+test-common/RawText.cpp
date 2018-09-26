@@ -1,6 +1,8 @@
 #include "Test.h"
 #include "RawText.h"
 
+TEST_MODULE_DEPENDENCIES (RawText, "Buffer")
+
 TEST_CASE (RawText) {
     //Log::Scope  scope (Log::DEBUG);
 

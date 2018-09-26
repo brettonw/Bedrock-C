@@ -38,46 +38,16 @@ class UnitTest {
 
         static UnitTest* currentUnitTest;
         static BagObject* configurationObject;
-        static TextMap<UnitTest*>* registry;
 
-    public:
-        UnitTest (const Text& _name, const Text& sourceFileName) : name (_name), module (File (sourceFileName).getBasename ()), assertionsCount (0) {
-            if (not registry) {
-                registry = new TextMap<UnitTest*> ();
-            }
-            registry->set(name, this);
-        }
-
-        virtual ~UnitTest () {}
-
-        static bool test (bool assertion) {
-            if (currentUnitTest) {
-                ++currentUnitTest->assertionsCount;
-            }
-           return assertion;
-        }
-
-        virtual void test () = 0;
-        virtual Text getDependencies () const = 0;
-
-        static void runOne (const Text& testName) {
-            // ignore any test dependencies
-            UnitTest** test = registry->get(testName);
-            if (test) {
-                (*test)->callTest ();
-            }
-        }
-
-        static void runAll () {
-
-        }
+        // registry is a module::testname split, test dependencies are typically at a module level
+        static TextMap<TextMap<UnitTest*>>* registry;
 
         void callTest () {
             try {
                 currentUnitTest = this;
                 int logLevel = getLogLevel ();
                 if (logLevel >= 0) {
-                    Log::info () << "TEST: (" << module << ") " << name << endl;
+                    Log::info () << "TEST: (" << module << "." << name << ")" << endl;
                     {
                         Log::Scope scope (static_cast<uint> (logLevel));
                         test ();
@@ -139,6 +109,98 @@ class UnitTest {
             }
 
             return logLevel;
+        }
+
+        static TextSet getModuleDependencies (const Text& moduleName) {
+            TextSet result;
+            TextMap<UnitTest*> module = (*registry)[moduleName];
+            for (TextMap<UnitTest*>::const_iterator iter = module.begin (); iter != module.end (); ++iter) {
+                Text dependencies = iter->second->getDependencies();
+                if (dependencies.length() > 0) {
+                    vector<Text> dependencyArray = dependencies.split (",");
+                    for (vector<Text>::iterator depIter = dependencyArray.begin (); depIter != dependencyArray.end (); ++depIter) {
+                        result.put(*depIter);
+                    }
+                }
+            }
+            return result;
+        }
+
+        static void traverseDependencies (TextSet& touched, vector<Text>& targetDependencies, const Text& moduleName, const Text& forModuleName) {
+            if (registry->contains(moduleName)) {
+                if (not touched.contains(moduleName)) {
+                    touched.put(moduleName);
+                    TextSet dependencies = getModuleDependencies (moduleName);
+                    for (TextSet::iterator iter = dependencies.begin (); iter != dependencies.end (); ++iter) {
+                        traverseDependencies (touched, targetDependencies, *iter, moduleName);
+                    }
+                    targetDependencies.push_back(moduleName);
+                }
+            } else {
+                // unknown dependency
+                Log::error () << "Dependency (" << moduleName << ") of (" << forModuleName << ") is not a known test." << endl;
+            }
+        }
+
+    public:
+        UnitTest (const Text& _name, const Text& sourceFileName) : name (_name), module (File (sourceFileName).getBasename ()), assertionsCount (0) {
+            if (not registry) {
+                registry = new TextMap<TextMap<UnitTest*>> ();
+            }
+            (*registry)[module][name] = this;
+        }
+
+        virtual ~UnitTest () {}
+
+        const Text& getName () const {
+            return name;
+        }
+
+        const Text& getModule () const {
+            return module;
+        }
+
+        static bool test (bool assertion) {
+            if (currentUnitTest) {
+                ++currentUnitTest->assertionsCount;
+            }
+           return assertion;
+        }
+
+        virtual void test () = 0;
+        virtual Text getDependencies () const = 0;
+
+        static void runOne (const Text& descriptor) {
+            // test descriptors are given by "module.name" - if name is missing, we run all the
+            // tests in the requested module - this method runs the requested tests, it does not
+            // try to resolve dependencies
+            vector<Text> pair = descriptor.split (".");
+            TextMap<UnitTest*> module = (*registry)[pair[0]];
+            if (pair.size() == 2) {
+                module[pair[1]]->callTest();
+            } else {
+                for (TextMap<UnitTest*>::const_iterator iter = module.begin (); iter != module.end (); ++iter) {
+                    iter->second->callTest();
+                }
+            }
+        }
+
+        static void runAll () {
+            // the dependencies string with each registered test defines a graph that we have to
+            // traverse to get the list of tests in the order we will run them
+            TextSet touched;
+            vector<Text> dependencies;
+            for (typename TextMap<TextMap<UnitTest*>>::const_iterator iter = registry->begin (); iter != registry->end (); ++iter) {
+                traverseDependencies (touched, dependencies, iter->first, "ALL");
+            }
+            for (vector<Text>::const_iterator iter = dependencies.begin (); iter != dependencies.end (); ++iter) {
+                runOne (*iter);
+            }
+            /*
+            for (TextMap<UnitTest*>::const_iterator iter = registry->begin (); iter != registry->end (); ++iter) {
+                iter->second->callTest();
+            }
+            */
         }
 
         static void writeConfiguration () {

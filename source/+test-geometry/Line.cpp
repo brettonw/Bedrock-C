@@ -1,6 +1,8 @@
 #include "Test.h"
 #include "Line.h"
 
+TEST_MODULE_DEPENDENCIES (Line2, "Tuple")
+
 TEST_CASE(Line2) {
     //Log::Scope scope (Log::TRACE);
 

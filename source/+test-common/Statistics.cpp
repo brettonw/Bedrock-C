@@ -1,6 +1,8 @@
 #include "Test.h"
 #include "Statistics.h"
 
+TEST_MODULE_DEPENDENCIES (Statistics, "Types")
+
 TEST_CASE (Statistics) {
     //Log::Scope scope (Log::DEBUG);
 

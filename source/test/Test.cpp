@@ -7,6 +7,10 @@ TEST_CASE(ForceFailure) {
 */
 
 int main (int argc, char** argv) {
+    // TODO process the arguments to "run one", override a test configuration, or force initialization of configuration
+
+    cerr << "STARTING TESTS..." << endl;
+    UnitTest::runAll();
 	cerr << "TESTS COMPLETED SUCCESSFULLY!" << endl;
 
 	UnitTest::writeConfiguration();
