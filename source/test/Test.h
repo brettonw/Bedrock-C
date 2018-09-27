@@ -79,7 +79,7 @@
             void TEST_CASE_##name::test ()
 
 #define TEST_MODULE_DEPENDENCIES(module, dependencies)                                          \
-            TEST_CASE_WITH_DEPENDENCIES(module##Dependencies, dependencies) {                   \
+            TEST_CASE_WITH_DEPENDENCIES(_Dependencies_##module, dependencies) {                 \
                 ++assertionsCount;                                                              \
             }
 
