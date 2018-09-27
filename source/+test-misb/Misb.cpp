@@ -1,6 +1,8 @@
 #include "Test.h"
 #include "Misb.h"
 
+TEST_MODULE_DEPENDENCIES (Misb, "Range")
+
 TEST_CASE(MisbComputeByteBount) {
     //void Misb::computeByteCount (double min, double max, double precision, uint* byteCount)
     uint byteCount = 0;

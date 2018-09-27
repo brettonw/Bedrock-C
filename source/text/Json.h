@@ -143,7 +143,7 @@ class Json {
                 const byte* stop = decoder.getCurrent();
                 decoder.goNext ();
                 Text string ((const char*)(start), stop - start);
-                Log::debug () << "readString (" << string << ")" << endl;
+                Log::trace () << "readString (" << string << ")" << endl;
                 return string;
             }
 
@@ -160,7 +160,7 @@ class Json {
             const byte* start = consumeUntilStop (bareValueStopChars);
             const byte* stop = decoder.getCurrent();
             Text string ((const char*)(start), stop - start);
-            Log::debug () << "readBareString (" << string << ")" << endl;
+            Log::trace () << "readBareString (" << string << ")" << endl;
             return string;
         }
 

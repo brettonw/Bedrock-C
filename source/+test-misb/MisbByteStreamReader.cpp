@@ -2,6 +2,8 @@
 #include "MisbByteStreamReader.h"
 #include "MisbByteStreamWriter.h"
 
+TEST_MODULE_DEPENDENCIES (MisbByteStreamReader, "MisbByteStream,ReadSupplier")
+
 #define MISB_BYTE_STREAM_WRITER_X MisbByteStreamWriter0
 #define MISB_BYTE_STREAM_READER_X MisbByteStreamReader0
 
