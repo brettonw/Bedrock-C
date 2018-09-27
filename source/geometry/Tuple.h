@@ -32,17 +32,26 @@ class Tuple {
 
         ENABLE_DIMENSION(2)
         Tuple (Scalar x, Scalar y) {
-            TupleHelper<Scalar, dimension>::rcopy (value, &x);
+            //TupleHelper<Scalar, dimension>::rcopy (value, &x);
+            value[0] = x;
+            value[1] = y;
         }
 
         ENABLE_DIMENSION(3)
         Tuple (Scalar x, Scalar y, Scalar z) {
-            TupleHelper<Scalar, dimension>::rcopy (value, &x);
+            //TupleHelper<Scalar, dimension>::rcopy (value, &x);
+            value[0] = x;
+            value[1] = y;
+            value[2] = z;
         }
 
         ENABLE_DIMENSION(4)
         Tuple (Scalar x, Scalar y, Scalar z, Scalar w) {
-            TupleHelper<Scalar, dimension>::rcopy (value, &x);
+            //TupleHelper<Scalar, dimension>::rcopy (value, &x);
+            value[0] = x;
+            value[1] = y;
+            value[2] = z;
+            value[3] = w;
         }
 
         Tuple (Scalar* source) {
