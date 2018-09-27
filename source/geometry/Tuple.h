@@ -32,26 +32,26 @@ class Tuple {
 
         ENABLE_DIMENSION(2)
         Tuple (Scalar x, Scalar y) {
+            // the optimizer doesn't pass the parameters on the stack, so the too-clever by half
+            // reverse-copy approach doesn't work in release build
             //TupleHelper<Scalar, dimension>::rcopy (value, &x);
-            value[0] = x;
-            value[1] = y;
+            value[0] = x; value[1] = y;
         }
 
         ENABLE_DIMENSION(3)
         Tuple (Scalar x, Scalar y, Scalar z) {
+            // the optimizer doesn't pass the parameters on the stack, so the too-clever by half
+            // reverse-copy approach doesn't work in release build
             //TupleHelper<Scalar, dimension>::rcopy (value, &x);
-            value[0] = x;
-            value[1] = y;
-            value[2] = z;
+            value[0] = x; value[1] = y; value[2] = z;
         }
 
         ENABLE_DIMENSION(4)
         Tuple (Scalar x, Scalar y, Scalar z, Scalar w) {
+            // the optimizer doesn't pass the parameters on the stack, so the too-clever by half
+            // reverse-copy approach doesn't work in release build
             //TupleHelper<Scalar, dimension>::rcopy (value, &x);
-            value[0] = x;
-            value[1] = y;
-            value[2] = z;
-            value[3] = w;
+            value[0] = x; value[1] = y; value[2] = z; value[3] = w;
         }
 
         Tuple (Scalar* source) {
