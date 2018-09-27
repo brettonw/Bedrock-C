@@ -16,7 +16,7 @@ class Welzl {
         PointList pointList;
 
         struct State {
-            Point p;
+            Point  p;   // the boundary point added to reach this state
             Point  c;   // center point of ball
             Scalar r;   // squared radius of ball
             Vector v;
