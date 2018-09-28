@@ -55,7 +55,7 @@
 #define TEST_TRUE(_x) TEST_XYOP(bool (_x), true, ==)
 #define TEST_FALSE(_x) TEST_XYOP(bool (_x), false, ==)
 
-#define TEST_NYI Log::debug () << "Not Yet Implemented" << endl; UnitTest::test (true)
+#define TEST_NYI Log::debug () << "Not Yet Implemented" << endl; ++assertionsCount
 
 #define EXPECT_FAIL(_x) {                                                                       \
                 try {                                                                           \
@@ -67,10 +67,10 @@
                 }                                                                               \
             }
 
-#define TEST_CASE_WITH_DEPENDENCIES(name, dependencies)                                         \
+#define TEST_CASE_WITH_DEPENDENCIES_CALL(name, dependencies, call)                              \
             class TEST_CASE_##name : public UnitTest {                                          \
                 public:                                                                         \
-                    TEST_CASE_##name () : UnitTest (#name, __FILE__) {}                         \
+                    TEST_CASE_##name () : UnitTest (#name, __FILE__, call) {}                   \
                     virtual void test ();                                                       \
                     virtual Text getDependencies () const { return dependencies; }              \
                     static TEST_CASE_##name object;                                             \
@@ -78,9 +78,12 @@
             TEST_CASE_##name TEST_CASE_##name::object;                                          \
             void TEST_CASE_##name::test ()
 
+#define TEST_CASE_WITH_DEPENDENCIES(name, dependencies)                                         \
+            TEST_CASE_WITH_DEPENDENCIES_CALL(name, dependencies, true)
+
 #define TEST_MODULE_DEPENDENCIES(module, dependencies)                                          \
-            TEST_CASE_WITH_DEPENDENCIES(_Dependencies_##module, dependencies) {                 \
+            TEST_CASE_WITH_DEPENDENCIES_CALL(_Dependencies_##module, dependencies, false) {     \
                 ++assertionsCount;                                                              \
             }
 
-#define TEST_CASE(name) TEST_CASE_WITH_DEPENDENCIES(name, "")
+#define TEST_CASE(name) TEST_CASE_WITH_DEPENDENCIES_CALL(name, "", true)

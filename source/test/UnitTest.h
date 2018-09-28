@@ -35,6 +35,7 @@ class UnitTest {
         Text name;
         Text module;
         uint assertionsCount;
+        bool call;
 
         static UnitTest* currentUnitTest;
         static BagObject* configurationObject;
@@ -43,33 +44,35 @@ class UnitTest {
         static TextMap<TextMap<UnitTest*>>* registry;
 
         void callTest () {
-            try {
-                currentUnitTest = this;
-                int logLevel = getLogLevel ();
-                if (logLevel >= 0) {
-                    Log::info () << "TEST: (" << module << "." << name << ")" << endl;
-                    {
-                        Log::Scope scope (static_cast<uint> (logLevel));
-                        test ();
-                    }
-                    if (assertionsCount > 0) {
-                        Log::debug () << "PASSED: " << name << endl << endl;
+            if (call) {
+                try {
+                    currentUnitTest = this;
+                    int logLevel = getLogLevel ();
+                    if (logLevel >= 0) {
+                        Log::info () << "TEST: (" << module << "." << name << ")" << endl;
+                        {
+                            Log::Scope scope (static_cast<uint> (logLevel));
+                            test ();
+                        }
+                        if (assertionsCount > 0) {
+                            Log::debug () << "PASSED: " << name << endl << endl;
+                        } else {
+                            Log::error () << "EMPTY: " << name << " (made no assertions)" << endl << endl;
+                            exit (EXIT_FAILURE);
+                        }
                     } else {
-                        Log::error () << "EMPTY: " << name << " (made no assertions)" << endl << endl;
-                        exit (EXIT_FAILURE);
+                        Log::info () << "SKIP: (" << module << ") " << name << endl;
                     }
-                } else {
-                    Log::info () << "SKIP: (" << module << ") " << name << endl;
+                } catch (RuntimeError& runtimeError) {
+                    Log::exception (runtimeError);
+                    exit (EXIT_FAILURE);
+                } catch (exception& exception) {
+                    cerr << "[OTHER] " << exception.what () << endl;
+                    exit (EXIT_FAILURE);
+                } catch (...) {
+                    cerr << "[ UNKN] exiting..." << endl;
+                    exit (EXIT_FAILURE);
                 }
-            } catch (RuntimeError& runtimeError) {
-                Log::exception (runtimeError);
-                exit (EXIT_FAILURE);
-            } catch (exception& exception) {
-                cerr << "[OTHER] " << exception.what () << endl;
-                exit (EXIT_FAILURE);
-            } catch (...) {
-                cerr << "[ UNKN] exiting..." << endl;
-                exit (EXIT_FAILURE);
             }
         }
 
@@ -143,7 +146,7 @@ class UnitTest {
         }
 
     public:
-        UnitTest (const Text& _name, const Text& sourceFileName) : name (_name), module (File (sourceFileName).getBasename ()), assertionsCount (0) {
+        UnitTest (const Text& _name, const Text& sourceFileName, bool _call) : name (_name), module (File (sourceFileName).getBasename ()), assertionsCount (0), call (_call) {
             if (not registry) {
                 registry = new TextMap<TextMap<UnitTest*>> ();
             }
