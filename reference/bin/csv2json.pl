@@ -10,6 +10,7 @@ sub readCsvFile {
     my $headers = [];
     my $data = [];
     if (open (my $csvFile, "<:encoding(UTF-8)", $csvFileName)) {
+        my $gotHeaders = 0;
         while (my $row = <$csvFile>) {
             chomp $row;
             $row =~ s/[\n\r]//g;
@@ -20,10 +21,15 @@ sub readCsvFile {
                     
                     # the format of these files is that the first two lines are the 
                     # filename and the header row, respectively
-                    if ($row =~ /^#(.*)/) {
-                        @{$headers} = split (/,\s*/, $1);
-                        if (scalar (@$headers) > 1) {
-                            #print STDERR "HEADERS: @headers\n";
+                    if ($gotHeaders == 0) {
+                        if ($row =~ /^#?(.*)/) {
+                            @{$headers} = split (/,\s*/, $1);
+                            if (scalar (@$headers) > 1) {
+                                #print STDERR "HEADERS: @$headers\n";
+                                $gotHeaders = 1;
+                            } else {
+                                print STDERR "SKIPPING LINE WITH NO HEADERS\n";
+                            }
                         }
                     } else {
                         # this is a data row - the approach could be more efficient, but for 
@@ -56,19 +62,24 @@ sub readCsvFile {
 print STDERR "$ARGV[0]\n";
 my $data = readCsvFile ($ARGV[0])->{data};
 
-my $rowSeparator = "[\n";
-for my $row (@$data) {
-    print $rowSeparator;
-    $rowSeparator = ",\n";
-    
-    my $separator = "    {";
-    for my $key (keys (%$row)) {
-        my $value = exists ($row->{$key}) ? $row->{$key} : "";
-        print "$separator\"$key\":\"$value\"";
-        $separator = ",";
+my $outputFileName = $ARGV[0];
+$outputFileName =~ s/\.csv$/.json/i;
+if (open (my $outputFile, ">:encoding(UTF-8)", $outputFileName)) {
+    my $rowSeparator = "[\n";
+    for my $row (@$data) {
+        print $outputFile $rowSeparator;
+        $rowSeparator = ",\n";
+        
+        my $separator = "    {";
+        for my $key (keys (%$row)) {
+            my $value = exists ($row->{$key}) ? $row->{$key} : "";
+            print $outputFile "$separator\"$key\":\"$value\"";
+            $separator = ",";
+        }
+        print $outputFile "}";
     }
-    print "}";
+    print $outputFile "\n]\n";
+    close $outputFile;
 }
-print "\n]\n";
 
 
