@@ -13,9 +13,8 @@
 #include <fstream>
 #include <unistd.h>
 
-
-#include "RuntimeError.h"
-#include "Buffer.h"
+#include "Log.h"
+#include "Text.h"
 
 MAKE_PTR_TO(File) {
     private:
@@ -77,7 +76,9 @@ MAKE_PTR_TO(File) {
                     while ((ent = readdir (directory))) {
                         Text name (ent->d_name);
                         if (name.find (".") != 0) {
-                            files.push_back (new File (ent->d_name));
+                            name = (path + "/") << name;
+                            Log::debug () << "Found dir file: " << name << endl;
+                            files.push_back (new File (name));
                         }
                     }
                     closedir (directory);

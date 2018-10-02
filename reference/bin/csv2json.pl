@@ -45,7 +45,11 @@ sub readCsvFile {
                                 }
                             }
                         }
-                        push (@$data, $rowData);
+                        if (scalar (keys %$rowData) > 0) {
+                            push (@$data, $rowData);
+                        } else {
+                            print STDERR "Empty row for ($row)\n";
+                        }
                     }
                 }
             } else {
@@ -59,27 +63,32 @@ sub readCsvFile {
     return {"headers" => $headers, "data" => $data};
 }
 
-print STDERR "$ARGV[0]\n";
-my $data = readCsvFile ($ARGV[0])->{data};
-
-my $outputFileName = $ARGV[0];
-$outputFileName =~ s/\.csv$/.json/i;
-if (open (my $outputFile, ">:encoding(UTF-8)", $outputFileName)) {
-    my $rowSeparator = "[\n";
-    for my $row (@$data) {
-        print $outputFile $rowSeparator;
-        $rowSeparator = ",\n";
-        
-        my $separator = "    {";
-        for my $key (keys (%$row)) {
-            my $value = exists ($row->{$key}) ? $row->{$key} : "";
-            print $outputFile "$separator\"$key\":\"$value\"";
-            $separator = ",";
+for my $arg (@ARGV) {
+    print STDERR "$arg\n";
+    my $data = readCsvFile ($arg)->{data};
+    
+    my $outputFileName = $arg;
+    $outputFileName =~ s/\.csv$/.json/i;
+    if (open (my $outputFile, ">:encoding(UTF-8)", $outputFileName)) {
+        my $rowSeparator = "[\n";
+        for my $row (@$data) {
+            if (scalar keys (%$row) > 0) {
+            print $outputFile $rowSeparator;
+            $rowSeparator = ",\n";
+            
+            my $separator = "    {";
+            for my $key (keys (%$row)) {
+                my $value = exists ($row->{$key}) ? $row->{$key} : "";
+                print $outputFile "$separator\"$key\":\"$value\"";
+                $separator = ",";
+            }
+            print $outputFile "}";
+            } else {
+                print STDERR "EMPTY ROW\n";
+            }
         }
-        print $outputFile "}";
+        print $outputFile "\n]\n";
+        close $outputFile;
     }
-    print $outputFile "\n]\n";
-    close $outputFile;
 }
-
 

@@ -301,12 +301,15 @@ class Json {
             return PtrToBagThing ();
         }
 
-        static PtrToBagThing readFile (const Text& filename) {
-            File file (filename);
-            if (file.getExists ()) {
-                Text text = file.readText();
+        static PtrToBagThing readFile (const PtrToFile& file) {
+            if (file->getExists ()) {
+                Text text = file->readText();
                 return readBagThing(text);
             }
             return PtrToBagThing ();
+        }
+
+        static PtrToBagThing readFile (const Text& filename) {
+            return readFile (new File (filename));
         }
 };
