@@ -77,12 +77,13 @@ MAKE_PTR_TO(File) {
                         Text name (ent->d_name);
                         if (name.find (".") != 0) {
                             name = (path + "/") << name;
-                            Log::debug () << "Found dir file: " << name << endl;
+                            Log::trace () << "Found file in directory (" << path << "): " << name << endl;
                             files.push_back (new File (name));
                         }
                     }
                     closedir (directory);
                 }
+                sort (files.begin (), files.end ());
                 return files;
             }
             throw RuntimeError (Text ("File (") << path << ") is not a directory");

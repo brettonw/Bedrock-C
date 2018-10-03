@@ -106,7 +106,7 @@ class BagObject : public BagContainer {
             return ptrToBagThing;
         }
 
-        bool contains (const Text& name) {
+        bool contains (const Text& name) const {
             return value.get (name);
         }
 
