@@ -138,4 +138,19 @@ TEST_CASE (TextReplace) {
     replaceResult = longString.replace ("xy", "&");
     TEST_EQUALS(replaceResult.length (), 10);
     TEST_EQUALS(replaceResult, longString);
+
+    longString = "a b c d";
+    replaceResult = longString.replace (" ", "-");
+    TEST_EQUALS(replaceResult.length (), 7);
+    TEST_EQUALS(replaceResult, "a-b-c-d");
+
+    longString = " a b c d";
+    replaceResult = longString.replace (" ", "-");
+    TEST_EQUALS(replaceResult.length (), 8);
+    TEST_EQUALS(replaceResult, "-a-b-c-d");
+
+    longString = "a b c d ";
+    replaceResult = longString.replace (" ", "-");
+    TEST_EQUALS(replaceResult.length (), 8);
+    TEST_EQUALS(replaceResult, "a-b-c-d-");
 }

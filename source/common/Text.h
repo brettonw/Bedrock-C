@@ -215,15 +215,8 @@ class Text {
         Text replace (const Text& pattern, const Text& value) const {
             vector<Text> parts = split (pattern);
             Text result = parts[0];
-            switch (parts.size ()) {
-                case 1:
-                    if (parts[0].length () != ptr->getLength ()) {
-                        result << value;
-                    }
-                    break;
-                case 2:
-                    result << value << parts[1];
-                    break;
+            for (int i = 1, end = parts.size(); i < end; ++i) {
+                result << value << parts[i];
             }
             return result;
         }
