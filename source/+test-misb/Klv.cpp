@@ -20,6 +20,6 @@ TEST_CASE(KlvRead) {
     Log::Scope scope (Log::DEBUG);
 
     Klv klv (File ("stennis.klv").read());
-    while (klv.readUniversalSet ()) {}
+    klv.readUniversalSet ();
     TEST_TRUE(true);
 }
