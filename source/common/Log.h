@@ -68,6 +68,7 @@ class Log {
             return *this;
         }
 
+        // this is the endl handler
         Log& operator << (std::ostream&(*f)(std::ostream&)) {
             if (level >= filterLevel) {
                 (*stream) << f;
