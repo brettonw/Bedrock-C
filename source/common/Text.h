@@ -304,6 +304,9 @@ ostream& operator << (ostream& ostr, const Text& text) {
     return ostr << (const char*) text;
 }
 
+#define END_LINE    "\n";
+
+// I'm not really sure where these should go...
 inline
 static Text hex (u8 value, const char* lead = "0x") {
     uint bitsNeeded = static_cast<u8> (ceil (log2 (value)));
@@ -318,4 +321,23 @@ static u8 fromHex (const char* hexString) {
     return strtoul (hexString, 0, 16);
 }
 
-#define END_LINE    "\n";
+inline Text hexBytes (const void* ptr, uint length, uint lineLength = 16, uint groupLength = 4) {
+    Text result;
+    const byte* bytes = static_cast<const byte*> (ptr);
+    const char* separator = "";
+    const char* lineSeparator = "";
+    uint groupsPerLine = lineLength / groupLength;
+    for (uint i = 0; i < length; ++i) {
+        if ((i % groupLength) == 0) {
+            result << separator;
+            separator = " ";
+        }
+        if ((i % lineLength) == 0) {
+            result << lineSeparator;
+            separator = "";
+        }
+        result << hex (bytes[i]);
+    }
+    return result;
+}
+
