@@ -321,22 +321,22 @@ static u8 fromHex (const char* hexString) {
     return strtoul (hexString, 0, 16);
 }
 
-inline Text hexBytes (const void* ptr, uint length, uint lineLength = 16, uint groupLength = 4) {
+inline Text hexBytes (const void* ptr, uint length, uint lineLength = 32, uint groupLength = 2) {
     Text result;
     const byte* bytes = static_cast<const byte*> (ptr);
-    const char* separator = "";
+    const char* separator;
     const char* lineSeparator = "";
-    uint groupsPerLine = lineLength / groupLength;
     for (uint i = 0; i < length; ++i) {
+        if ((i % lineLength) == 0) {
+            result << lineSeparator;
+            separator = "";
+            lineSeparator = END_LINE;
+        }
         if ((i % groupLength) == 0) {
             result << separator;
             separator = " ";
         }
-        if ((i % lineLength) == 0) {
-            result << lineSeparator;
-            separator = "";
-        }
-        result << hex (bytes[i]);
+        result << hex (bytes[i], "");
     }
     return result;
 }
