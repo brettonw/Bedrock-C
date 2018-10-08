@@ -18,8 +18,13 @@ TEST_CASE(KlvDictionary) {
 
 TEST_CASE(KlvRead) {
     Log::Scope scope (Log::DEBUG);
-
-    Klv klv (File ("stennis.klv").read());
-    klv.readUniversalSet ();
+    File klvDirectory ("klv");
+    vector<PtrToFile> files = klvDirectory.getFiles();
+    for (vector<PtrToFile>::iterator iter = files.begin (); iter != files.end (); ++iter) {
+        if ((*iter)->getExtension() == "klv") {
+            Klv klv ((*iter)->read());
+            klv.readUniversalSet ();
+        }
+    }
     TEST_TRUE(true);
 }
