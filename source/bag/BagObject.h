@@ -110,6 +110,11 @@ class BagObject : public BagContainer {
             return value.get (name);
         }
 
+        PtrToBagObject remove (const Text& name) {
+            value.erase (name);
+            return this;
+        }
+
         /*
         PtrToBagThing operator [] (const Text& name) {
             return get (name);

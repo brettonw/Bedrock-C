@@ -312,7 +312,7 @@ static Text hex (u8 value, const char* lead = "0x") {
     uint bitsNeeded = static_cast<u8> (ceil (log2 (value)));
     uint bytesNeeded = max ((bitsNeeded >> 3) + ((bitsNeeded & 0x07) ? 1u : 0), 1u);
     ostringstream out;
-    out << lead << setfill ('0') << setw (bytesNeeded * 2) << hex << value;
+    out << lead << setfill ('0') << setw (bytesNeeded * 2) << nouppercase << hex << value;
     return Text (out.str ().c_str ());
 }
 

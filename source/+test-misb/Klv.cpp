@@ -21,10 +21,21 @@ TEST_CASE(KlvRead) {
     File klvDirectory ("klv");
     vector<PtrToFile> files = klvDirectory.getFiles();
     for (vector<PtrToFile>::iterator iter = files.begin (); iter != files.end (); ++iter) {
+        Log::debug () << "Reading " << (*iter)->getBasename() << endl;
         if ((*iter)->getExtension() == "klv") {
             Klv klv ((*iter)->read());
-            klv.readUniversalSet ();
+            //try {
+                klv.readUniversalSet ();
+                //break;
+            //} catch (RuntimeError& error) {
+            //    Log::exception(error);
+            //}
         }
     }
+
+    // drop an accumulated version of the dictionary
+    PtrToBagObject misbDictionary = Klv::makeDictionary();
+    File output ("misb-dictionary.json");
+    output.writeText(misbDictionary->toJson());
     TEST_TRUE(true);
 }
