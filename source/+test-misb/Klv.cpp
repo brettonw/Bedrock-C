@@ -34,8 +34,6 @@ TEST_CASE(KlvRead) {
     }
 
     // drop an accumulated version of the dictionary
-    PtrToBagObject misbDictionary = Klv::makeDictionary();
-    File output ("misb-dictionary.json");
-    output.writeText(misbDictionary->toJson());
+    Klv::makeDictionary();
     TEST_TRUE(true);
 }
