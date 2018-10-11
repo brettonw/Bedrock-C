@@ -37,6 +37,14 @@ class TextMap : public map<Text, ValueType, TextLess> {
             return (find != this->end ()) ? &(find->second) : 0;
         }
 
+        vector<Text> keys () const {
+            vector<Text> result;
+            for (const_iterator iter = this->begin (); iter != this->end (); ++iter) {
+                result.push_back(iter->first);
+            }
+            return result;
+        }
+
         Text toText () const {
             Text result;
             const char* separator = "";
@@ -67,6 +75,14 @@ class TextSet : public set<Text, TextLess> {
 
         bool contains (const Text& value) {
             return (this->find (value) != this->end ());
+        }
+
+        vector<Text> keys () const {
+            vector<Text> result;
+            for (iterator iter = begin (); iter != end (); ++iter) {
+                result.push_back(*iter);
+            }
+            return result;
         }
 
         Text toText () const {

@@ -18,6 +18,7 @@ TEST_CASE(KlvDictionary) {
 
 TEST_CASE(KlvRead) {
     Log::Scope scope (Log::DEBUG);
+
     File klvDirectory ("klv");
     vector<PtrToFile> files = klvDirectory.getFiles();
     for (vector<PtrToFile>::iterator iter = files.begin (); iter != files.end (); ++iter) {
@@ -34,6 +35,7 @@ TEST_CASE(KlvRead) {
     }
 
     // drop an accumulated version of the dictionary
-    Klv::makeDictionary();
+    //Klv::makeDictionary();
+
     TEST_TRUE(true);
 }

@@ -19,7 +19,7 @@ TEST_CASE (TextSet) {
     TEST_EQUALS (ts.size(), 0);
     ts.put ("Hello");
     TEST_EQUALS (ts.size(), 1);
-    TEST_EQUALS (ts.contains(Text ("Hello")), true);
+    TEST_EQUALS (ts.contains("Hello"), true);
     ts.put ("World");
     TEST_EQUALS (ts.size(), 2);
     TEST_EQUALS (ts.contains(Text ("Hello")), true);
@@ -31,6 +31,10 @@ TEST_CASE (TextSet) {
 
     TEST_EQUALS (ts.toText (), "Hello, World");
     Log::debug () << ts << endl;
+
+    vector<Text> keys = ts.keys ();
+    TEST_EQUALS (keys[0], "Hello");
+    TEST_EQUALS (keys[1], "World");
 }
 
 TEST_CASE (TextMap) {
@@ -57,4 +61,8 @@ TEST_CASE (TextMap) {
 
     TEST_EQUALS (tm.toText (), "Hello: Joe, xxx: yyy");
     Log::debug () << tm << endl;
+
+    vector<Text> keys = tm.keys ();
+    TEST_EQUALS (keys[0], "Hello");
+    TEST_EQUALS (keys[1], "xxx");
 }

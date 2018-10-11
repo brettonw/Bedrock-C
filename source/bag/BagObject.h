@@ -115,6 +115,10 @@ class BagObject : public BagContainer {
             return this;
         }
 
+        vector<Text> keys () const {
+            return value.keys();
+        }
+
         /*
         PtrToBagThing operator [] (const Text& name) {
             return get (name);
