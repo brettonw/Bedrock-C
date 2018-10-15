@@ -100,11 +100,11 @@ class BagArray : public BagContainer {
         }
 
         #define GET_TYPE(bagType, bagTypeType, baseType)                                            \
-            baseType get ## bagType (uint index) const {                                            \
+            baseType get##bagType (uint index) const {                                              \
                 PtrToBagThing bagThing = convert (get (index), BagType::bagTypeType);               \
                 if (bagThing) {                                                                     \
-                    PtrToBag ## bagType bag ## bagType = ptr_downcast<Bag ## bagType> (bagThing);   \
-                    baseType thing = bag ## bagType->get ();                                        \
+                    PtrToBag##bagType bag##bagType = ptr_downcast<Bag##bagType> (bagThing);         \
+                    baseType thing = bag##bagType->get ();                                          \
                     return thing;                                                                   \
                 }                                                                                   \
                 throw RuntimeError (Text ("BagArray: can't fetch index ") << index <<               \
@@ -118,11 +118,11 @@ class BagArray : public BagContainer {
 
         #undef GET_TYPE
         #define GET_TYPE(bagType, baseType)                                                         \
-            baseType getBag ## bagType (uint index) const  {                                        \
+            baseType getBag##bagType (uint index) const  {                                          \
                 PtrToBagThing bagThing = get (index);                                               \
                 if (bagThing) {                                                                     \
-                    PtrToBag ## bagType bag ## bagType = ptr_downcast<Bag ## bagType> (bagThing);   \
-                    return bag ## bagType;                                                          \
+                    PtrToBag##bagType bag##bagType = ptr_downcast<Bag##bagType> (bagThing);         \
+                    return bag##bagType;                                                            \
                 }                                                                                   \
                 throw RuntimeError (Text ("BagArray: can't fetch index ") << index <<               \
                     " (of " << value.size () << ")");                                               \
