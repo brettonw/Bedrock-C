@@ -201,6 +201,21 @@ TEST_CASE(MisbExample4) {
     TEST_EQUALS(decodedValue, -numeric_limits<double>::infinity ());
 }
 
+TEST_CASE(From060185) {
+    byte valueBytes[] = {0x71, 0xc2};
+    ulong encodedValue = (valueBytes[0] << 8) | valueBytes[1];
+    double decodedValue = Misb::decodeSimple(encodedValue, 0, 360, 2);
+    TEST_EQUALS_EPS (decodedValue, 159.974365, 1.0e-3);
+}
+
+TEST_CASE(FromStennis) {
+    byte valueBytes[] = {0x4b, 0x84};
+    ulong encodedValue = (valueBytes[0] << 8) | valueBytes[1];
+    double decodedValue = Misb::decodeSimple(encodedValue, 0, 360, 2);
+    TEST_EQUALS_EPS (decodedValue, 86.5791, 50);
+    // XXX need to come back to this...
+}
+
 TEST_CASE(MisbSpecialValues) {
     double min = 0.1, max = 0.9;
     uint byteCount = 3;

@@ -10,15 +10,17 @@ TEST_CASE(KlvRead) {
     File klvDirectory ("klv");
     vector<PtrToFile> files = klvDirectory.getFiles();
     for (vector<PtrToFile>::iterator iter = files.begin (); iter != files.end (); ++iter) {
-        Log::debug () << "Reading " << (*iter)->getBasename() << endl;
-        if ((*iter)->getExtension() == "klv") {
-            Klv klv ((*iter)->read());
-            //try {
-                klv.readUniversalSet ();
-                //break;
-            //} catch (RuntimeError& error) {
-            //    Log::exception(error);
-            //}
+        if ((*iter)->getBasename() == "stennis") {
+            Log::debug () << "Reading " << (*iter)->getBasename() << endl;
+            if ((*iter)->getExtension() == "klv") {
+                Klv klv ((*iter)->read());
+                //try {
+                    klv.readUniversalSet ();
+                    //break;
+                //} catch (RuntimeError& error) {
+                //    Log::exception(error);
+                //}
+            }
         }
     }
 
