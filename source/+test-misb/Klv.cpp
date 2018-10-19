@@ -13,13 +13,7 @@ TEST_CASE(KlvRead) {
         if ((*iter)->getBasename() != "xxx") {
             Log::debug () << "Reading " << (*iter)->getBasename() << endl;
             if ((*iter)->getExtension() == "klv") {
-                Klv klv ((*iter)->read());
-                //try {
-                    klv.readUniversalSet ();
-                    //break;
-                //} catch (RuntimeError& error) {
-                //    Log::exception(error);
-                //}
+                Klv ((*iter)->read()).readUniversalSet ();
             }
         }
     }
