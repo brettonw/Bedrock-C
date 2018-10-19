@@ -14,3 +14,10 @@ TEST_CASE(MisbDictionary) {
     Text name = entry->getText("Name");
     TEST_EQUALS (name, "Sigma_Height");
 }
+
+/*
+TEST_CASE(Rewrite) {
+    MisbDictionary dictionary (MISB_DIR "misb-dictionary.json");
+    dictionary.rewrite(MISB_DIR "misb-database.json");
+}
+*/
