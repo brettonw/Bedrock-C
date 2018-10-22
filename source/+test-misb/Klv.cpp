@@ -13,7 +13,8 @@ TEST_CASE(KlvRead) {
         if ((*iter)->getBasename() != "xxx") {
             Log::debug () << "Reading " << (*iter)->getBasename() << endl;
             if ((*iter)->getExtension() == "klv") {
-                Klv ((*iter)->read()).readUniversalSet ();
+                PtrToMisbDictionary misbDictionary = new MisbDictionary (MISB_DIR "misb-database.json");
+                Klv (misbDictionary, (*iter)->read()).readUniversalSet ();
             }
         }
     }
@@ -35,6 +36,7 @@ TEST_CASE(ST0902) {
     for (vector<Text>::iterator iter = hexBytes.begin (); iter != hexBytes.end (); ++iter) {
         bytes.push_back(fromHex (*iter));
     }
-    Klv (Buffer::make (bytes.data(), bytes.size())).readUniversalSet ();
+    PtrToMisbDictionary misbDictionary = new MisbDictionary (MISB_DIR "misb-database.json");
+    Klv (misbDictionary, Buffer::make (bytes.data(), bytes.size())).readUniversalSet ();
     TEST_TRUE(true);
 }
