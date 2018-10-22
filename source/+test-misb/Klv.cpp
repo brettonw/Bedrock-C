@@ -21,7 +21,7 @@ TEST_CASE(KlvRead) {
 }
 
 TEST_CASE(ST0902) {
-    Log::Scope scope (Log::DEBUG);
+    //Log::Scope scope (Log::DEBUG);
 
     // this test file contains two UAS datalink packets given in ST0902.7, section 9, Annex C
     // the standard contains an omission in data for tag 0x14 where it sets the bytes to the value
