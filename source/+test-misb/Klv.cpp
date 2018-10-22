@@ -5,7 +5,7 @@
 TEST_MODULE_DEPENDENCIES (Klv, "UniversalLabelKey,MisbByteStreamReader,MisbByteStreamWriter")
 
 TEST_CASE(KlvRead) {
-    //Log::Scope scope (Log::DEBUG);
+    Log::Scope scope (Log::DEBUG);
 
     File klvDirectory ("klv");
     vector<PtrToFile> files = klvDirectory.getFiles();
