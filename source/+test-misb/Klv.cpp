@@ -10,10 +10,10 @@ TEST_CASE(KlvRead) {
     File klvDirectory ("klv");
     vector<PtrToFile> files = klvDirectory.getFiles();
     for (vector<PtrToFile>::iterator iter = files.begin (); iter != files.end (); ++iter) {
-        if ((*iter)->getBasename() != "xxx") {
+        if ((*iter)->getBasename() == "stennis") {
             Log::debug () << "Reading " << (*iter)->getBasename() << endl;
             if ((*iter)->getExtension() == "klv") {
-                PtrToMisbDictionary misbDictionary = new MisbDictionary (MISB_DIR "misb-database.json");
+                PtrToMisbDictionary misbDictionary = new MisbDictionary (MISB_DIR "minotaur-database.json");
                 Klv (misbDictionary, (*iter)->read()).readUniversalSet ();
             }
         }
