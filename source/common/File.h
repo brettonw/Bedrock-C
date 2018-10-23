@@ -1,6 +1,7 @@
 #pragma once
 
 #ifdef __APPLE__
+//int proc_pidpath(int pid, void * buffer, uint32_t  buffersize);
 #include <libproc.h>
 // libproc pulls in something that defines these values
 #undef TRUE
