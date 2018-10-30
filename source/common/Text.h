@@ -323,6 +323,9 @@ static u8 fromHex (const char* hexString) {
 
 inline Text hexBytes (const void* ptr, uint length, uint lineLength = 32, uint groupLength = 2) {
     Text result;
+    if (length > lineLength) {
+        result << END_LINE;
+    }
     const byte* bytes = static_cast<const byte*> (ptr);
     const char* separator;
     const char* lineSeparator = "";
