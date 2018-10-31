@@ -20,8 +20,6 @@
 MAKE_PTR_TO(File) {
     private:
         Text path;
-        struct stat stats;
-        bool exists;
 
         template<typename BufferType>
         PtrTo<BufferType> readIntoBuffer () const {
@@ -56,16 +54,18 @@ MAKE_PTR_TO(File) {
         }
 
     public:
-        File (const Text& _path) : path (_path), exists (stat (path, &stats) == 0) { }
+        File (const Text& _path) : path (_path) { }
 
         ~File () {}
 
         bool getExists () const {
-            return exists;
+            struct stat stats;
+            return (stat (path, &stats) == 0);
         }
 
         bool isDirectory () const {
-            return exists and S_ISDIR(stats.st_mode);
+            struct stat stats;
+            return (stat (path, &stats) == 0) and S_ISDIR(stats.st_mode);
         }
 
         vector<PtrToFile> getFiles () const {
