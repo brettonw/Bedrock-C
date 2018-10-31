@@ -13,7 +13,7 @@ TEST_CASE(KlvRead) {
         if ((*iter)->getBasename() == "SD_MP2_0601_SYNC") {
             Log::debug () << "Reading " << (*iter)->getBasename() << endl;
             if ((*iter)->getExtension() == "klv") {
-                PtrToMisbDictionary misbDictionary = new MisbDictionary (MISB_DIR "misb-database.json");
+                PtrToMisbDictionary misbDictionary = MisbDictionary::fromUrl ();
                 Klv (misbDictionary, (*iter)->read()).readUniversalSetAll ();
             }
         }
@@ -36,7 +36,7 @@ TEST_CASE(ST0902) {
     for (vector<Text>::iterator iter = hexBytes.begin (); iter != hexBytes.end (); ++iter) {
         bytes.push_back(fromHex (*iter));
     }
-    PtrToMisbDictionary misbDictionary = new MisbDictionary (MISB_DIR "misb-database.json");
+    PtrToMisbDictionary misbDictionary = MisbDictionary::fromUrl ();
     Klv (misbDictionary, Buffer::make (bytes.data(), bytes.size())).readUniversalSet ();
     TEST_TRUE(true);
 }
