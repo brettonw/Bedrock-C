@@ -10,7 +10,7 @@ TEST_CASE(KlvRead) {
     File klvDirectory ("klv");
     vector<PtrToFile> files = klvDirectory.getFiles();
     for (vector<PtrToFile>::iterator iter = files.begin (); iter != files.end (); ++iter) {
-        if ((*iter)->getBasename() == "SD_MP2_0601_SYNC") {
+        if ((*iter)->getBasename() == "HD_H264_0903_TS_SYN_V1_001") {
             Log::debug () << "Reading " << (*iter)->getBasename() << endl;
             if ((*iter)->getExtension() == "klv") {
                 PtrToMisbDictionary misbDictionary = MisbDictionary::fromUrl (true);
