@@ -13,7 +13,7 @@ TEST_CASE(KlvRead) {
         if ((*iter)->getBasename() == "HD_H264_0903_TS_SYN_V1_001") {
             Log::debug () << "Reading " << (*iter)->getBasename() << endl;
             if ((*iter)->getExtension() == "klv") {
-                PtrToMisbDictionary misbDictionary = MisbDictionary::fromUrl (true);
+                PtrToMisbDictionary misbDictionary = MisbDictionary::fromFile ();
                 Klv (misbDictionary, (*iter)->read()).readUniversalSetAll ();
             }
         }
@@ -36,7 +36,7 @@ TEST_CASE(ST0902) {
     for (vector<Text>::iterator iter = hexBytes.begin (); iter != hexBytes.end (); ++iter) {
         bytes.push_back(fromHex (*iter));
     }
-    PtrToMisbDictionary misbDictionary = MisbDictionary::fromUrl (false);
+    PtrToMisbDictionary misbDictionary = MisbDictionary::fromFile ();
     Klv (misbDictionary, Buffer::make (bytes.data(), bytes.size())).readUniversalSet ();
     TEST_TRUE(true);
 }
