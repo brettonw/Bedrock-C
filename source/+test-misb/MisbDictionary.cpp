@@ -44,6 +44,11 @@ TEST_CASE(WriteMisbStandard) {
                 for (vector<Text>::const_iterator iter = keys.begin (); iter != keys.end (); ++iter) {
                     PtrToBagArray array = standardsObject->getBagArray (*iter);
                     Log::debug() << "  Standard (" << *iter << ") with " << array->size() << " entr" << ((array->size() == 1) ? "y" : "ies") << endl;
+
+                    // save it out to a file
+                    Text json = array->toJson() << END_LINE;
+                    File jsonFile (*iter + ".json");
+                    jsonFile.writeText(json);
                 }
             }
         }
