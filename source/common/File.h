@@ -151,6 +151,23 @@ MAKE_PTR_TO(File) {
             return (length != -1) ? new File (Text (buffer, length)) : PtrToFile ();
         }
 
+        static Text makePath (const Text& left, const Text& right) {
+            // left       |     right     |     mark     |    result
+            // ""               "yyy"           ""            "yyy"
+            // ""               "/yyy"          ""            "/yyy"
+            // "xxx"            "yyy"           ""            "xxx/yyy"
+            // "xxx"            "/yyy"          ""            "xxx/yyy"
+            // "/"              "/yyy"          ""            "/yyy"
+            // "/"              "yyy"           ""            "/yyy"
+            // "xxx/"           "yyy"           ""            "xxx/yyy"
+            // "xxx/"           "/yyy"          ""            "xxx/yyy"
+            bool leftMark = (left.length () > 0) and (left[left.length () - 1] == '/');
+            Text leftTrimmed = leftMark ? left.substring(0, left.length () - 1) : left;
+            bool rightMark = (right.length () > 0) and (right[0] == '/');
+            Text rightTrimmed = rightMark ? right.substring(1) : right;
+            return leftTrimmed + ((leftTrimmed.length() > 0 ) ? "/" : "") + rightTrimmed;
+        }
+
 
         // open, close
         // read, write

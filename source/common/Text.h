@@ -131,6 +131,15 @@ class Text {
             return Text (RawText::make(get (), length ()));
         }
 
+        // character access
+        char at (uint index) const {
+            return (ptr->get ())[index];
+        }
+
+        char operator [] (uint index) const {
+            return at (index);
+        }
+
         // compare
         int compare (const char* source, uint sourceLength) const {
             return ptr->compare((const byte*) (source), sourceLength);
