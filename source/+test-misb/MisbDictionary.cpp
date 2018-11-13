@@ -22,6 +22,7 @@ void addToStandard (PtrToBagObject& standardsObject, const Text& standard, PtrTo
     standardsObject->getBagArray (standard)->add(entry);
 }
 
+/*
 TEST_CASE(WriteMisbStandard) {
     Log::Scope scope (Log::DEBUG);
     PtrToFile databaseFile = new File (MISB_DIR MISB_DATABASE_NAME ".json");
@@ -55,3 +56,4 @@ TEST_CASE(WriteMisbStandard) {
     }
     TEST_TRUE (true);
 }
+*/
