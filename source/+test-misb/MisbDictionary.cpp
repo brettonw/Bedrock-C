@@ -9,7 +9,7 @@ TEST_CASE(MisbDictionary) {
     Text keyText ("06.0e.2b.34.01.01.01.01.0e.01.01.03.2d.02.00.00");
     UniversalLabelKey key (keyText);
 
-    PtrToMisbDictionary dictionary = MisbDictionary::fromFile ();
+    PtrToMisbDictionary dictionary = MisbDictionary::fromFiles ();
     PtrToBagObject entry = dictionary->get(key);
     Text name = entry->getText("Name");
     TEST_EQUALS (name, "Sigma_Height");
@@ -24,7 +24,7 @@ void addToStandard (PtrToBagObject& standardsObject, const Text& standard, PtrTo
 
 TEST_CASE(WriteMisbStandard) {
     Log::Scope scope (Log::DEBUG);
-    PtrToFile databaseFile = new File (MISB_DATABASE_NAME);
+    PtrToFile databaseFile = new File (MISB_DIR MISB_DATABASE_NAME ".json");
     if (databaseFile->getExists ()) {
         PtrToBagThing database = Json::readFile(databaseFile);
         if (database) {

@@ -151,21 +151,20 @@ MAKE_PTR_TO(File) {
             return (length != -1) ? new File (Text (buffer, length)) : PtrToFile ();
         }
 
+        // given two strings, a path on the left, and a leaf on the right (could be a path), join
+        // them to create a valid path. paths with empty leaves will have trailing slashes.
         static Text makePath (const Text& left, const Text& right) {
-            // left       |     right     |     mark     |    result
-            // ""               "yyy"           ""            "yyy"
-            // ""               "/yyy"          ""            "/yyy"
-            // "xxx"            "yyy"           ""            "xxx/yyy"
-            // "xxx"            "/yyy"          ""            "xxx/yyy"
-            // "/"              "/yyy"          ""            "/yyy"
-            // "/"              "yyy"           ""            "/yyy"
-            // "xxx/"           "yyy"           ""            "xxx/yyy"
-            // "xxx/"           "/yyy"          ""            "xxx/yyy"
-            bool leftMark = (left.length () > 0) and (left[left.length () - 1] == '/');
-            Text leftTrimmed = leftMark ? left.substring(0, left.length () - 1) : left;
-            bool rightMark = (right.length () > 0) and (right[0] == '/');
-            Text rightTrimmed = rightMark ? right.substring(1) : right;
-            return leftTrimmed + ((leftTrimmed.length() > 0 ) ? "/" : "") + rightTrimmed;
+            // leading slashes on the right side are to be stripped, as their presence indicates an
+            // attempt to separate the leaf from the preceding path, which we will do anyway
+            Text rightPath = ((right.length () > 0) and (right[0] == '/')) ? right.substring (1) : right;
+
+            // valid values for left are {empty} or ".", "/", "{xxx}", or "{xxx}/" - we condition
+            // this so leftPath is always a valid path with no trailing slashes
+            Text leftPath = (left.length () == 0) ? "." : left;
+            leftPath = (leftPath[leftPath.length () - 1] == '/') ? leftPath.substring(0, leftPath.length () - 1) : leftPath;
+
+            // return the concatenated new path
+            return leftPath + "/" + rightPath;
         }
 
 

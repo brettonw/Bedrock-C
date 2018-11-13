@@ -78,3 +78,23 @@ TEST_CASE(ReadText) {
     Text text = file.readText ();
     TEST_EQUALS(text, "Test\n");
 }
+
+TEST_CASE(MakePath) {
+    // happy paths
+    TEST_EQUALS(File::makePath("/", "yyy"), "/yyy");
+    TEST_EQUALS(File::makePath("xxx", "yyy"), "xxx/yyy");
+    TEST_EQUALS(File::makePath("xxx/", "yyy"), "xxx/yyy");
+    TEST_EQUALS(File::makePath("xxx", "/yyy"), "xxx/yyy");
+    TEST_EQUALS(File::makePath("xxx/", "/yyy"), "xxx/yyy");
+
+    // adversarial paths
+    TEST_EQUALS(File::makePath("xxx", ""), "xxx/");
+    TEST_EQUALS(File::makePath("xxx", "/"), "xxx/");
+
+    TEST_EQUALS(File::makePath("", ""), "./");
+    TEST_EQUALS(File::makePath("", "/"), "./");
+    TEST_EQUALS(File::makePath("", "yyy"), "./yyy");
+
+    TEST_EQUALS(File::makePath("/", ""), "/");
+    TEST_EQUALS(File::makePath("/", "/"), "/");
+}
