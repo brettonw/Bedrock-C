@@ -36,7 +36,9 @@ TEST_CASE(ST0902) {
     for (vector<Text>::iterator iter = hexBytes.begin (); iter != hexBytes.end (); ++iter) {
         bytes.push_back(fromHex (*iter));
     }
-    PtrToMisbDictionary misbDictionary = MisbDictionary::fromFiles ({ "SMPTE-RP-210.13", "MISB-ST-0601.6", "MISB-ST-0102.10", "MISB-ST-0806.4", "MISB-ST-0301.5", "MISB-ST-0801.5", "MISB-RP-1204.0"});
-    Klv (misbDictionary, Buffer::make (bytes.data(), bytes.size())).readUniversalSet ();
+    PtrToMisbDictionary misbDictionary = MisbDictionary::fromFiles ({ "SMPTE-RP-210.13", "MISB-ST-0807.22", "MISB-ST-0601.6", "MISB-ST-0102.10", "MISB-ST-0806.4", "MISB-RP-1204.0" });
+    Klv klv (misbDictionary, Buffer::make (bytes.data(), bytes.size()));
+    klv.readUniversalSet ();
+    klv.readUniversalSet ();
     TEST_TRUE(true);
 }
