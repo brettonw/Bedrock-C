@@ -69,7 +69,7 @@ MAKE_PTR_TO(File) {
         }
 
         // return true if the directory is present after the call
-        bool makeDirectory () {
+        bool makeDirectory () const {
             return (getExists () or (mkdir (path, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == 0));
         }
 
@@ -131,7 +131,7 @@ MAKE_PTR_TO(File) {
             return Text (readIntoBuffer<RawText> ());
         }
 
-        void write (const char* ptr, long length) {
+        void write (const char* ptr, long length) const {
             ofstream file (path, ios::out | ios::binary | ios::trunc);
             if (file.is_open()) {
                 file.write (ptr, length);
@@ -141,12 +141,12 @@ MAKE_PTR_TO(File) {
             }
         }
 
-        void writeText (const Text& text) {
+        void writeText (const Text& text) const {
             write (text.get(), text.length ());
         }
 
         // return true if the target does not exist on completion
-        bool remove () {
+        bool remove () const {
             return ((not getExists ()) or (isDirectory () ? (rmdir (path) == 0) : (::remove (path) == 0)));
         }
 

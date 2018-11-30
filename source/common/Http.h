@@ -46,12 +46,15 @@ class Http {
 
                     // perform the request, res will get the return code
                     CURLcode res = curl_easy_perform (curlHandle);
-                    if(res != CURLE_OK) {
-                        Log::error () << "curl_easy_perform() failed: " << curl_easy_strerror (res) << endl;
-                    }
 
                     // close the file
                     fclose (httpDataFile);
+
+                    // check the result
+                    if(res != CURLE_OK) {
+                        file->remove ();
+                        throw RuntimeError (Text ("curl_easy_perform() failed: ") << curl_easy_strerror (res));
+                    }
                 }
 
                 curl_easy_cleanup (curlHandle);
