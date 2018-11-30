@@ -98,3 +98,14 @@ TEST_CASE(MakePath) {
     TEST_EQUALS(File::makePath("/", ""), "/");
     TEST_EQUALS(File::makePath("/", "/"), "/");
 }
+
+TEST_CASE(MakeDirectory) {
+    // make sure there is no directory, create one, make sure it's there, then clean up and make
+    // sure there is no directory again
+    File testDirectory ("testDir");
+    TEST_TRUE(testDirectory.remove ());
+    TEST_TRUE(testDirectory.makeDirectory ());
+    TEST_TRUE(testDirectory.getExists ());
+    TEST_TRUE(testDirectory.remove ());
+    TEST_FALSE(testDirectory.getExists ());
+}

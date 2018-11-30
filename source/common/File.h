@@ -68,6 +68,11 @@ MAKE_PTR_TO(File) {
             return (stat (path, &stats) == 0) and S_ISDIR(stats.st_mode);
         }
 
+        // return true if the directory is present after the call
+        bool makeDirectory () {
+            return (getExists () or (mkdir (path, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == 0));
+        }
+
         vector<PtrToFile> getFiles () const {
             if (isDirectory ()) {
                 vector<PtrToFile> files;
@@ -140,6 +145,11 @@ MAKE_PTR_TO(File) {
             write (text.get(), text.length ());
         }
 
+        // return true if the target does not exist on completion
+        bool remove () {
+            return ((not getExists ()) or (isDirectory () ? (rmdir (path) == 0) : (::remove (path) == 0)));
+        }
+
         static PtrToFile getExecutable () {
             char buffer[PATH_MAX];
             #ifdef __linux
@@ -166,7 +176,6 @@ MAKE_PTR_TO(File) {
             // return the concatenated new path
             return leftPath + "/" + rightPath;
         }
-
 
         // open, close
         // read, write

@@ -1,6 +1,7 @@
 #pragma once
 
 // standard includes
+#include <errno.h>
 #include <cstring>
 #include <cstdint>
 #include <cstdlib>
