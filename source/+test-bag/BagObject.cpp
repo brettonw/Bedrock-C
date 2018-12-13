@@ -1,13 +1,13 @@
 #include "Test.h"
 #include "Bag.h"
 
-TEST_CASE(EmptyBagObject) {
+TEST_CASE(Empty) {
     PtrToBagObject bagObject = new BagObject ();
     TEST_EQUALS(bagObject->size (), 0);
     TEST_EQUALS(bagObject->toJson (), "{}");
 }
 
-TEST_CASE(BagObject) {
+TEST_CASE(Basic) {
     //Log::Scope scope (Log::TRACE);
     PtrToBagObject bagObject = (new BagObject ())
         ->put ("A", "Hello World")
@@ -36,7 +36,7 @@ TEST_CASE(BagObject) {
     //bagObject->put ("XX", new BagArray ());
 }
 
-TEST_CASE(BagConversions) {
+TEST_CASE(Conversions) {
     //Log::Scope scope (Log::TRACE);
     PtrToBagObject bagObject = (new BagObject ())
         ->put ("A", "Hello World")
@@ -72,7 +72,7 @@ TEST_CASE(Bag2) {
     Log::debug () << bag << endl;
 }
 
-TEST_CASE(BagObjectNameTable) {
+TEST_CASE(NameTable) {
     //Log::Scope scope (Log::TRACE);
     PtrToBagArray bagArray = new BagArray ();
     Text    def ("DEF");
@@ -87,4 +87,17 @@ TEST_CASE(BagObjectNameTable) {
     }
     TEST_XYOP(def.getReferenceCount(), 5, <);
     TEST_EQUALS(bagArray->size (), 5);
+}
+
+TEST_CASE(WithPrototype) {
+    PtrToBagObject prototype = (new BagObject ())
+        ->put ("x", 100)
+        ->put ("y", 200)
+        ->put ("z", 300);
+    PtrToBagObject object = BagObject::fromPrototype (prototype)
+        ->put ("y", 400);
+    TEST_EQUALS(object->getInteger ("x"), 100);
+    TEST_EQUALS(prototype->getInteger ("y"), 200);
+    TEST_EQUALS(object->getInteger ("y"), 400);
+    TEST_EQUALS(object->getInteger ("z"), 300);
 }

@@ -3,6 +3,8 @@
 #include "BagContainer.h"
 #include "TextContainer.h"
 
+#define BAG_PROTOTYPE_NAME  "__PROTOTYPE__"
+
 class BagObject : public BagContainer {
     protected:
         TextMap<PtrToBagThing> value;
@@ -31,6 +33,14 @@ class BagObject : public BagContainer {
         BagObject () : BagContainer (BagType::OBJECT) {}
         BagObject (const BagObject& source) : BagContainer (BagType::OBJECT), value (source.value) {}
         virtual ~BagObject () {}
+
+        static PtrToBagObject fromPrototype (const PtrToBagObject& prototype) {
+            PtrToBagObject ptrToBagObject (new BagObject ());
+            if (prototype) {
+                ptrToBagObject->put (BAG_PROTOTYPE_NAME, prototype);
+            }
+            return ptrToBagObject;
+        }
 
         virtual Text toJson () const {
             const char* prepend = "";
@@ -78,14 +88,14 @@ class BagObject : public BagContainer {
             return value.size();
         }
 
-        PtrToBagThing getLocal (const Text& name) {
-            PtrToBagThing* handle = value.get (name);
-            return (handle) ? *handle : PtrToBagThing ();
+        PtrToBagThing getFromPrototype (const Text& path) const {
+            const PtrToBagThing* handle = value.get (BAG_PROTOTYPE_NAME);
+            return (handle) ? ptr_downcast<BagObject> (*handle)->get (path) : PtrToBagThing ();
         }
 
         const PtrToBagThing getLocal (const Text& name) const {
             const PtrToBagThing* handle = value.get (name);
-            return (handle) ? *handle : PtrToBagThing ();
+            return (handle) ? *handle : getFromPrototype (name);
         }
 
         virtual const PtrToBagThing get (const Text& path) const {
@@ -100,9 +110,12 @@ class BagObject : public BagContainer {
                         default: break;
                     }
                 }
-                // not valid
-                return PtrToBagThing ();
+
+                // the base node wasn't able to satisfy the request, try getting it from the
+                // prototype as a fallback
+                return getFromPrototype (path);
             }
+
             return ptrToBagThing;
         }
 
