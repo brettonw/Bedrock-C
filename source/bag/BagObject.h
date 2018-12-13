@@ -119,6 +119,10 @@ class BagObject : public BagContainer {
             return ptrToBagThing;
         }
 
+        const PtrToBagObject getPrototype () const {
+            return ptr_downcast<BagObject> (getLocal (BAG_PROTOTYPE_NAME));
+        }
+
         bool contains (const Text& name) const {
             return value.get (name);
         }
