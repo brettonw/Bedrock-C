@@ -71,7 +71,7 @@ class BagArray : public BagContainer {
             return add (new BagBool (thing));
         }
 
-        uint size () {
+        uint size () const {
             return value.size();
         }
 

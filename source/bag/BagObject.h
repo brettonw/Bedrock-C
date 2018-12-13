@@ -123,8 +123,8 @@ class BagObject : public BagContainer {
             return ptr_downcast<BagObject> (getLocal (BAG_PROTOTYPE_NAME));
         }
 
-        PtrToBagObject setPrototype (PtrToBagObject& prototype) {
-            return put (BAG_PROTOTYPE_NAME, prototype);
+        PtrToBagObject setPrototype (const PtrToBagObject& prototype) {
+            return put (BAG_PROTOTYPE_NAME, const_cast<PtrToBagObject&> (prototype));
         }
 
         bool contains (const Text& name) const {
