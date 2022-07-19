@@ -9,6 +9,7 @@ class MatrixIdentityHelper {
         // only defined for square matrices
         static void identity (Scalar* destination) {
             *destination = (m == n) ? 1.0 : 0.0;
+            //cerr << "m: " << m << ", n: " << n << ", v: " << *destination << endl;
             MatrixIdentityHelper<Scalar, n, m - 1, size>::identity (destination + 1);
         }
 };
@@ -23,10 +24,10 @@ class MatrixIdentityHelper<Scalar, n, 0, size> {
 };
 
 template<typename Scalar, uint size>
-class MatrixIdentityHelper<Scalar, 0, 0, size> {
+class MatrixIdentityHelper<Scalar, 1, 0, size> {
     public:
         // only defined for square matrices
-        static void identity (Scalar* destination) {}
+        static void identity (Scalar* destination) { }
 };
 
 

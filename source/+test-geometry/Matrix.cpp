@@ -71,8 +71,11 @@ TEST_CASE(AccessTimes) {
 }
 
 TEST_CASE(Identity) {
+    Log::debug () << "pre-matrix" << endl;
     Matrix<f8, 4, 4> m;
+    Log::debug () << "matrix created" << endl;
     m.identity();
+    Log::debug () << "matrix identity" << endl;
     TEST_EQUALS(m(0, 1), 0);
     TEST_EQUALS(m(0, 0), 1);
     TEST_EQUALS(m(1, 1), 1);
